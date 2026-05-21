@@ -73,13 +73,27 @@ public class EmitBrickCmd
     private void OnFlyComplete()
     {
         cityElement.SetBrickState(this.nextBrick, BrickState.Full);
-        var isEnd = cityElement.AllFull() && cityElement.HasVisuals() == false;
-        if (isEnd)
+        if (cityElement.HasVisuals() || cityElement.CountFlyingBricks() > 0)
+        {
+            return;
+        }
+        var cityElementCompleted = cityElement.AllFull();
+        if (cityElementCompleted)
         {
             //cityElement.EnableAllBricks(false);
             cityElement.AddComponent<BrickTopDownExplosion>();
             cityElement.EnableVisuals(true);
             new UnlockCityElementCmd().Run();
+        }
+        else
+        {
+            var hasColoredBricks = cityElement.CountColoredBricks() > 0;
+            var hasTransparentBricks = cityElement.CountTransparentBricks() > 0;
+            if (!hasColoredBricks && hasTransparentBricks)
+            {
+                cityElement.ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
+            }
+
         }
         /*else
         {

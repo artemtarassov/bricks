@@ -9,12 +9,16 @@ public class CityElement : MonoBehaviour
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
 
-    public CityElementColors cityElementColors { get; private set; }
+
+    public string dataKey => this.transform.parent.name + "_" + this.name;
+
+    //public CityElementColors cityElementColors { get; private set; }
+
+    [HideInInspector]
+    public CityElementDataContainer dataContainer;
 
     public Dictionary<Transform, BrickState> allBricks = new Dictionary<Transform, BrickState>();
     public Dictionary<Transform, ColorIndex> brickColors = new Dictionary<Transform, ColorIndex>();
-
-    //public List<BricksLayer> layers;
 
     private BrickLayersContainer brickLayersContainer;
 
@@ -23,7 +27,7 @@ public class CityElement : MonoBehaviour
         allBricks = new Dictionary<Transform, BrickState>();
         brickColors = new Dictionary<Transform, ColorIndex>();
 
-        var bricks = GetBricksContainer().GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
+        var bricks = this.GetBricks();
         Assert.IsTrue(bricks.Count > 0, "No bricks found in city element " + this.name);
 
         foreach (var brick in bricks)
@@ -35,7 +39,16 @@ public class CityElement : MonoBehaviour
 
         this.EnableVisuals(false);
         this.EnableAllBricks(true);
-        this.cityElementColors = new CityElementColors(this.CountBricks());
+        //this.cityElementColors = new CityElementColors(this.CountBricks());
+    }
+
+    public List<Transform> GetBricks()
+    {
+        if (this.allBricks != null && this.allBricks.Keys.Count > 0)
+        {
+            return this.allBricks.Keys.ToList();
+        }
+        return GetBricksContainer().GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
     }
 
     public int CountBricks()
@@ -68,6 +81,7 @@ public class CityElement : MonoBehaviour
         return this.allBricks.All(kv => kv.Value == BrickState.Full);
     }
 
+    
 
     private Material GetMaterialByName(string name)
     {
@@ -107,7 +121,18 @@ public class CityElement : MonoBehaviour
     }
 
 
-    public void SetBrickColors(BrickData bd)
+    private int pointer = 0;
+    public void ShowNextColoredBricks(int totalDifferentBrickColors)
+    {
+        for (var i = 0; i < totalDifferentBrickColors && pointer < this.dataContainer.brickDataList.Count; i++)
+        {
+            var next = this.dataContainer.brickDataList[pointer];
+            this.SetBrickColors(next);
+            pointer++;
+        }
+    }
+
+    private void SetBrickColors(BrickData bd)
     {
         Assert.IsTrue(bd.amount > 0, "invalid amout");
         for (var i = 0; i < bd.amount; i++)
@@ -192,12 +217,7 @@ public class CityElement : MonoBehaviour
 
     public Vector3 GetAveragePosition()
     {
-        var bricks = this.allBricks.Keys.ToList();
-        if (bricks.Count == 0)
-        {
-            return Vector3.zero;
-        }
-
+        var bricks = GetBricks();
         var sum = Vector3.zero;
         foreach (var brick in bricks)
         {
@@ -207,29 +227,4 @@ public class CityElement : MonoBehaviour
         return sum / bricks.Count;
     }
 
-    public int CountCompletedRows()
-    {
-        foreach (var layer in brickLayersContainer.layers)
-        {
-            
-        }
-        return 0;
-    }
-
-    private int CountBricksSameX(BricksLayer bl)
-    {
-        var count = 1;
-        for (var i = 1; i < bl.bricks.Count; i++)
-        {
-            if (Mathf.Abs(bl.bricks[i].position.x - bl.bricks[i - 1].position.x) < 0.001f)
-            {
-                count++;
-            }
-            else
-            {
-                break;
-            }
-        }
-        return count;
-    }
 }

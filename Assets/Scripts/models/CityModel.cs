@@ -18,7 +18,7 @@ public class BricksLayer
 
 public class CityModel
 {
-    public static readonly CityModel Instance = new CityModel();
+    public static CityModel Instance;
 
     public Action<FlyData> OnFlyBrick;
     public Action<CityElement> OnCityElementUnlocked;

@@ -1,18 +1,46 @@
 {
     "list": [
         {
-            "key": "keyHouseName_keyCityElementName",
+            "key": "Preset_House_05_Group8_1",
             "brickDataList": [
                 {
-                    "color": "C1",
-                    "amount": 3
+                    "color": 2,
+                    "amount": 15
                 },
                 {
-                    "color": "C2",
-                    "amount": 2
+                    "color": 4,
+                    "amount": 10
                 },
                 {
-                    "color": "C3",
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
                     "amount": 1
                 }
             ],
@@ -21,14 +49,2251 @@
                     "columnIndex": 0,
                     "list": [
                         {
-                            "type": "Brick",
+                            "type": 1,
                             "brickData": {
-                                "color": "C1",
+                                "color": 2,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group8_2",
+            "brickDataList": [
+                {
+                    "color": 5,
+                    "amount": 15
+                },
+                {
+                    "color": 2,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group7",
+            "brickDataList": [
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 8
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 8
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group5",
+            "brickDataList": [
+                {
+                    "color": 4,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 6,
+                    "amount": 15
+                },
+                {
+                    "color": 2,
+                    "amount": 1
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group6_1",
+            "brickDataList": [
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 15
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 1
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 15
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 4
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 4
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group6_2",
+            "brickDataList": [
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 1
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 1
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 10
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group1_2",
+            "brickDataList": [
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 1
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 10
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 15
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 1
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 3
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group2",
+            "brickDataList": [
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 1,
+                    "amount": 1
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 15
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 4,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 3
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
                                 "amount": 3
                             }
                         },
                         {
-                            "type": "AddMoreBricks"
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group3",
+            "brickDataList": [
+                {
+                    "color": 2,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 15
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 9
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 9
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_1",
+            "brickDataList": [
+                {
+                    "color": 2,
+                    "amount": 1
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 3,
+                    "amount": 10
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 0,
+                    "amount": 3
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_2",
+            "brickDataList": [
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 15
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 1
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_3",
+            "brickDataList": [
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 1
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 4
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 4
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_4",
+            "brickDataList": [
+                {
+                    "color": 3,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 15
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 1
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 1
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_5",
+            "brickDataList": [
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 15
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 1
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 10
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group4_6",
+            "brickDataList": [
+                {
+                    "color": 1,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 10
+                },
+                {
+                    "color": 0,
+                    "amount": 1
+                },
+                {
+                    "color": 5,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 15
+                },
+                {
+                    "color": 6,
+                    "amount": 10
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 5
+                },
+                {
+                    "color": 3,
+                    "amount": 9
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 9
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "Preset_House_05_Group1_1",
+            "brickDataList": [
+                {
+                    "color": 2,
+                    "amount": 15
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 5,
+                    "amount": 1
+                },
+                {
+                    "color": 4,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 1,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 0,
+                    "amount": 10
+                },
+                {
+                    "color": 3,
+                    "amount": 5
+                },
+                {
+                    "color": 4,
+                    "amount": 15
+                },
+                {
+                    "color": 6,
+                    "amount": 5
+                },
+                {
+                    "color": 2,
+                    "amount": 4
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 15
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 4,
+                                "amount": 15
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 1,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 0,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 6,
+                                "amount": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "columnIndex": 2,
+                    "list": [
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 5,
+                                "amount": 1
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 1,
+                                "amount": 10
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 3,
+                                "amount": 5
+                            }
+                        },
+                        {
+                            "type": 1,
+                            "brickData": {
+                                "color": 2,
+                                "amount": 4
+                            }
                         }
                     ]
                 }

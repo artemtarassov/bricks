@@ -12,43 +12,31 @@ public class UnlockCityElementCmd
 
     public void Run()
     {
+        Assert.IsTrue(BalancingModel.Instance.DidLoad(), "BalancingModel data not loaded. Did you forget to call Load()?");
         var cityElement = CityModel.Instance.UnlockNextElement();
-        new SetNextBricksColorsCmd(cityElement).Run();
-        this.SetupBricksInSlots(cityElement);
-    }
-
-    private void SetupBricksInSlots(CityElement cityElement)
-    {
-        var originPredefinedBricks = cityElement.cityElementColors.predefinedBricks;
-        var predefinedBricks = originPredefinedBricks.ToList();
-        var predefinedBricksCount = predefinedBricks.Sum((a) => a.amount);
-        Assert.IsTrue(predefinedBricks.Count > 0, "predefinedBricks is empty");
+        cityElement.dataContainer = BalancingModel.Instance.GetData(cityElement.dataKey);
+        cityElement.ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
 
         var sm = SlotModel.Instance;
         sm.ClearAll();
-        var maxColumns = sm.Columns.Count;
-
-        while (predefinedBricks.Count > 0)
+        var slotElementDataList = cityElement.dataContainer.slotElementDataList;
+        foreach (var sedl in slotElementDataList)
         {
-            for (var c = 0; c < maxColumns && predefinedBricks.Count > 0; c++)
+            var columnIndex = sedl.columnIndex;
+            foreach (var sed in sedl.list)
             {
-                var b = predefinedBricks.First().Clone();
-                predefinedBricks.RemoveAt(0);
-                sm.AddBricksToColumn(c, b);
+                if (sed.type == SlotElementType.Bricks)
+                {
+                    sm.AddBricksToColumn(columnIndex, sed.brickData);
+                }
+                else if (sed.type == SlotElementType.AddMoreBricks)
+                {
+                    sm.AddMoreBricksToColumn(columnIndex);
+                }
             }
-            var randColumn = Random.Range(0, maxColumns);
-            sm.AddMoreBricksToColumn(randColumn);
         }
+
         sm.OnSlotsChanged?.Invoke(null);
-
-
-
-        var bricksInSlots = sm.CountBricks();
-        var allBricks = cityElement.CountBricks();
-        Assert.AreEqual(allBricks, predefinedBricksCount, "allBricks not equal CountBricks. allBricks " + allBricks + " predefinedBricksCount " + predefinedBricksCount);
-
-        Assert.IsTrue(bricksInSlots > 0, "There should be bricks in slots after unlocking city element");
-        Assert.AreEqual(allBricks, bricksInSlots, "invalid count");
 
 
         var mainCam = Camera.main;
@@ -67,6 +55,6 @@ public class UnlockCityElementCmd
             mainCam.transform.DORotate(cityElement.camRot + new Vector3(5, 0, 0), 1f);
         }
 
-
     }
+
 }

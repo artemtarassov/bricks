@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public static class ListUtil
 {
@@ -28,5 +29,12 @@ public static class ListUtil
         }
         int randomIndex = Random.Range(0, list.Count);
         return list[randomIndex];
+    }
+
+    public static void Swap<T>(this List<T> list, int indexA, int indexB)
+    {
+        Assert.IsTrue(indexA >= 0 && indexA < list.Count, $"indexA {indexA} is out of range for list of size {list.Count}");
+        Assert.IsTrue(indexB >= 0 && indexB < list.Count, $"indexB {indexB} is out of range for list of size {list.Count}");
+        (list[indexA], list[indexB]) = (list[indexB], list[indexA]);
     }
 }

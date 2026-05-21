@@ -62,6 +62,7 @@ public enum ColorIndex
     C3 = 3,
     C4 = 4,
     C5 = 5,
+    C6 = 6,
 }
 
 public enum BrickState
@@ -70,4 +71,19 @@ public enum BrickState
     Flying = 3,
     Full = 4,
     Colored = 5,
+}
+
+
+[Serializable]
+public class DataContainerList
+{
+    public List<CityElementDataContainer> list;
+}
+
+[Serializable]
+public class CityElementDataContainer
+{
+    public string key;
+    public List<BrickData> brickDataList;
+    public List<SlotElementDataList> slotElementDataList;
 }

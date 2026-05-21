@@ -6,7 +6,8 @@ using UnityEngine.Assertions;
 
 public class SlotModel
 {
-    public static readonly SlotModel Instance = new SlotModel();
+    public static readonly int MaxColumns = 3;
+    public static SlotModel Instance;
     public List<SlotElementDataList> Columns { get; private set; }
 
     public BrickData[] Emitters { get; private set; }
@@ -17,13 +18,11 @@ public class SlotModel
     public SlotModel()
     {
         this.Emitters = new BrickData[2];
-        this.Columns = new List<SlotElementDataList>()
+        this.Columns = new List<SlotElementDataList>();
+        for (var i = 0; i < MaxColumns; i++)
         {
-            new SlotElementDataList(),
-            new SlotElementDataList(),
-            new SlotElementDataList(),
-            new SlotElementDataList(),
-        };
+            this.Columns.Add(new SlotElementDataList());
+        }
     }
 
     public int CountBricks()
@@ -53,7 +52,7 @@ public class SlotModel
         Assert.IsTrue(column >= 0 && column < this.Columns.Count, "Column index out of range");
         Assert.IsTrue(bd.amount > 0, "Brick data amount must be greater than 0");
         Assert.IsTrue(bd.color != ColorIndex.Undefined, "Brick data color index must be defined");
-        Debug.Log($"Adding brick to slot: column {column}, color {bd.color}, amount {bd.amount}");
+//        Debug.Log($"Adding brick to slot: column {column}, color {bd.color}, amount {bd.amount}");
         this.Columns[column].list.Add(new SlotElementData(bd));
     }
 
