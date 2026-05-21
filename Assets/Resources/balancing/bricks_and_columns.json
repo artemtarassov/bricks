@@ -1,0 +1,38 @@
+{
+    "list": [
+        {
+            "key": "keyHouseName_keyCityElementName",
+            "brickDataList": [
+                {
+                    "color": "C1",
+                    "amount": 3
+                },
+                {
+                    "color": "C2",
+                    "amount": 2
+                },
+                {
+                    "color": "C3",
+                    "amount": 1
+                }
+            ],
+            "slotElementDataList": [
+                {
+                    "columnIndex": 0,
+                    "list": [
+                        {
+                            "type": "Brick",
+                            "brickData": {
+                                "color": "C1",
+                                "amount": 3
+                            }
+                        },
+                        {
+                            "type": "AddMoreBricks"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
