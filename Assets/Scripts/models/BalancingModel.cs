@@ -8,7 +8,7 @@ public class BalancingModel
     public static BalancingModel Instance;
 
     public static NonRepeatingShuffleBag<int> shuffledAmounts = new NonRepeatingShuffleBag<int>(new List<int>()
-        { 5,5,5,10,10,15,1}
+        { 5,5,5,10,10,15}
 );
     public static NonRepeatingShuffleBag<ColorIndex> shuffledColorIndexes = new NonRepeatingShuffleBag<ColorIndex>(new List<ColorIndex>()
         { ColorIndex.C0, ColorIndex.C1, ColorIndex.C2, ColorIndex.C3, ColorIndex.C4, ColorIndex.C5, ColorIndex.C6 }

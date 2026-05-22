@@ -18,6 +18,22 @@ public class SlotController : MonoBehaviour
         this.emitterPrefab = this.gameObject.GetComponentInChildren<EmitterBrick>(true);
     }
 
+    void Start()
+    {
+        this.emitterPrefab.gameObject.SetActive(false);
+        this.columnPrefab.gameObject.SetActive(false);
+
+        SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
+        SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
+        SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
+        CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
+
+        if (CityModel.Instance.GetCurrentElement() != null)
+        {
+            this.Setup();
+        }
+    }
+
     private SlotColumn GetSlotColumnByIndex(int index)
     {
         if (index >= this.columns.Count)
@@ -43,25 +59,13 @@ public class SlotController : MonoBehaviour
         return this.emitters[index];
     }
 
-    void Start()
-    {
-        this.emitterPrefab.gameObject.SetActive(false);
-        this.columnPrefab.gameObject.SetActive(false);
 
-        SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
-        SlotModel.Instance.OnSlotsChanged += OnSlotsChanged;
-        CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
-
-        if (CityModel.Instance.GetCurrentElement() != null)
-        {
-            this.Setup();
-        }
-    }
 
     void OnDestroy()
     {
         SlotModel.Instance.OnEmitterChanged -= OnEmitterChanged;
-        SlotModel.Instance.OnSlotsChanged -= OnSlotsChanged;
+        SlotModel.Instance.OnColumnsChanged -= OnColumnsChanged;
+        SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
         CityModel.Instance.OnCityElementUnlocked -= OnCityElementUnlocked;
     }
 
@@ -72,29 +76,44 @@ public class SlotController : MonoBehaviour
 
     private void Setup()
     {
-        this.OnEmitterChanged(null);
-        this.OnSlotsChanged(null);
+        this.OnEmitterChanged();
+        this.OnColumnsChanged();
     }
 
-    private void OnEmitterChanged(BrickData bd)
+    private void OnEmitterChanged(int index = -1)
     {
         var slotModel = SlotModel.Instance;
-        var emitters = slotModel.Emitters;
-        for (var i = 0; i < emitters.Length; i++)
+        if (index == -1)
         {
-            var emitter = GetEmitterByIndex(i);
-            emitter.Setup(emitters[i]);
+            for (int i = 0; i < slotModel.Emitters.Length; i++)
+            {
+                GetEmitterByIndex(i).Setup(slotModel.Emitters[i], false);
+            }
+            return;
+        }
+        GetEmitterByIndex(index).Setup(slotModel.Emitters[index], false);
+    }
+
+    private void OnColumnsChanged()
+    {
+        Debug.Log("SlotController: OnColumnsChanged called");
+        var slotModel = SlotModel.Instance;
+        foreach (var c in slotModel.Columns)
+        {
+            Debug.Log($"SlotController Setting up slot column {c.columnIndex} with {c.list.Count} elements");
+            GetSlotColumnByIndex(c.columnIndex).Setup(c);
         }
     }
-
-    private void OnSlotsChanged(BrickData bd)
+    private void OnBrickMovedFromColumnToEmitter(BrickData bd, int emitterIndex)
     {
-        var slotModel = SlotModel.Instance;
-        var columns = slotModel.Columns;
-        for (var i = 0; i < columns.Count && i < 5; i++)
+        foreach (var column in this.columns)
         {
-            var column = GetSlotColumnByIndex(i);
-            column.Setup(columns[i]);
+            var removedSlot = column.Remove(bd);
+            if (removedSlot != null)
+            {
+                GetEmitterByIndex(emitterIndex).Setup(bd, true);
+                break;
+            }
         }
     }
 }

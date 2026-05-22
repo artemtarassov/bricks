@@ -50,6 +50,11 @@ public class SlotElementDataList
 {
     public int columnIndex;
     public List<SlotElementData> list = new List<SlotElementData>();
+
+    public SlotElementDataList()
+    {
+        
+    }
 }
 
 [Serializable]

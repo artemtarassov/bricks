@@ -6,7 +6,7 @@ internal sealed class FillWithCubesSettings
     public const string BrickPrefabPath = "Assets/Prefabs/Brick.prefab";
     public const string BrickMaterialPath = "Assets/Materials/BrickMat.mat";
 
-    public float BrickSize = 0.3f;
+    public float BrickSize = 0.2f;
     public float BrickGap = 0.01f;
     public bool IncludeInactiveObjects;
     public bool AddBrickColliders;

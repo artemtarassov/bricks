@@ -18,17 +18,12 @@ public class SelectColumnCmd
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
             Assert.IsTrue(hasEmitterSpace, "No space for new emitter");
 
-            var didRemove = SlotModel.Instance.RemoveFromColumn(this.data);
-            Assert.IsTrue(didRemove, "Failed to remove element from column");
-
-            SlotModel.Instance.AddEmitter(this.data.brickData);
+            SlotModel.Instance.MoveFromColumnToEmitter(this.data);
             return;
         }
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
-            var didRemove = SlotModel.Instance.RemoveFromColumn(this.data);
-            Assert.IsTrue(didRemove, "Failed to remove element from column");
-
+            SlotModel.Instance.MoveFromColumnToEmitter(this.data);
             CityModel.Instance.GetCurrentElement().ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
             return;
         }

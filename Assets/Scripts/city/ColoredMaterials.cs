@@ -46,16 +46,30 @@ public class ColoredMaterials : MonoBehaviour
 
     private void SetMaterialColors()
     {
-        return;
-        var colors = new List<Color>()
+        List<Color> colors = new()
         {
-            new Color(0.000f, 0.482f, 1.000f), // #007BFF Bright Blue
-            new Color(1.000f, 0.302f, 0.302f), // #FF4D4D Hot Coral
-            new Color(1.000f, 0.839f, 0.039f), // #FFD60A Vivid Yellow
-            new Color(0.000f, 0.835f, 1.000f), // #00D5FF Aqua Cyan
-            new Color(0.608f, 0.365f, 0.898f), // #9B5DE5 Electric Purple
-            new Color(0.494f, 0.851f, 0.341f), // #7ED957 Lime Green
-            new Color(1.000f, 0.176f, 0.667f), // #FF2DAA Hot Pink
+            /*
+            new Color32(215,  25,  28, 255), // #D7191C Red
+            new Color32(245, 124,   0, 255), // #F57C00 Orange
+            new Color32(244, 208,  63, 255), // #F4D03F Yellow
+            new Color32( 26, 150,  65, 255), // #1A9641 Green
+            new Color32( 31,  93, 204, 255), // #1F5DCC Blue
+            new Color32(123,  44, 191, 255), // #7B2CBF Purple
+            new Color32(107, 114, 128, 255)  // #6B7280 Slate Gray*/
+
+                new Color32(255,  45,  45, 255), // #FF2D2D Bright Red
+
+            new Color32(255, 140,   0, 255), // #FF8C00 Bright Orange
+
+            new Color32(255, 220,   0, 255), // #FFDC00 Bright Yellow
+
+            new Color32(  0, 210,  90, 255), // #00D25A Bright Green
+
+            new Color32(  0, 120, 255, 255), // #0078FF Bright Blue
+
+            new Color32(155,  65, 255, 255), // #9B41FF Bright Purple
+
+            new Color32( 90, 220, 220, 255)  // #5ADCDC Bright Teal
         };
         GetMaterialByColorIndex(ColorIndex.C0).color = colors[0];
         GetMaterialByColorIndex(ColorIndex.C1).color = colors[1];

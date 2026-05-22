@@ -12,8 +12,9 @@ public class SlotModel
 
     public BrickData[] Emitters { get; private set; }
 
-    public Action<BrickData> OnSlotsChanged;
-    public Action<BrickData> OnEmitterChanged;
+    public Action OnColumnsChanged;
+    public Action<int> OnEmitterChanged;
+    public Action<BrickData, int> OnBrickMovedFromColumnToEmitter;
 
     public SlotModel()
     {
@@ -21,8 +22,13 @@ public class SlotModel
         this.Columns = new List<SlotElementDataList>();
         for (var i = 0; i < MaxColumns; i++)
         {
-            this.Columns.Add(new SlotElementDataList());
+            this.Columns.Add(new SlotElementDataList() { columnIndex = i });
         }
+    }
+
+    public bool HasBricksInEmitters()
+    {
+        return this.Emitters.Any(e => e != null && e.amount > 0);
     }
 
     public int CountBricks()
@@ -52,7 +58,7 @@ public class SlotModel
         Assert.IsTrue(column >= 0 && column < this.Columns.Count, "Column index out of range");
         Assert.IsTrue(bd.amount > 0, "Brick data amount must be greater than 0");
         Assert.IsTrue(bd.color != ColorIndex.Undefined, "Brick data color index must be defined");
-//        Debug.Log($"Adding brick to slot: column {column}, color {bd.color}, amount {bd.amount}");
+        //        Debug.Log($"Adding brick to slot: column {column}, color {bd.color}, amount {bd.amount}");
         this.Columns[column].list.Add(new SlotElementData(bd));
     }
 
@@ -67,12 +73,12 @@ public class SlotModel
         Assert.IsTrue(bd.amount > 0, "Emitter amount must be greater than 0");
         Assert.IsTrue(Array.Exists(this.Emitters, e => e == bd), "Emitter must be in emitters list");
         bd.amount--;
+        int index = Array.FindIndex(this.Emitters, e => e == bd);
         if (bd.amount < 1)
         {
-            int index = Array.FindIndex(this.Emitters, e => e == bd);
             this.Emitters[index] = null;
         }
-        OnEmitterChanged?.Invoke(bd);
+        OnEmitterChanged?.Invoke(index);
     }
 
     public bool HasEmitterSpace()
@@ -80,18 +86,23 @@ public class SlotModel
         return Array.FindIndex(this.Emitters, e => e == null) != -1;
     }
 
-    public void AddEmitter(BrickData brickData)
+    public int GetEmptyEmitterIndex()
+    {
+        return Array.FindIndex(this.Emitters, e => e == null);
+    }
+
+    private int AddEmitter(BrickData brickData)
     {
         Assert.IsTrue(brickData.amount > 0);
         Assert.IsTrue(brickData.color != ColorIndex.Undefined);
         Assert.IsTrue(Array.FindIndex(this.Emitters, e => e == brickData) == -1);
 
-        var emptyIndex = Array.FindIndex(this.Emitters, e => e == null);
+        var emptyIndex = GetEmptyEmitterIndex();
         this.Emitters[emptyIndex] = brickData;
-        this.OnEmitterChanged?.Invoke(brickData);
+        return emptyIndex;
     }
 
-    public bool RemoveFromColumn(SlotElementData sed)
+    public bool MoveFromColumnToEmitter(SlotElementData sed)
     {
         foreach (var c in this.Columns)
         {
@@ -99,7 +110,8 @@ public class SlotModel
             if (element != null)
             {
                 c.list.Remove(element);
-                this.OnSlotsChanged?.Invoke(sed.brickData);
+                var emitterIndex = AddEmitter(sed.brickData);
+                this.OnBrickMovedFromColumnToEmitter?.Invoke(sed.brickData, emitterIndex);
                 return true;
             }
         }

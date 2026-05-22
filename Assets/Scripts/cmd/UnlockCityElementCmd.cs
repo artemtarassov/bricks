@@ -20,6 +20,7 @@ public class UnlockCityElementCmd
         var sm = SlotModel.Instance;
         sm.ClearAll();
         var slotElementDataList = cityElement.dataContainer.slotElementDataList;
+        Assert.IsTrue(slotElementDataList.Count > 1, "City element should have at least 2 columns of slot data");
         foreach (var sedl in slotElementDataList)
         {
             var columnIndex = sedl.columnIndex;
@@ -36,7 +37,7 @@ public class UnlockCityElementCmd
             }
         }
 
-        sm.OnSlotsChanged?.Invoke(null);
+        sm.OnColumnsChanged?.Invoke();
 
 
         var mainCam = Camera.main;

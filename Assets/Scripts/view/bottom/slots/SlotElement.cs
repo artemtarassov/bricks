@@ -1,9 +1,14 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SlotElement : MonoBehaviour
 {
-    [SerializeField] private UIBrick brick;
+    //[SerializeField] private UIBrick brick;
     [SerializeField] private GameObject addMoreBricks;
+
+    [SerializeField] private TMP_Text count;
+    [SerializeField] private Image colorImg;
 
     public BrickData brickData;
 
@@ -29,24 +34,26 @@ public class SlotElement : MonoBehaviour
     public void SetupWithBricks(BrickData brickData)
     {
         this.brickData = brickData;
-        this.brick.SetData(brickData);
-        this.brick.gameObject.SetActive(true);
+        //this.brick.SetData(brickData);
+        //this.brick.gameObject.SetActive(true);
+        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(brickData.color);
+        this.count.text = brickData.amount.ToString();
         this.addMoreBricks.SetActive(false);
     }
 
     public void SetupWithAddMoreBricks()
     {
         this.brickData = null;
-        this.brick.SetData(null);
-        this.brick.gameObject.SetActive(false);
+        //this.brick.SetData(null);
+        //this.brick.gameObject.SetActive(false);
         this.addMoreBricks.SetActive(true);
     }
 
     public void SetupAsEmpty()
     {
         this.brickData = null;
-        this.brick.SetData(null);
-        this.brick.gameObject.SetActive(false);
+        //this.brick.SetData(null);
+        //this.brick.gameObject.SetActive(false);
         this.addMoreBricks.SetActive(false);
     }
 }
