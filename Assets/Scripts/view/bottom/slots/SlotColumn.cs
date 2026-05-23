@@ -61,9 +61,10 @@ public class SlotColumn : MonoBehaviour
 
     private Vector3 GetSlotElementPosition(int index)
     {
+        var initialY = -20;
         var elementHeight = 150;
         var elementGap = 30;
-        var y = -elementHeight / 2 - index * (elementHeight + elementGap);
+        var y = -elementHeight / 2 - index * (elementHeight + elementGap) + initialY;
         return new Vector3(0, y, 0);
     }
 
@@ -84,7 +85,7 @@ public class SlotColumn : MonoBehaviour
         slotElement.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InFlash).OnComplete(() => Destroy(slotElement.gameObject));
         UpdateVisibility();
 
-        var t = Durations.SlotElementMove; 
+        var t = Durations.SlotElementMove;
         for (var i = 0; i < this.slotElements.Count; i++)
         {
             var e = this.slotElements[i];

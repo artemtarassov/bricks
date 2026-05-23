@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class SlotController : MonoBehaviour
 
     private List<EmitterBrick> emitters;
     private EmitterBrick emitterPrefab;
+
+    [SerializeField]
+    private Button addSpaceButton;
 
     void Awake()
     {
@@ -28,10 +32,17 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
         CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
 
+        this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
+
         if (CityModel.Instance.GetCurrentElement() != null)
         {
             this.Setup();
         }
+    }
+
+    private void OnAddSpaceButtonClicked()
+    {
+        new ShowViewCmd().Run(ViewName.AddSpaceView);
     }
 
     private SlotColumn GetSlotColumnByIndex(int index)
@@ -91,7 +102,9 @@ public class SlotController : MonoBehaviour
             }
             return;
         }
-        GetEmitterByIndex(index).Setup(slotModel.Emitters[index], false);
+        var isEmpty = slotModel.Emitters[index] == null ? true : slotModel.Emitters[index].amount < 2;
+        var animate = isEmpty;
+        GetEmitterByIndex(index).Setup(slotModel.Emitters[index], animate);
     }
 
     private void OnColumnsChanged()

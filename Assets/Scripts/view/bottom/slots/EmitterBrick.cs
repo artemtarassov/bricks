@@ -1,39 +1,52 @@
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EmitterBrick : MonoBehaviour
 {
     [HideInInspector]
     public BrickData brickData;
 
-    private UIBrick uiBrick;
+    [SerializeField] private TMP_Text count;
+    [SerializeField] private Image colorImg;
 
     void Awake()
     {
-        this.uiBrick = this.GetComponentInChildren<UIBrick>(true);
+        this.colorImg.transform.localScale = Vector3.zero;
+        this.count.text = "";
     }
 
-    public void Setup()
-    {
-        this.brickData = null;
-        this.uiBrick.SetData(null);
-        this.uiBrick.transform.DOKill();
-        this.uiBrick.transform.localScale = Vector3.one;
-    }
 
-    public void Setup(BrickData eb, bool animate)
+    public void Setup(BrickData eb = null, bool animate = false)
     {
         this.brickData = eb;
-        this.uiBrick.SetData(eb);
-        this.uiBrick.transform.DOKill();
+
+        if (eb == null)
+        {
+            this.count.text = "";
+            this.colorImg.transform.DOKill();
+            if (animate)
+            {
+                this.colorImg.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc);
+            }
+            else
+            {
+                this.colorImg.transform.localScale = Vector3.zero;
+            }
+            return;
+        }
+
+        this.colorImg.transform.DOKill();
+        this.count.text = eb.amount.ToString();
+        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(eb.color);
         if (animate)
         {
-            this.uiBrick.transform.localScale = Vector3.zero;
-            this.uiBrick.transform.DOScale(Vector3.one, Durations.SlotElementMove).SetEase(Ease.OutBack);
+            this.colorImg.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack);
         }
         else
         {
-            this.uiBrick.transform.localScale = Vector3.one;
+            this.colorImg.transform.localScale = Vector3.one;
         }
     }
 }
