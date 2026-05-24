@@ -10,6 +10,7 @@ public enum ViewName
 {
     None,
     AddSpaceView,
+    LoadIapView
 }
 
 public class ViewData

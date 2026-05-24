@@ -17,7 +17,6 @@ public class ModalsController : MonoBehaviour
         {
             view.gameObject.SetActive(false);
         }
-        new SetupCmd().Run();
     }
 
     void Start()

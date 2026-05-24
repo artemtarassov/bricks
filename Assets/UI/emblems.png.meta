@@ -131,8 +131,8 @@ TextureImporter:
         width: 994
         height: 105
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 4, y: 0, z: 19, w: 17}
       customData: 
       outline: []
       physicsShape: []
@@ -149,12 +149,12 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 11
-        y: 766
+        y: 770
         width: 1013
-        height: 134
+        height: 130
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 11, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -175,8 +175,8 @@ TextureImporter:
         width: 1013
         height: 149
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 5, z: 12, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -192,12 +192,12 @@ TextureImporter:
       name: emblems_3
       rect:
         serializedVersion: 2
-        x: 9
+        x: 17
         y: 468
-        width: 1010
-        height: 112
+        width: 990
+        height: 108
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -214,13 +214,13 @@ TextureImporter:
       name: emblems_4
       rect:
         serializedVersion: 2
-        x: 0
+        x: 10
         y: 351
-        width: 1024
+        width: 1014
         height: 112
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 9, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -238,10 +238,10 @@ TextureImporter:
         serializedVersion: 2
         x: 9
         y: 233
-        width: 1015
-        height: 107
+        width: 1005
+        height: 110
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -258,12 +258,12 @@ TextureImporter:
       name: emblems_6
       rect:
         serializedVersion: 2
-        x: 0
+        x: 11
         y: 84
-        width: 1004
-        height: 150
+        width: 980
+        height: 154
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -280,12 +280,12 @@ TextureImporter:
       name: emblems_7
       rect:
         serializedVersion: 2
-        x: 3
+        x: 14
         y: 3
-        width: 1021
-        height: 72
+        width: 996
+        height: 76
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -294,6 +294,28 @@ TextureImporter:
       bones: []
       spriteID: d3d56f058a3f446fe953af7cfca27a76
       internalID: -1204235960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: emblems_8
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 915
+        width: 411
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6b284a979568b47eaaf198f1c59f45a8
+      internalID: 1185227009
       vertices: []
       indices: 
       edges: []
@@ -320,6 +342,7 @@ TextureImporter:
       emblems_5: 1900235580
       emblems_6: -939599784
       emblems_7: -1204235960
+      emblems_8: 1185227009
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

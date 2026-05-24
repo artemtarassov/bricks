@@ -20,6 +20,7 @@ public class InitServicesCmd
         root.gameObject.AddComponent<AppleGameCenterController>();
 #endif
         new InitFBCmd().Run();
+        new InitIAPCmd().Run();
     }
 
 }
