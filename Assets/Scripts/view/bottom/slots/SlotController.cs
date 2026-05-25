@@ -27,6 +27,14 @@ public class SlotController : MonoBehaviour
         this.emitterPrefab.gameObject.SetActive(false);
         this.columnPrefab.gameObject.SetActive(false);
 
+
+        for (var i = 0; i < SlotModel.MaxEmitters; i++)
+        {
+            var eb = GetEmitterByIndex(i);
+            ViewModel.Instance.Emitters.Add(eb.transform);
+            eb.gameObject.SetActive(false);
+        }
+
         SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
@@ -62,9 +70,7 @@ public class SlotController : MonoBehaviour
         if (index >= this.emitters.Count)
         {
             var emitter = Instantiate(this.emitterPrefab, this.emitterPrefab.transform.parent);
-            emitter.gameObject.SetActive(true);
             this.emitters.Add(emitter);
-            ViewModel.Instance.Emitters.Add(emitter);
             return emitter;
         }
         return this.emitters[index];
@@ -91,20 +97,42 @@ public class SlotController : MonoBehaviour
         this.OnColumnsChanged();
     }
 
-    private void OnEmitterChanged(int index = -1)
+    private void OnEmitterChanged(EmitterSpace es = null)
     {
         var slotModel = SlotModel.Instance;
-        if (index == -1)
+
+        if (es == null)
         {
-            for (int i = 0; i < slotModel.Emitters.Length; i++)
+            var unlockedEmitters = slotModel.Emitters.FindAll(e => e.isUnlocked);
+            var lockedEmitters = slotModel.Emitters.FindAll(e => !e.isUnlocked);
+            foreach (var e in unlockedEmitters)
             {
-                GetEmitterByIndex(i).Setup(slotModel.Emitters[i], false);
+                var eb = GetEmitterByIndex(e.index);
+                eb.gameObject.SetActive(true);
+                eb.Setup(e.brickData, false);
+            }
+            foreach (var e in lockedEmitters)
+            {
+                var eb = GetEmitterByIndex(e.index);
+                eb.gameObject.SetActive(false);
             }
             return;
         }
-        var isEmpty = slotModel.Emitters[index] == null ? true : slotModel.Emitters[index].amount < 2;
-        var animate = isEmpty;
-        GetEmitterByIndex(index).Setup(slotModel.Emitters[index], animate);
+        {
+            var animate = es.IsEmpty;
+            var eb = GetEmitterByIndex(es.index);
+            if (es.isUnlocked)
+            {
+                eb.gameObject.SetActive(true);
+                eb.Setup(es.brickData, animate);
+            }
+            else
+            {
+                eb.gameObject.SetActive(false);
+            }
+
+        }
+
     }
 
     private void OnColumnsChanged()

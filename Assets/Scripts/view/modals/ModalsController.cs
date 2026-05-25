@@ -33,8 +33,12 @@ public class ModalsController : MonoBehaviour
 
     private void OnBlockingBackgroundClicked()
     {
-        //Debug.Log("ModalsController: Blocking background clicked. Hiding all views.");
-        new HideViewCmd().Run();
+        var allViews = this.GetComponentsInChildren<DefaultView>(true);
+        var active = allViews.FirstOrDefault(v => v.gameObject.activeSelf);
+        if (active != null)
+        {
+            active.OnBackgroundTap();
+        }
     }
 
     private void OnHideView(ViewName viewName)

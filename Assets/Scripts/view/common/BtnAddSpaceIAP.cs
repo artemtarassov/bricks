@@ -1,22 +1,19 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(UnityEngine.UI.Button))]
 public class BtnAddSpaceIAP : MonoBehaviour
 {
-    void Start()
-    {
-        this.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(OnClicked);
-    }
-
-    private void OnClicked()
-    {
-        new BtnCmd().Run(BtnCmd.BtnAction.AddSpaceForIAP);
-    }
 
     void OnEnable()
     {
         var txt = this.GetComponentInChildren<TMP_Text>();
-        txt.text = "+";
+        if (!IAPModel.Instance.HasPriceForProduct(IAPModel.AdditionalSpace))
+        {
+            txt.text = "-";
+            return;
+        }
+        txt.text = IAPModel.Instance.GetPriceForProduct(IAPModel.AdditionalSpace);
     }
 }

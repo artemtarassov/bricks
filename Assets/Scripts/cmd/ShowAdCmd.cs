@@ -5,9 +5,15 @@ using UnityEngine.Assertions;
 
 public class ShowAdCmd
 {
-    public void Run()
+    public void Run(RewardName rn)
     {
-        AdModel.Instance.ShowAd(new AdRewardData(RewardName.CASH1));
+        if (!AdModel.Instance.AllReady())
+        {
+            new ToastCmd("no ads").Run();
+            return;
+        }
+        AdModel.Instance.ShowAd(new AdRewardData(rn));
+        new ShowViewCmd().Run(ViewName.LoadingView);
     }
 
 }

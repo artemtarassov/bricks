@@ -7,18 +7,23 @@ using UnityEngine.Assertions;
 public class SlotModel
 {
     public static readonly int MaxColumns = 3;
+    public static readonly int MaxEmitters = 3;
     public static SlotModel Instance;
     public List<SlotElementDataList> Columns { get; private set; }
 
-    public BrickData[] Emitters { get; private set; }
+    public List<EmitterSpace> Emitters { get; private set; }
 
     public Action OnColumnsChanged;
-    public Action<int> OnEmitterChanged;
+    public Action<EmitterSpace> OnEmitterChanged;
     public Action<BrickData, int> OnBrickMovedFromColumnToEmitter;
 
     public SlotModel()
     {
-        this.Emitters = new BrickData[2];
+        this.Emitters = new List<EmitterSpace>();
+        for (var i = 0; i < MaxEmitters; i++)
+        {
+            this.Emitters.Add(new EmitterSpace() { index = i, isUnlocked = i < 2 });
+        }
         this.Columns = new List<SlotElementDataList>();
         for (var i = 0; i < MaxColumns; i++)
         {
@@ -26,9 +31,26 @@ public class SlotModel
         }
     }
 
+    public void LockEmitter(int emitterIndex)
+    {
+        var emitter = this.Emitters.Find((e) => e.index == emitterIndex);
+        emitter.isUnlocked = false;
+        emitter.brickData = null;
+        this.OnEmitterChanged?.Invoke(emitter);
+    }
+
+    public int UnlockNextEmitter()
+    {
+        var lockedEmitter = this.Emitters.Find(e => !e.isUnlocked);
+        Assert.IsNotNull(lockedEmitter, "No locked emitter found");
+        lockedEmitter.isUnlocked = true;
+        this.OnEmitterChanged?.Invoke(lockedEmitter);
+        return lockedEmitter.index;
+    }
+
     public bool HasBricksInEmitters()
     {
-        return this.Emitters.Any(e => e != null && e.amount > 0);
+        return this.Emitters.Any(e => e.HasBricks);
     }
 
     public int CountBricks()
@@ -41,16 +63,39 @@ public class SlotModel
         return count;
     }
 
-    public void ClearAll()
+    private void ClearAll()
     {
         foreach (var column in this.Columns)
         {
             column.list.Clear();
         }
-        for (var i = 0; i < this.Emitters.Length; i++)
+        for (var i = 0; i < this.Emitters.Count; i++)
         {
-            this.Emitters[i] = null;
+            this.Emitters[i].brickData = null;
         }
+    }
+
+    public void Fill(List<SlotElementDataList> slotElementDataList)
+    {
+        ClearAll();
+        Assert.IsTrue(slotElementDataList.Count > 1, "City element should have at least 2 columns of slot data");
+        foreach (var sedl in slotElementDataList)
+        {
+            var columnIndex = sedl.columnIndex;
+            foreach (var sed in sedl.list)
+            {
+                if (sed.type == SlotElementType.Bricks)
+                {
+                    this.AddBricksToColumn(columnIndex, sed.brickData);
+                }
+                else if (sed.type == SlotElementType.AddMoreBricks)
+                {
+                    this.AddMoreBricksToColumn(columnIndex);
+                }
+            }
+        }
+        this.OnColumnsChanged?.Invoke();
+
     }
 
     public void AddBricksToColumn(int column, BrickData bd)
@@ -68,37 +113,43 @@ public class SlotModel
         this.Columns[column].list.Add(new SlotElementData(SlotElementType.AddMoreBricks));
     }
 
-    public void DecrementEmitter(BrickData bd)
+    public void DecrementEmitter(int emitterIndex)
     {
-        Assert.IsTrue(bd.amount > 0, "Emitter amount must be greater than 0");
-        Assert.IsTrue(Array.Exists(this.Emitters, e => e == bd), "Emitter must be in emitters list");
+        var emitter = this.Emitters[emitterIndex];
+        Assert.IsNotNull(emitter);
+        Assert.IsTrue(emitter.HasBricks);
+        var bd = emitter.brickData;
         bd.amount--;
-        int index = Array.FindIndex(this.Emitters, e => e == bd);
         if (bd.amount < 1)
         {
-            this.Emitters[index] = null;
+            emitter.brickData = null;
         }
-        OnEmitterChanged?.Invoke(index);
+        OnEmitterChanged?.Invoke(emitter);
     }
 
     public bool HasEmitterSpace()
     {
-        return Array.FindIndex(this.Emitters, e => e == null) != -1;
+        return this.Emitters.Any((e) => e.IsEmpty);
+    }
+
+    public int CountEmptyEmitters()
+    {
+        return this.Emitters.Count((e) => e.IsEmpty);
     }
 
     public int GetEmptyEmitterIndex()
     {
-        return Array.FindIndex(this.Emitters, e => e == null);
+        var e = this.Emitters.Find((e) => e.IsEmpty);
+        return e != null ? e.index : -1;
     }
 
-    private int AddEmitter(BrickData brickData)
+    private int AddToUnlockedEmitter(BrickData brickData)
     {
         Assert.IsTrue(brickData.amount > 0);
         Assert.IsTrue(brickData.color != ColorIndex.Undefined);
-        Assert.IsTrue(Array.FindIndex(this.Emitters, e => e == brickData) == -1);
-
         var emptyIndex = GetEmptyEmitterIndex();
-        this.Emitters[emptyIndex] = brickData;
+        Assert.IsTrue(emptyIndex >= 0, "No empty emitter found");
+        this.Emitters[emptyIndex].brickData = brickData;
         return emptyIndex;
     }
 
@@ -110,7 +161,8 @@ public class SlotModel
             if (element != null)
             {
                 c.list.Remove(element);
-                var emitterIndex = AddEmitter(sed.brickData);
+                var emitterIndex = AddToUnlockedEmitter(sed.brickData);
+                Assert.IsTrue(emitterIndex >= 0, "No empty emitter found");
                 this.OnBrickMovedFromColumnToEmitter?.Invoke(sed.brickData, emitterIndex);
                 return true;
             }

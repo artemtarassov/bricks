@@ -12,6 +12,12 @@ public class SelectColumnCmd
 
     public void Run()
     {
+        var element = CityModel.Instance.GetCurrentElement();
+        if (!SlotModel.Instance.HasEmitterSpace() && element.CountFlyingBricks() == 0)
+        {
+            this.ShowOutOfSpace();
+            return;
+        }
 
         if (this.data.type == SlotElementType.Bricks)
         {
@@ -26,6 +32,19 @@ public class SelectColumnCmd
             SlotModel.Instance.MoveFromColumnToEmitter(this.data);
             CityModel.Instance.GetCurrentElement().ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
             return;
+        }
+    }
+
+    private void ShowOutOfSpace()
+    {
+        var attemptsLeft = PlayerModel.Instance.playerData.attempts;
+        if (attemptsLeft > 0)
+        {
+            new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+        }
+        else
+        {
+            new ShowViewCmd().Run(ViewName.GameOverView);
         }
     }
 }

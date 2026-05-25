@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class DefaultView : MonoBehaviour
 {
-    [SerializeField] protected GameObject bg;
-    [SerializeField] protected GameObject contents;
  
     protected void PlayOpenPopupSound()
     {
@@ -24,7 +22,10 @@ public class DefaultView : MonoBehaviour
         Debug.Log("DefaultView OnShown called");
     }
 
-
+    public virtual void OnBackgroundTap()
+    {
+        Debug.Log("DefaultView OnBackgroundTap called");
+    }
 
 
 }

@@ -7,13 +7,11 @@ public class BrickEmissionController : MonoBehaviour
     void Start()
     {
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
-        SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
     }
 
     void OnDestroy()
     {
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
-        SlotModel.Instance.OnEmitterChanged -= OnEmitterChanged;
         if (this.update != null)
         {
             this.update.Kill();
@@ -23,10 +21,6 @@ public class BrickEmissionController : MonoBehaviour
     private void OnBrickMovedFromColumnToEmitter(BrickData bd, int emitterIndex)
     {
         this.StartUpdate(true);
-    }
-
-    private void OnEmitterChanged(int index)
-    {
     }
 
     private void StartUpdate(bool start)

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerModel
@@ -5,6 +6,8 @@ public class PlayerModel
     public static PlayerModel Instance;
 
     public PlayerData playerData { get; private set; }
+
+    public Action OnPlayerDataChanged;
 
     public void Save()
     {
@@ -21,7 +24,7 @@ public class PlayerModel
     {
         this.playerData = new PlayerData()
         {
-            coins = 1000,
+            coins = 10000,
             unlockedBuildings = 0,
             attempts = 5,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
@@ -29,10 +32,44 @@ public class PlayerModel
         };
     }
 
+    public bool CanAfford(int cost)
+    {
+        return this.playerData.coins >= cost;
+    }
+
     public void AddCoins(int amount)
     {
+        Debug.Log($"PlayerModel: adding {amount} coins");
         this.playerData.coins += amount;
         this.playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+    }
+
+    public bool FillAttempts()
+    {
+        Debug.Log("PlayerModel: filling attempts");
+        if (this.playerData.attempts >= 5)
+        {
+            Debug.Log("PlayerModel: attempts are already full");
+            return false;
+        }
+        this.playerData.attempts = 5;
+        this.playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+        return true;
+    }
+
+    public bool UseAttempt()
+    {
+        if (this.playerData.attempts <= 0)
+        {
+            return false;
+        }
+        Debug.Log("PlayerModel: using attempt, attempts left before use: " + this.playerData.attempts);
+        this.playerData.attempts -= 1;
+        this.playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+        return true;
     }
 
     public void Load()
@@ -52,5 +89,7 @@ public class PlayerModel
             Debug.LogError($"PlayerModel Load: failed to parse player data json, error: {e}");
             this.CreateNewPlayerData();
         }
+
+
     }
 }

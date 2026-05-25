@@ -8,6 +8,9 @@ using UnityEngine;
 public enum RemoteConfigProperty
 {
     Undefined = 0,
+    MaxAttempts = 1,
+    RefillCoins = 2,
+    Reward1Coins = 3
 }
 
 [Serializable]
@@ -48,8 +51,11 @@ public class RemoteConfigData
             entries.Add(new RemoteConfigEntry { name = p, value = value });
         }
     }
-    //public int DailyCoins => GetValue(RemoteConfigProperty.DailyCoins, 1000);
+    public int MaxAttempts => GetValue(RemoteConfigProperty.MaxAttempts, 5);
+    public int RefillCoins => GetValue(RemoteConfigProperty.RefillCoins, 900);
 
+    //reward for completing one cityElement.
+    public int Reward1Coins => GetValue(RemoteConfigProperty.Reward1Coins, 50);
 
     public static RemoteConfigData Load()
     {

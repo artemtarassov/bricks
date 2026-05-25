@@ -5,20 +5,9 @@ public class AttemptsRow : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
     [SerializeField] private GameObject starsContainer;
-    void Start()
+
+    public void UpdateValues(int left)
     {
-
-    }
-
-    void OnEnable()
-    {
-        UpdateAttemptsLeft();
-    }
-
-    private void UpdateAttemptsLeft()
-    {
-        var left = 3;
-
         if (left == 0)
         {
             text.text = "No attempts left";

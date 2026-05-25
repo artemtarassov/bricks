@@ -8,7 +8,6 @@ using Unity.Services.RemoteConfig;
 using System;
 using Facebook.Unity;
 using UnityEngine.Events;
-using Unity.Services.Analytics;
 
 public class InitServicesCmd
 {

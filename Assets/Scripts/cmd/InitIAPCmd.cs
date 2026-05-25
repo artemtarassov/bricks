@@ -1,106 +1,174 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing;
-using UnityEngine.Purchasing.Extension;
 using UnityEngine.Purchasing.Security;
 
 public class InitIAPCmd
 {
-    public void Run()
-    {
-        InitIap();
-    }
-
     private static MyIAPManager manager;
 
-    private void InitIap()
+    public void Run()
     {
-        manager = new MyIAPManager();
-        var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-        builder.AddProduct(IAPModel.IncomeSpeedup, ProductType.NonConsumable);
-        builder.AddProduct(IAPModel.GoldenTicket, ProductType.NonConsumable);
-        builder.AddProduct(IAPModel.GoldenTicketOffer, ProductType.NonConsumable);
-        builder.AddProduct(IAPModel.UnlockRoom, ProductType.Consumable);
-        builder.AddProduct(IAPModel.ItemsPack1, ProductType.Consumable);
-        builder.AddProduct(IAPModel.ItemsPack2, ProductType.Consumable);
-        builder.AddProduct(IAPModel.ItemsPack3, ProductType.Consumable);
-        builder.AddProduct(IAPModel.PersonalPet, ProductType.Consumable);
-        builder.AddProduct(IAPModel.CashPack1, ProductType.Consumable);
-        builder.AddProduct(IAPModel.CashPack2, ProductType.Consumable);
-        builder.AddProduct(IAPModel.CashPack3, ProductType.Consumable);
-        builder.AddProduct(IAPModel.KeepUpOffer, ProductType.Consumable);
-        UnityPurchasing.Initialize(manager, builder);
+        if (manager == null)
+        {
+            manager = new MyIAPManager();
+        }
+
+        manager.Initialize();
     }
 }
 
-class MyIAPManager : IDetailedStoreListener
+class MyIAPManager
 {
-    private IStoreController controller;
-    private IExtensionProvider extensions;
+    private readonly List<ProductDefinition> productDefinitions = new List<ProductDefinition>()
+    {
+        new ProductDefinition(IAPModel.AdditionalSpace, ProductType.NonConsumable),
+        new ProductDefinition(IAPModel.GoldenTicket, ProductType.NonConsumable),
+        new ProductDefinition(IAPModel.CashPack1, ProductType.Consumable),
+        new ProductDefinition(IAPModel.CashPack2, ProductType.Consumable),
+        new ProductDefinition(IAPModel.CashPack3, ProductType.Consumable),
+    };
 
+    private StoreController storeController;
+    private bool isInitialized;
+    private bool isInitializing;
+    private bool modelEventsSubscribed;
     private bool isRestoring = false;
-    private HashSet<string> restoredProductIds = new HashSet<string>();
+    private readonly HashSet<string> restoredProductIds = new HashSet<string>();
 
-    private void OnRestorePurchases()
+    public void Initialize()
     {
-        var e = extensions.GetExtension<IAppleExtensions>(); 
+        if (isInitialized || isInitializing)
+        {
+            return;
+        }
 
-        this.isRestoring = true;
-        new HideViewCmd().Run();
-        new ShowViewCmd().Run(ViewName.LoadIapView);
-
-        e.RestoreTransactions(
-            (bool b, string error) =>
-            {
-                isRestoring = false;
-                new HideViewCmd().Run(ViewName.LoadIapView);
-                if (b)
-                {
-                    foreach (var productId in restoredProductIds)
-                    {
-                        //Debug.Log("MyIAPManager OnRestorePurchases restored: " + productId);
-                        new CompleteIapCmd(productId).Run(IapResponse.Restore); 
-                    }
-                }
-                else
-                {
-                    foreach (var productId in restoredProductIds)
-                    {
-                        //Debug.Log("MyIAPManager OnRestorePurchases restored: " + productId);
-                        new CompleteIapCmd(productId).Run(IapResponse.Failed);
-                    }
-                    Debug.LogError("MyIAPManager OnRestorePurchases failed: " + error);
-                }
-            }
-        );
-        //add listener
+        InitializeAsync();
     }
 
-    private void OnPurchaseRequest(string p)
+    private async void InitializeAsync()
     {
-        //Debug.Log("InitIap OnPurchaseRequest: " + p);
-        //new HideViewCmd().Run();
-        new ShowViewCmd().Run(ViewName.LoadIapView); 
-        this.controller.InitiatePurchase(p);
+        isInitializing = true;
+        storeController = UnityIAPServices.StoreController();
+        SubscribeToStoreEvents();
+        SubscribeToModelEvents();
+
+        try
+        {
+            await storeController.Connect();
+            isInitialized = true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("MyIAPManager Connect failed: " + e.Message);
+        }
+        finally
+        {
+            isInitializing = false;
+        }
     }
 
-    /// <summary>
-    /// Called when Unity IAP is ready to make purchases.
-    /// </summary>
-    public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
+    private void SubscribeToStoreEvents()
     {
-        //Debug.Log("MyIAPManager OnInitialized");
-        this.controller = controller;
-        this.extensions = extensions;
+        storeController.OnStoreConnected += OnStoreConnected;
+        storeController.OnStoreDisconnected += OnStoreDisconnected;
+        storeController.OnProductsFetched += OnProductsFetched;
+        storeController.OnProductsFetchFailed += OnProductsFetchFailed;
+        storeController.OnPurchasePending += OnPurchasePending;
+        storeController.OnPurchaseConfirmed += OnPurchaseConfirmed;
+        storeController.OnPurchaseFailed += OnPurchaseFailed;
+        storeController.OnPurchaseDeferred += OnPurchaseDeferred;
+        storeController.OnPurchasesFetched += OnPurchasesFetched;
+        storeController.OnPurchasesFetchFailed += OnPurchasesFetchFailed;
+    }
+
+    private void SubscribeToModelEvents()
+    {
+        if (modelEventsSubscribed || IAPModel.Instance == null)
+        {
+            return;
+        }
 
         IAPModel.Instance.OnPurchaseRequest += OnPurchaseRequest;
         IAPModel.Instance.OnRestorePurchases += OnRestorePurchases;
+        modelEventsSubscribed = true;
+    }
 
-        foreach (var product in controller.products.all)
+    private void OnStoreConnected()
+    {
+        SubscribeToModelEvents();
+        storeController.FetchProducts(productDefinitions);
+    }
+
+    private void OnRestorePurchases()
+    {
+        if (storeController == null)
         {
-            var localizedPrice = (float)(product.metadata.localizedPrice);
+            Debug.LogWarning("MyIAPManager OnRestorePurchases called before store initialization");
+            return;
+        }
+
+        isRestoring = true;
+        restoredProductIds.Clear();
+        new HideViewCmd().Run();
+        new ShowViewCmd().Run(ViewName.LoadingView);
+
+        storeController.RestoreTransactions(
+            (bool b, string error) =>
+            {
+                if (!b)
+                {
+                    FinishRestore(IapResponse.Failed, error);
+                }
+            }
+        );
+    }
+
+    private void FinishRestore(IapResponse response, string message = null)
+    {
+        isRestoring = false;
+        new HideViewCmd().Run(ViewName.LoadingView);
+
+        foreach (var productId in restoredProductIds)
+        {
+            new CompleteIapCmd(productId, message).Run(response);
+        }
+
+        if (response == IapResponse.Failed)
+        {
+            Debug.LogError("MyIAPManager OnRestorePurchases failed: " + message);
+        }
+    }
+
+    private void OnPurchaseRequest(string productId)
+    {
+        if (storeController == null)
+        {
+            Debug.LogWarning("MyIAPManager OnPurchaseRequest called before store initialization");
+            return;
+        }
+
+        new ShowViewCmd().Run(ViewName.LoadingView);
+
+        try
+        {
+            storeController.PurchaseProduct(productId);
+        }
+        catch (Exception e)
+        {
+            new HideViewCmd().Run(ViewName.LoadingView);
+            Debug.LogWarning("MyIAPManager PurchaseProduct failed: " + e.Message);
+        }
+    }
+
+    private void OnProductsFetched(List<Product> products)
+    {
+        foreach (var product in products)
+        {
+            var localizedPrice = (float)product.metadata.localizedPrice;
             var localizedPriceString = product.metadata.localizedPriceString;
-            if (!string.IsNullOrEmpty(localizedPriceString))
+            if (!string.IsNullOrEmpty(localizedPriceString) && IAPModel.Instance != null)
             {
                 IAPModel.Instance.SetPriceForProduct(
                     product.definition.id,
@@ -111,75 +179,63 @@ class MyIAPManager : IDetailedStoreListener
             }
         }
 
-        if (controller.products.all.Length == 0)
+        if (products.Count == 0)
         {
             Debug.LogError("MyIAPManager no products found");
         }
     }
 
-    /// <summary>
-    /// Called when Unity IAP encounters an unrecoverable initialization error.
-    ///
-    /// Note that this will not be called if Internet is unavailable; Unity IAP
-    /// will attempt initialization until it becomes available.
-    /// </summary>
-    public void OnInitializeFailed(InitializationFailureReason error)
+    private void OnProductsFetchFailed(ProductFetchFailed failure)
     {
-        Debug.LogWarning("MyIAPManager OnInitializeFailed InitializationFailureReason:" + error);
+        Debug.LogError("MyIAPManager OnProductsFetchFailed: " + failure.FailureReason);
     }
 
-    /// <summary>
-    /// Called when a purchase completes.
-    ///
-    /// May be called at any time after OnInitialized().
-    /// </summary>
-    public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs e)
+    private void OnPurchasePending(PendingOrder order)
     {
-        //Debug.Log("MyIAPManager ProcessPurchase: " + e.purchasedProduct.definition.id);
-        var productId = e.purchasedProduct.definition.id.ToString();
-        var transactionID = e.purchasedProduct.transactionID;
-
-
         var validated = true;
-        #if !UNITY_EDITOR
-        validated = Validate(e);
-        #endif
+#if !UNITY_EDITOR
+        validated = Validate(order);
+#endif
 
         if (!validated)
         {
-            var p = e.purchasedProduct;
-            new CompleteIapCmd(productId, transactionID).Run(IapResponse.Failed);
-            new HideViewCmd().Run(ViewName.LoadIapView);
-            return PurchaseProcessingResult.Complete;
+            CompletePendingOrder(order, IapResponse.Failed, order.Info.TransactionID);
+            return;
         }
 
         if (isRestoring)
         {
-            restoredProductIds.Add(productId);
-            return PurchaseProcessingResult.Complete;
+            AddRestoredProductIds(order);
+            storeController.ConfirmPurchase(order);
+            return;
         }
 
-        new CompleteIapCmd(productId, transactionID).Run(IapResponse.Success);
-        new HideViewCmd().Run(ViewName.LoadIapView);
-        return PurchaseProcessingResult.Complete;
+        CompletePendingOrder(order, IapResponse.Success, order.Info.TransactionID);
     }
 
-    private bool Validate(PurchaseEventArgs e)
+    private void CompletePendingOrder(PendingOrder order, IapResponse response, string message)
     {
-        bool validPurchase = true;
+        foreach (var cartItem in order.CartOrdered.Items())
+        {
+            if (cartItem == null || cartItem.Product == null)
+            {
+                continue;
+            }
 
+            new CompleteIapCmd(cartItem.Product.definition.id, message).Run(response);
+        }
+
+        new HideViewCmd().Run(ViewName.LoadingView);
+        storeController.ConfirmPurchase(order);
+    }
+
+    private bool Validate(Order order)
+    {
         try
         {
-            #if UNITY_ANDROID
-            var validator = new CrossPlatformValidator(GooglePlayTangle.Data(), null, Application.identifier);
-            #elif UNITY_IOS || UNITY_STANDALONE_OSX
-            var validator = new CrossPlatformValidator(null, AppleTangle.Data(), Application.identifier);
-            #else
-            return true;
-            #endif
-            // On Google Play, result has a single product ID.
-            var result = validator.Validate(e.purchasedProduct.receipt);
-            // For informational purposes, we list the receipt(s)
+#if UNITY_ANDROID
+            var validator = new CrossPlatformValidator(GooglePlayTangle.Data(), Application.identifier);
+            var result = validator.Validate(order.Info.Receipt);
             Debug.Log("Receipt is valid. Contents:");
             foreach (IPurchaseReceipt productReceipt in result)
             {
@@ -187,46 +243,111 @@ class MyIAPManager : IDetailedStoreListener
                 Debug.Log(productReceipt.purchaseDate.ToString());
                 Debug.Log(productReceipt.transactionID);
             }
+#endif
+            return true;
         }
         catch (IAPSecurityException ex)
         {
             Debug.LogError("Invalid receipt, not unlocking content. " + ex);
-            validPurchase = false;
+            return false;
         }
-        return validPurchase;
     }
 
-    /// <summary>
-    /// Called when a purchase fails.
-    /// IStoreListener.OnPurchaseFailed is deprecated,
-    /// use IDetailedStoreListener.OnPurchaseFailed instead.
-    /// </summary>
-    public void OnPurchaseFailed(Product i, PurchaseFailureReason p)
+    private void OnPurchaseConfirmed(Order order)
     {
-        //IAPModel.Instance.SetPurchaseFailed(i.definition.id);
-        new CompleteIapCmd(i.definition.id, p.ToString()).Run(IapResponse.Failed);
-        new HideViewCmd().Run(ViewName.LoadIapView);
-        Debug.LogWarning(
-            "MyIAPManager OnPurchaseFailed: " + i.definition.id + " PurchaseFailureReason:" + p
-        );
+        if (order is FailedOrder failedOrder)
+        {
+            Debug.LogWarning(
+                "MyIAPManager ConfirmPurchase failed: "
+                    + failedOrder.FailureReason
+                    + " details:"
+                    + failedOrder.Details
+            );
+        }
     }
 
-    public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
+    private void OnPurchaseFailed(FailedOrder failedOrder)
     {
-        new HideViewCmd().Run(ViewName.LoadIapView);
-        var urlEncodedMsg = System.Uri.EscapeDataString(failureDescription.message);
-        new CompleteIapCmd(product.definition.id, urlEncodedMsg).Run(IapResponse.Failed);
-        //IAPModel.Instance.SetPurchaseFailed(product.definition.id);
-        Debug.LogWarning(
-            "MyIAPManager OnPurchaseFailed: "
-                + product.definition.id
-                + " PurchaseFailureDescription:"
-                + failureDescription
-        );
+        new HideViewCmd().Run(ViewName.LoadingView);
+        var urlEncodedMsg = Uri.EscapeDataString(failedOrder.Details);
+
+        foreach (var cartItem in failedOrder.CartOrdered.Items())
+        {
+            if (cartItem == null || cartItem.Product == null)
+            {
+                continue;
+            }
+
+            new CompleteIapCmd(cartItem.Product.definition.id, urlEncodedMsg).Run(IapResponse.Failed);
+            Debug.LogWarning(
+                "MyIAPManager OnPurchaseFailed: "
+                    + cartItem.Product.definition.id
+                    + " PurchaseFailureReason:"
+                    + failedOrder.FailureReason
+                    + " details:"
+                    + failedOrder.Details
+            );
+        }
     }
 
-    public void OnInitializeFailed(InitializationFailureReason error, string message)
+    private void OnPurchaseDeferred(DeferredOrder deferredOrder)
     {
-        Debug.LogWarning("MyIAPManager InitializationFailureReason:" + error + " message:" + message);
+        new HideViewCmd().Run(ViewName.LoadingView);
+
+        foreach (var cartItem in deferredOrder.CartOrdered.Items())
+        {
+            if (cartItem == null || cartItem.Product == null)
+            {
+                continue;
+            }
+
+            Debug.LogWarning("MyIAPManager OnPurchaseDeferred: " + cartItem.Product.definition.id);
+        }
+    }
+
+    private void OnPurchasesFetched(Orders orders)
+    {
+        if (!isRestoring)
+        {
+            return;
+        }
+
+        foreach (var order in orders.ConfirmedOrders)
+        {
+            AddRestoredProductIds(order);
+        }
+
+        foreach (var order in orders.PendingOrders)
+        {
+            AddRestoredProductIds(order);
+        }
+
+        FinishRestore(IapResponse.Restore);
+    }
+
+    private void OnPurchasesFetchFailed(PurchasesFetchFailureDescription failure)
+    {
+        if (!isRestoring)
+        {
+            return;
+        }
+
+        FinishRestore(IapResponse.Failed, failure.Message);
+    }
+
+    private void AddRestoredProductIds(Order order)
+    {
+        foreach (var cartItem in order.CartOrdered.Items())
+        {
+            if (cartItem != null && cartItem.Product != null)
+            {
+                restoredProductIds.Add(cartItem.Product.definition.id);
+            }
+        }
+    }
+
+    private void OnStoreDisconnected(StoreConnectionFailureDescription description)
+    {
+        Debug.LogWarning("MyIAPManager Store disconnected: " + description.message);
     }
 }

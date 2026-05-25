@@ -14,31 +14,12 @@ public class UnlockCityElementCmd
     {
         Assert.IsTrue(BalancingModel.Instance.DidLoad(), "BalancingModel data not loaded. Did you forget to call Load()?");
         var cityElement = CityModel.Instance.UnlockNextElement();
-        cityElement.dataContainer = BalancingModel.Instance.GetData(cityElement.dataKey);
-        cityElement.ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
+        var dataContainer = BalancingModel.Instance.GetDataCopy(cityElement.dataKey);
+        cityElement.Setup(dataContainer,BalancingModel.AdditionalBricksOnEmptyElement);
 
         var sm = SlotModel.Instance;
-        sm.ClearAll();
         var slotElementDataList = cityElement.dataContainer.slotElementDataList;
-        Assert.IsTrue(slotElementDataList.Count > 1, "City element should have at least 2 columns of slot data");
-        foreach (var sedl in slotElementDataList)
-        {
-            var columnIndex = sedl.columnIndex;
-            foreach (var sed in sedl.list)
-            {
-                if (sed.type == SlotElementType.Bricks)
-                {
-                    sm.AddBricksToColumn(columnIndex, sed.brickData);
-                }
-                else if (sed.type == SlotElementType.AddMoreBricks)
-                {
-                    sm.AddMoreBricksToColumn(columnIndex);
-                }
-            }
-        }
-
-        sm.OnColumnsChanged?.Invoke();
-
+        sm.Fill(slotElementDataList);
 
         var mainCam = Camera.main;
 

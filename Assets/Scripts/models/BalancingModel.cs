@@ -48,7 +48,7 @@ public class BalancingModel
         this.dataContainerList = data;
     }
 
-    public CityElementDataContainer GetData(string key)
+    public CityElementDataContainer GetDataCopy(string key)
     {
         Assert.IsNotNull(this.dataContainerList, "BalancingModel GetData: dataContainerList is null, did you forget to call Load()?");
         Assert.IsNotNull(key, "BalancingModel GetData: key is null");
@@ -58,7 +58,7 @@ public class BalancingModel
             Debug.LogError($"BalancingModel GetData: no data found for key {key}");
             return null;
         }
-        return container;
+        return container.Clone();
     }
 
     public void Save()

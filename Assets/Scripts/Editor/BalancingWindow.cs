@@ -35,7 +35,7 @@ public class BalancingWindow : EditorWindow
     {
         Assert.IsTrue(difficulty >= 0 && difficulty <= 3, "ApplyDifficulty: difficulty should be between 0 and 3");
         var counter = 0;
-        var data = BalancingModel.Instance.GetData(key);
+        var data = BalancingModel.Instance.GetDataCopy(key);
         var columnIndexList = new List<int>();
         for (var i = 0; i < SlotModel.MaxColumns; i++)
         {
@@ -92,7 +92,7 @@ public class BalancingWindow : EditorWindow
     {
 
         var key = cityElement.dataKey;
-        var cec = new CityElementColors(cityElement.GetBricks().Count);
+        var cec = new CityElementColors(cityElement.FindAllBricks().Count);
         var predefinedBricks = cec.predefinedBricks.ToList();
         Assert.IsTrue(predefinedBricks.Count > 0, "predefinedBricks is empty");
 

@@ -11,7 +11,7 @@ public class EmitBricksCmd
         var emitters = SlotModel.Instance.Emitters;
         foreach (var emitter in emitters)
         {
-            if (emitter != null && emitter.amount > 0)
+            if (emitter.HasBricks)
             {
                 new EmitBrickCmd(emitter).Run();
                 var hasCityElement = CityModel.Instance.GetCurrentElement() != null;
@@ -28,11 +28,12 @@ public class EmitBrickCmd
 {
     private CityElement cityElement;
     private Transform nextBrick;
-    private ColorIndex colorIndex => emitter.color;
-    private BrickData emitter;
+    private ColorIndex colorIndex => emitter.brickData.color;
+    private EmitterSpace emitter;
 
-    public EmitBrickCmd(BrickData emitter)
+    public EmitBrickCmd(EmitterSpace emitter)
     {
+        Assert.IsTrue(emitter.HasBricks);
         this.cityElement = CityModel.Instance.GetCurrentElement();
         this.emitter = emitter;
         Assert.IsNotNull(this.cityElement, "No current city element found");
@@ -41,7 +42,7 @@ public class EmitBrickCmd
 
     private Vector3 GetFromPos()
     {
-        var screenPos = ViewModel.Instance.Emitters.Find(e => e.brickData == this.emitter).transform.position;
+        var screenPos = ViewModel.Instance.Emitters[emitter.index].position;
         var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 10));
         return worldPos;
     }
@@ -66,7 +67,7 @@ public class EmitBrickCmd
         var fromPos = GetFromPos();
         CityModel.Instance.FlyBrick(fromPos, nextBrick, this.colorIndex);
         cityElement.SetBrickState(nextBrick, BrickState.Flying);
-        SlotModel.Instance.DecrementEmitter(this.emitter);
+        SlotModel.Instance.DecrementEmitter(this.emitter.index);
         DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete);
     }
 
@@ -84,6 +85,7 @@ public class EmitBrickCmd
             cityElement.AddComponent<BrickTopDownExplosion>();
             cityElement.EnableVisuals(true);
             new UnlockCityElementCmd().Run();
+            return;
         }
         else
         {
@@ -93,7 +95,6 @@ public class EmitBrickCmd
             {
                 cityElement.ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
             }
-
         }
         /*else
         {

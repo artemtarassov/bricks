@@ -10,7 +10,9 @@ public enum ViewName
 {
     None,
     AddSpaceView,
-    LoadIapView
+    LoadingView,
+    OutOfSpaceView,
+    GameOverView,
 }
 
 public class ViewData
@@ -23,7 +25,7 @@ public class ViewModel
 {
     public static ViewModel Instance;
 
-    public List<EmitterBrick> Emitters = new List<EmitterBrick>();
+    public List<Transform> Emitters = new List<Transform>();
 
     private List<ViewData> viewDataStack = new List<ViewData>();//only the last one is visible
 
@@ -36,6 +38,8 @@ public class ViewModel
     public Action<string, Vector2> OnShowParticles;
     public bool SetupCompleted { get; private set; } = false;
     public Action<ViewData, bool> OnViewChange;
+
+    public Action<string> OnToastMsg;
 
     public Action OnSetupCompleted;
 
@@ -53,6 +57,11 @@ public class ViewModel
     public List<ViewData> GetViews()
     {
         return viewDataStack;
+    }
+
+    public void ShowToast(string msg)
+    {
+        OnToastMsg?.Invoke(msg);
     }
 
     public void LockUI(float sec)
@@ -85,13 +94,9 @@ public class ViewModel
     {
         OnShowParticles?.Invoke(name, pos);
     }
-
-    private HashSet<ViewName> activeViews = new HashSet<ViewName>();
-
     public void ShowView(ViewName viewName, bool animate = true)
     {
         Debug.Log($"ViewModel: Showing view {viewName}, animate {animate}");    
-        activeViews.Add(viewName);
         viewDataStack.Add(new ViewData { viewName = viewName });
         OnShowView?.Invoke(viewName, animate);
     }
@@ -99,22 +104,18 @@ public class ViewModel
     public void HideView(ViewName viewName = ViewName.None)
     {
         Debug.Log($"ViewModel: Hiding view {viewName}");
-        activeViews.Remove(viewName);
         viewDataStack.RemoveAll(v => v.viewName == viewName);
         OnHideView?.Invoke(viewName);
     }
 
     public bool HasView(ViewName viewName)
     {
-        return activeViews.Contains(viewName);
+        return viewDataStack.Any(v => v.viewName == viewName);
     }
 
     public bool HasAnyView()
     {
-        return activeViews.Count > 0;
+        return viewDataStack.Count > 0;
     }
-
-
-
 
 }

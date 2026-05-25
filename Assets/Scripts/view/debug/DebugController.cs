@@ -12,6 +12,7 @@ public class DebugController : MonoBehaviour
 
     public void OnNextBtnClicked()
     {
-        new UnlockCityElementCmd().Run();
+        new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+        //new UnlockCityElementCmd().Run();
     }
 }

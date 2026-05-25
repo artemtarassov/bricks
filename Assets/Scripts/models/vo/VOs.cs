@@ -19,6 +19,7 @@ public enum SlotElementType
 {
     Empty,
     Bricks,
+    HiddenBricks,
     AddMoreBricks,
 }
 
@@ -43,6 +44,14 @@ public class SlotElementData
         this.type = type;
         this.brickData = null;
     }
+    public SlotElementData Clone()
+    {
+        return new SlotElementData()
+        {
+            type = this.type,
+            brickData = this.brickData != null ? this.brickData.Clone() : null
+        };
+    }
 }
 
 [Serializable]
@@ -51,9 +60,15 @@ public class SlotElementDataList
     public int columnIndex;
     public List<SlotElementData> list = new List<SlotElementData>();
 
-    public SlotElementDataList()
+    public SlotElementDataList Clone()
     {
-        
+        var clone = new SlotElementDataList();
+        clone.columnIndex = this.columnIndex;
+        foreach (var item in this.list)
+        {
+            clone.list.Add(item.Clone());
+        }
+        return clone;
     }
 }
 
@@ -78,6 +93,16 @@ public enum BrickState
     Colored = 5,
 }
 
+[Serializable]
+public class EmitterSpace
+{
+    public BrickData brickData = null;
+    public int index;
+    public bool isUnlocked = false;
+    public bool HasBricks => isUnlocked && brickData != null && brickData.amount > 0;
+    public bool IsEmpty => isUnlocked && brickData == null;
+}
+
 
 [Serializable]
 public class DataContainerList
@@ -91,4 +116,21 @@ public class CityElementDataContainer
     public string key;
     public List<BrickData> brickDataList;
     public List<SlotElementDataList> slotElementDataList;
+
+    public CityElementDataContainer Clone()
+    {
+        var clone = new CityElementDataContainer();
+        clone.key = this.key;
+        clone.brickDataList = new List<BrickData>();
+        foreach (var item in this.brickDataList)
+        {
+            clone.brickDataList.Add(item.Clone());
+        }
+        clone.slotElementDataList = new List<SlotElementDataList>();
+        foreach (var item in this.slotElementDataList)
+        {
+            clone.slotElementDataList.Add(item.Clone());
+        }
+        return clone;
+    }
 }

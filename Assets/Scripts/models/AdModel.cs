@@ -15,7 +15,7 @@ using UnityEngine.Events;
 public enum RewardName
 {
     UNDEFINED = 0,
-    CASH1 = 1,
+    SPACE1 = 1,
 }
 
 [Serializable]
@@ -58,7 +58,7 @@ public class AdModel
 
     private const string savekey = "adsdata";
 
-    public bool shouldLoadAds = false;
+    public bool shouldLoadAds = true;
 
     public void LoadData()
     {

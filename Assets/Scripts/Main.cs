@@ -1,10 +1,26 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class Main : MonoBehaviour
 {
     void Awake()
     {
-        new SetupCmd().Run();
+        new SetupCmd().Run(this.transform);
+    }
+
+    void Start()
+    {
+        DOTween.Sequence(this).AppendInterval(1).AppendCallback(OnSecUpdate).SetLoops(-1);
+    }
+
+    void OnDestroy()
+    {
+        DOTween.Kill(this);
+    }
+
+    private void OnSecUpdate()
+    {
+        new CheckOutOfSpaceCmd().Run();
     }
 
     //on Application Quit, save player data
