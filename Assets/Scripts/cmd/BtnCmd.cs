@@ -18,9 +18,15 @@ public class BtnCmd
 
     public void Run(BtnAction action)
     {
+        if (action == BtnAction.Restart)
+        {
+
+            return;
+        }
         if (action == BtnAction.RefillAttempts)
         {
-            var full = playerModel.playerData.attempts >= 5;
+            var max = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
+            var full = playerModel.playerData.attempts >= max;
             if (full)
             {
                 Toast("Attempts are already full");
@@ -32,11 +38,8 @@ public class BtnCmd
                 Toast("Not enough coins");
                 return;
             }
-
             playerModel.AddCoins(-costs);
-            playerModel.FillAttempts();
-            Toast("Attempts refilled");
-
+            playerModel.FillAttempts(max, max);
             return;
         }
         if (action == BtnAction.ContinueNextAttempt)
@@ -48,9 +51,18 @@ public class BtnCmd
                 return;
             }
             var cityElement = cityModel.GetCurrentElement();
-            var dataContainer = BalancingModel.Instance.GetDataCopy(cityElement.dataKey);
-            cityElement.Setup(dataContainer, BalancingModel.AdditionalBricksOnEmptyElement);
+            var dataContainer = cityElement.dataContainer;
+            dataContainer.Reset();
+
+            cityElement.ShowBrickStates();
             slotModel.Fill(dataContainer.slotElementDataList);
+            ViewModel.Instance.OutOfSpaceFlag = false;
+            return;
+        }
+
+        if (action == BtnAction.FreeAttemptForAd)
+        {
+            new ShowAdCmd().Run(RewardName.ADD_ATTEMPT);
             return;
         }
     }

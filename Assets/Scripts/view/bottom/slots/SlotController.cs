@@ -42,10 +42,15 @@ public class SlotController : MonoBehaviour
 
         this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
 
-        if (CityModel.Instance.GetCurrentElement() != null)
+        if (CityModel.Instance.HasGroups())
         {
             this.Setup();
         }
+    }
+
+    private void UpdateAddSpaceButtonVisibility()
+    {
+        this.addSpaceButton.gameObject.SetActive(PlayerModel.Instance.playerData.additionalEmitterUnlockTimeoutTimestamp == 0);
     }
 
     private void OnAddSpaceButtonClicked()
@@ -99,6 +104,7 @@ public class SlotController : MonoBehaviour
 
     private void OnEmitterChanged(EmitterSpace es = null)
     {
+        Debug.Log("SlotController: OnEmitterChanged called");
         var slotModel = SlotModel.Instance;
 
         if (es == null)
@@ -115,6 +121,7 @@ public class SlotController : MonoBehaviour
             {
                 var eb = GetEmitterByIndex(e.index);
                 eb.gameObject.SetActive(false);
+                eb.RemoveTimeout();
             }
             return;
         }
@@ -129,9 +136,20 @@ public class SlotController : MonoBehaviour
             else
             {
                 eb.gameObject.SetActive(false);
+                eb.RemoveTimeout();
             }
 
         }
+
+        var curTimestamp = TimeUtils.GetUnixTimestamp();
+        var playerData = PlayerModel.Instance.playerData;
+        var additionalEmitterUnlockTimeoutTimestamp = playerData.additionalEmitterUnlockTimeoutTimestamp;
+        if (additionalEmitterUnlockTimeoutTimestamp > 0)
+        {
+            var additionalEmitter = GetEmitterByIndex(SlotModel.AdditionalEmitterIndex);
+            additionalEmitter.SetTimeout(additionalEmitterUnlockTimeoutTimestamp);
+        }
+        this.UpdateAddSpaceButtonVisibility();
 
     }
 

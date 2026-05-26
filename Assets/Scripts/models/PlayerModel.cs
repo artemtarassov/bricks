@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class PlayerModel
 {
@@ -26,10 +27,33 @@ public class PlayerModel
         {
             coins = 10000,
             unlockedBuildings = 0,
-            attempts = 5,
+            attempts = 1,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true
         };
+    }
+
+
+    public void LockAdditionalEmitter()
+    {
+        if (playerData.additionalEmitterUnlockTimeoutTimestamp == -1)
+        {
+            return; //permanently unlocked, do not lock
+        }
+        playerData.additionalEmitterUnlockTimeoutTimestamp = 0;
+        playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+    }
+
+    public void UnlockAdditionalEmitter(int additionalEmitterUnlockTimeoutTimestamp = -1)
+    {
+        if (playerData.additionalEmitterUnlockTimeoutTimestamp == -1)
+        {
+            return; //permanently unlocked, do not lock
+        }
+        playerData.additionalEmitterUnlockTimeoutTimestamp = additionalEmitterUnlockTimeoutTimestamp;
+        playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
     }
 
     public bool CanAfford(int cost)
@@ -45,19 +69,18 @@ public class PlayerModel
         OnPlayerDataChanged?.Invoke();
     }
 
-    public bool FillAttempts()
+    public bool FillAttempts(int amount, int max)
     {
-        Debug.Log("PlayerModel: filling attempts");
-        if (this.playerData.attempts >= 5)
+        if (this.playerData.attempts >= max)
         {
-            Debug.Log("PlayerModel: attempts are already full");
             return false;
         }
-        this.playerData.attempts = 5;
+        this.playerData.attempts = Math.Min(this.playerData.attempts + amount, max);
         this.playerData.isDirty = true;
         OnPlayerDataChanged?.Invoke();
         return true;
     }
+
 
     public bool UseAttempt()
     {

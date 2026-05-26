@@ -7,7 +7,7 @@ public class ShowAdCmd
 {
     public void Run(RewardName rn)
     {
-        if (!AdModel.Instance.AllReady())
+        if (!AdModel.Instance.IsAdReady(rn))
         {
             new ToastCmd("no ads").Run();
             return;

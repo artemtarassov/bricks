@@ -16,6 +16,7 @@ public enum RewardName
 {
     UNDEFINED = 0,
     SPACE1 = 1,
+    ADD_ATTEMPT = 2,
 }
 
 [Serializable]
@@ -60,7 +61,7 @@ public class AdModel
 
     public bool shouldLoadAds = true;
 
-    public void LoadData()
+    public void Load()
     {
         if (FilePrefs.HasKey(savekey))
         {

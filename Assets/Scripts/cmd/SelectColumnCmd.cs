@@ -13,7 +13,7 @@ public class SelectColumnCmd
     public void Run()
     {
         var element = CityModel.Instance.GetCurrentElement();
-        if (!SlotModel.Instance.HasEmitterSpace() && element.CountFlyingBricks() == 0)
+        if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
         {
             this.ShowOutOfSpace();
             return;
@@ -24,27 +24,20 @@ public class SelectColumnCmd
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
             Assert.IsTrue(hasEmitterSpace, "No space for new emitter");
 
-            SlotModel.Instance.MoveFromColumnToEmitter(this.data);
+            SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
             return;
         }
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
-            SlotModel.Instance.MoveFromColumnToEmitter(this.data);
-            CityModel.Instance.GetCurrentElement().ShowNextColoredBricks(BalancingModel.AdditionalBricksOnEmptyElement);
+            SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
+            element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
+            element.ShowBrickStates();
             return;
         }
     }
 
     private void ShowOutOfSpace()
     {
-        var attemptsLeft = PlayerModel.Instance.playerData.attempts;
-        if (attemptsLeft > 0)
-        {
-            new ShowViewCmd().Run(ViewName.OutOfSpaceView);
-        }
-        else
-        {
-            new ShowViewCmd().Run(ViewName.GameOverView);
-        }
+        new ShowViewCmd().Run(ViewName.OutOfSpaceView);
     }
 }

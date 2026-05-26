@@ -1,18 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
-[Serializable]
-public class BrickData
-{
-    public ColorIndex color = ColorIndex.Undefined;
-    public int amount = 0;
 
-    public BrickData Clone()
-    {
-        return new BrickData() { color = this.color, amount = this.amount };
-    }
-}
 
 [Serializable]
 public enum SlotElementType
@@ -28,6 +19,15 @@ public class SlotElementData
 {
     public SlotElementType type;
     public BrickData brickData = null;
+
+    public bool IsInEmitterSpace()
+    {
+        if (this.brickData == null)
+        {
+            return false;
+        }
+        return this.brickData.emittingAmount > 0;
+    }
 
     public SlotElementData()
     {
@@ -85,10 +85,13 @@ public enum ColorIndex
     C6 = 6,
 }
 
+
+[Serializable]
 public enum BrickState
 {
+    Undefined = 0,
     Transparent = 1,
-    Flying = 3,
+    Emitting = 3,
     Full = 4,
     Colored = 5,
 }
@@ -99,38 +102,48 @@ public class EmitterSpace
     public BrickData brickData = null;
     public int index;
     public bool isUnlocked = false;
-    public bool HasBricks => isUnlocked && brickData != null && brickData.amount > 0;
+    public bool HasColoredBricks => isUnlocked && brickData != null && brickData.coloredAmount > 0;
     public bool IsEmpty => isUnlocked && brickData == null;
 }
 
 
 [Serializable]
-public class DataContainerList
+public class GroupDataListContainer
 {
-    public List<CityElementDataContainer> list;
+    public List<GroupDataList> groups = new List<GroupDataList>();
 }
 
-[Serializable]
-public class CityElementDataContainer
-{
-    public string key;
-    public List<BrickData> brickDataList;
-    public List<SlotElementDataList> slotElementDataList;
 
-    public CityElementDataContainer Clone()
+[Serializable]
+public class GroupDataList
+{
+    public string groupName;
+    public List<CityElementDataContainer> cityElementDataList;
+    public GroupDataList(string n)
     {
-        var clone = new CityElementDataContainer();
-        clone.key = this.key;
-        clone.brickDataList = new List<BrickData>();
-        foreach (var item in this.brickDataList)
+        this.groupName = n;
+        this.cityElementDataList = new List<CityElementDataContainer>();
+    }
+
+    public GroupDataList Clone()
+    {
+        var clone = new GroupDataList(this.groupName);
+        foreach (var item in this.cityElementDataList)
         {
-            clone.brickDataList.Add(item.Clone());
-        }
-        clone.slotElementDataList = new List<SlotElementDataList>();
-        foreach (var item in this.slotElementDataList)
-        {
-            clone.slotElementDataList.Add(item.Clone());
+            clone.cityElementDataList.Add(item.Clone());
         }
         return clone;
+    }
+
+    public bool HasBricks()
+    {
+        foreach (var cityElementDataContainer in this.cityElementDataList)
+        {
+            if (cityElementDataContainer.SlotsHaveBricks())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -75,7 +75,7 @@ public class ModalsController : MonoBehaviour
         var allViews = this.GetComponentsInChildren<DefaultView>(true);
         return allViews.Any(v => v.gameObject.activeSelf);
     }
-    private void OnShowView(ViewName viewName, bool animate)
+    private void OnShowView(ViewName viewName)
     {
         var allViews = this.GetComponentsInChildren<DefaultView>(true);
         foreach (var view in allViews)
@@ -84,7 +84,7 @@ public class ModalsController : MonoBehaviour
             view.gameObject.SetActive(view.gameObject.name == viewName.ToString());
             if (view.gameObject.activeSelf && !wasActive)
             {
-                view.OnShown(animate);
+                view.OnShown();
                 //view.transform.localScale = Vector3.zero;
                 var t = Durations.ModalViewTransition;
                 view.transform.DOKill();

@@ -26,8 +26,16 @@ public class CompleteIapCmd
 
     public void Run(IapResponse response, bool report = true)
     {
+        if (productId == IAPModel.AdditionalSpace)
+        {
+            if (response == IapResponse.Success || response == IapResponse.Restore)
+            {
+                PlayerModel.Instance.UnlockAdditionalEmitter();
+                SlotModel.Instance.UnlockAdditionalEmitter();
+                ViewModel.Instance.OutOfSpaceFlag = false;
+            }
+        }
 
-        
     }
 
 

@@ -21,7 +21,8 @@ public class SlotColumn : MonoBehaviour
 
     private void OnClick()
     {
-        new SelectColumnCmd(this.columnData.list[0]).Run();
+        var nextVisibleSlotElement = this.slotElements.Find(e => e.gameObject.activeSelf).slotElementData;
+        new SelectColumnCmd(nextVisibleSlotElement).Run();
     }
 
     private SlotElement CreateSlotElementByIndex(int index)

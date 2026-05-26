@@ -125,11 +125,6 @@ public class IAPModel
         OnPricesSet?.Invoke(productId);
     }
 
-    public int GetKeepUpOfferCash()
-    {
-        return 50000;
-    }
-
     public string GetProductIdByIndex(int index)
     {
         return productIds[index];

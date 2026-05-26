@@ -4,12 +4,8 @@ using UnityEngine;
 
 public class ShowViewCmd
 {
-    public void Run(ViewName viewName, object p = null)
+    public void Run(ViewName viewName)
     {
-        ViewModel.Instance.ShowView(viewName, true);
-    }
-    public void Run(ViewData vd)
-    {
-        //ViewModel.Instance.ShowView(vd);
+        ViewModel.Instance.ShowView(viewName);
     }
 }

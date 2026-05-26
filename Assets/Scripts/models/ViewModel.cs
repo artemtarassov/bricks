@@ -12,13 +12,18 @@ public enum ViewName
     AddSpaceView,
     LoadingView,
     OutOfSpaceView,
-    GameOverView,
 }
 
 public class ViewData
 {
     public ViewName viewName;
     public object data = null;
+
+    public ViewData(ViewName viewName, object data = null)
+    {
+        this.viewName = viewName;
+        this.data = data;
+    }
 }
 
 public class ViewModel
@@ -29,7 +34,7 @@ public class ViewModel
 
     private List<ViewData> viewDataStack = new List<ViewData>();//only the last one is visible
 
-    public Action<ViewName, bool> OnShowView;
+    public Action<ViewName> OnShowView;
     public Action<ViewName> OnHideView;
 
     public Transform root;
@@ -48,6 +53,8 @@ public class ViewModel
     public Action OnShowPushNotificationsSettings;
 
     private float UILockedTime;
+
+    public bool OutOfSpaceFlag = false;
 
     public ViewModel()
     {
@@ -94,16 +101,18 @@ public class ViewModel
     {
         OnShowParticles?.Invoke(name, pos);
     }
-    public void ShowView(ViewName viewName, bool animate = true)
+    public void ShowView(ViewName viewName)
     {
-        Debug.Log($"ViewModel: Showing view {viewName}, animate {animate}");    
-        viewDataStack.Add(new ViewData { viewName = viewName });
-        OnShowView?.Invoke(viewName, animate);
+        var existingView = viewDataStack.FirstOrDefault(v => v.viewName == viewName);
+        if (existingView == null)
+        {
+            viewDataStack.Add(new ViewData(viewName));
+        }
+        OnShowView?.Invoke(viewName);
     }
 
     public void HideView(ViewName viewName = ViewName.None)
     {
-        Debug.Log($"ViewModel: Hiding view {viewName}");
         viewDataStack.RemoveAll(v => v.viewName == viewName);
         OnHideView?.Invoke(viewName);
     }

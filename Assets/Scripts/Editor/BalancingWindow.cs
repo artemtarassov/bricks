@@ -31,11 +31,11 @@ public class BalancingWindow : EditorWindow
     }
 
 
-    public void ApplyDifficulty(string key, int difficulty = 1)//0-3
+    public void ApplyDifficulty(string groupName, string dataKey, int difficulty = 1)//0-3
     {
         Assert.IsTrue(difficulty >= 0 && difficulty <= 3, "ApplyDifficulty: difficulty should be between 0 and 3");
         var counter = 0;
-        var data = BalancingModel.Instance.GetDataCopy(key);
+        var data = BalancingModel.Instance.GetDataCopy(groupName, dataKey);
         var columnIndexList = new List<int>();
         for (var i = 0; i < SlotModel.MaxColumns; i++)
         {
@@ -84,14 +84,13 @@ public class BalancingWindow : EditorWindow
             }
         }
 
-        BalancingModel.Instance.Save();
         Debug.Log($"BalancingWindow ApplyDifficulty: total swaps applied: {counter}, difficulty: {difficulty}   ");
     }
 
     private void OnAddBalancingDataClicked(CityElement cityElement)
     {
 
-        var key = cityElement.dataKey;
+        var data = cityElement.dataKey;
         var cec = new CityElementColors(cityElement.FindAllBricks().Count);
         var predefinedBricks = cec.predefinedBricks.ToList();
         Assert.IsTrue(predefinedBricks.Count > 0, "predefinedBricks is empty");
@@ -105,6 +104,7 @@ public class BalancingWindow : EditorWindow
             for (var c = 0; c < maxColumns && predefinedBricks.Count > 0; c++)
             {
                 var b = predefinedBricks.First().Clone();
+                b.SetAllColored();
                 predefinedBricks.RemoveAt(0);
                 if (slotElementDataList.Count <= c)
                 {
@@ -113,8 +113,9 @@ public class BalancingWindow : EditorWindow
                 slotElementDataList[c].list.Add(new SlotElementData(b));
             }
         }
-
-        BalancingModel.Instance.InsertData(key, cec.predefinedBricks, slotElementDataList);
+        var group = cityElement.transform.parent.GetComponent<CityElementGroup>();
+        var groupName = group.GroupName;
+        BalancingModel.Instance.InsertData(groupName, data, cec.predefinedBricks, slotElementDataList);
         var entries = BalancingModel.Instance.CountEntries();
         Debug.Log($"BalancingWindow: total entries in BalancingModel: {entries}");
 
@@ -133,7 +134,8 @@ public class BalancingWindow : EditorWindow
         {
             difficulty = 0;
         }
-        this.ApplyDifficulty(key, difficulty);
+        this.ApplyDifficulty(groupName, data, difficulty);
+        BalancingModel.Instance.Save();
     }
 
 }

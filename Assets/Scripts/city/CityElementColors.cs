@@ -17,15 +17,17 @@ public class CityElementColors
         {
             var amount = shuffledAmounts.GetNext();
             var clr = shuffledColorIndexes.GetNext();
-            this.predefinedBricks.Add(new BrickData() { color = clr, amount = amount });
+            this.predefinedBricks.Add(new BrickData(amount, clr));
             bricksToAdd -= amount;
         }
         if (bricksToAdd < 0)
         {
             var last = this.predefinedBricks.Last();
-            last.amount += bricksToAdd;
+            this.predefinedBricks.Remove(last);
+            last = new BrickData(last.max + bricksToAdd, last.color);
+            this.predefinedBricks.Add(last);
         }
-        var predefinedSum = this.predefinedBricks.Sum(b => b.amount);
+        var predefinedSum = this.predefinedBricks.Sum(b => b.transparentAmount);
         Assert.AreEqual(cnt, predefinedSum, $"Sum of predefined bricks should match the number of bricks to add. " +
             $"Bricks to add: {bricksToAdd}, sum of predefined bricks: {predefinedSum}");
     }

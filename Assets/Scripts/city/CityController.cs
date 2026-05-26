@@ -1,3 +1,4 @@
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -9,13 +10,9 @@ public class CityController : MonoBehaviour
     void Start()
     {
         CityModel.Instance.OnFlyBrick += OnFlyBrick;
-        var cityElements = GetComponentsInChildren<CityElement>(true);
-        foreach (var element in cityElements)
-        {
-            CityModel.Instance.AddCityElement(element);
-        }
+        var cityElementGroups = GetComponentsInChildren<CityElementGroup>(true).ToList();
+        new SetupCityCmd().Run(cityElementGroups);
         this.gameObject.AddComponent<BrickEmissionController>();
-        new UnlockCityElementCmd().Run();
     }
 
     void OnDestroy()

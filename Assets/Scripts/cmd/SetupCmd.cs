@@ -9,8 +9,11 @@ public class SetupCmd
         PlayerModel.Instance = new PlayerModel();
         PlayerModel.Instance.Load();
 
+        RemoteConfigModel.Instance = new RemoteConfigModel();
+
         IAPModel.Instance = new IAPModel();
         AdModel.Instance = new AdModel();
+        AdModel.Instance.Load();
 
         CityModel.Instance = new CityModel();
         SlotModel.Instance = new SlotModel();

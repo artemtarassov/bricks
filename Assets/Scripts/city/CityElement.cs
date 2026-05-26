@@ -15,7 +15,7 @@ public class CityElement : MonoBehaviour
     [HideInInspector]
     public CityElementDataContainer dataContainer;
 
-    public Dictionary<Transform, BrickState> brickState = new Dictionary<Transform, BrickState>();
+    private Dictionary<Transform, BrickState> brickState = new Dictionary<Transform, BrickState>();
     private Dictionary<Transform, ColorIndex> brickColors = new Dictionary<Transform, ColorIndex>();
 
     private BrickLayersContainer brickLayersContainer;
@@ -26,13 +26,6 @@ public class CityElement : MonoBehaviour
         //brickColors = new Dictionary<Transform, ColorIndex>();
 
         var bricks = this.FindAllBricks();
-        Assert.IsTrue(bricks.Count > 0, "No bricks found in city element " + this.name);
-
-        foreach (var brick in bricks)
-        {
-            this.brickState.Add(brick, BrickState.Transparent);
-            this.brickColors.Add(brick, ColorIndex.Undefined);
-        }
         this.brickLayersContainer = new BrickLayersContainer(bricks);
 
         this.EnableVisuals(false);
@@ -40,31 +33,14 @@ public class CityElement : MonoBehaviour
         //this.cityElementColors = new CityElementColors(this.CountBricks());
     }
 
-    public void Setup(CityElementDataContainer dataContainer, int additionalBricksOnEmptyElement = 0)
+    public void Setup(CityElementDataContainer dataContainer)
     {
-        Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.key}");
+        Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.dataKey}");
         this.dataContainer = dataContainer;
-
-        var sortedBricks = this.brickLayersContainer.sortedBricks;
-
-        pointer = 0;
         this.EnableAllBricks(true);
         this.EnableVisuals(false);
-
-        var j = 0;
-        foreach (var bd in dataContainer.brickDataList)
-        {
-            for (var i = 0; i < bd.amount && j < sortedBricks.Count; i++)
-            {
-                this.brickColors[sortedBricks[j]] = bd.color;
-                j++;
-            }
-        }
-        foreach (var b in sortedBricks)
-        {
-            SetBrickState(b, BrickState.Transparent);
-        }
-        this.ShowNextColoredBricks(additionalBricksOnEmptyElement);
+        this.SetBrickColors();
+        this.ShowBrickStates();
     }
 
     public List<Transform> FindAllBricks()
@@ -72,20 +48,7 @@ public class CityElement : MonoBehaviour
         return GetBricksContainer().GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
     }
 
-    public int CountBricks()
-    {
-        return this.brickState.Keys.Count;
-    }
 
-    public int CountTransparentBricks()
-    {
-        return this.brickState.Count(kv => kv.Value == BrickState.Transparent);
-    }
-
-    public int CountColoredBricks(ColorIndex colorIndex)
-    {
-        return this.brickState.Count(kv => kv.Value == BrickState.Colored && this.GetColorOfBrick(kv.Key) == colorIndex);
-    }
 
     public ColorIndex GetColorOfBrick(Transform brick)
     {
@@ -93,32 +56,9 @@ public class CityElement : MonoBehaviour
         return this.brickColors[brick];
     }
 
-    public int CountColoredBricks()
-    {
-        return this.brickState.Count(kv => kv.Value == BrickState.Colored);
-    }
-
-    public int CountFlyingBricks()
-    {
-        return this.brickState.Count(kv => kv.Value == BrickState.Flying);
-    }
-
-    public bool AllFull()
-    {
-        return this.brickState.All(kv => kv.Value == BrickState.Full);
-    }
-
     public HashSet<ColorIndex> GetBrickColors()
     {
-        var result = new HashSet<ColorIndex>();
-        foreach (var c in this.brickState)
-        {
-            if (c.Value == BrickState.Colored || c.Value == BrickState.Flying)
-            {
-                result.Add(this.GetColorOfBrick(c.Key));
-            }
-        }
-        return result;
+        return this.dataContainer.GetBrickColors();
     }
 
 
@@ -133,21 +73,78 @@ public class CityElement : MonoBehaviour
         return ColoredMaterials.Instance.GetMaterialByColorIndex(colorIndex);
     }
 
+    private List<Transform> SortedBricks => this.brickLayersContainer.sortedBricks;
 
-    public Transform GetNextColoredBrick(ColorIndex colorIndex)
+    private void SetBrickColors()
     {
-        return this.brickLayersContainer.sortedBricks.Find(b => this.brickState[b] == BrickState.Colored && this.GetColorOfBrick(b) == colorIndex);
+        var j = 0;
+        foreach (var bd in dataContainer.brickDataList)
+        {
+            for (var i = 0; i < bd.max && j < SortedBricks.Count; i++)
+            {
+                this.brickColors[SortedBricks[j]] = bd.color;
+                j++;
+            }
+        }
     }
 
-    public Transform GetNextTransparentBrick()
+    public void ShowBrickStates()
     {
-        return this.brickLayersContainer.sortedBricks.Find(b => this.brickState[b] == BrickState.Transparent);
+        Assert.IsNotNull(this.dataContainer, "Data container is null. Cannot show brick states.");
+        Assert.IsTrue(this.dataContainer.brickDataList.Count > 0, "Brick data list is empty. Cannot show brick states.");
+        Assert.IsTrue(this.SortedBricks.Count > 0, "No bricks found in city element. Cannot show brick states.");
+        var j = 0;
+        foreach (var bd in dataContainer.brickDataList)
+        {
+            for (var i = 0; i < bd.max && j < SortedBricks.Count; i++)
+            {
+                Assert.IsNotNull(SortedBricks[j], "Sorted brick is null. Cannot show brick state.");
+                this.ShowBrickState(SortedBricks[j], bd.GetBrickState(i));
+                j++;
+            }
+        }
+        if (this.dataContainer.ElementCompleted() && !this.HasVisuals())
+        {
+            this.gameObject.AddComponent<BrickTopDownExplosion>();
+            this.EnableVisuals(true);
+        }
     }
 
-    private int pointer = 0;
-    public void ShowNextColoredBricks(int totalDifferentBrickColors)
+
+    public Transform GetColoredBrick(ColorIndex colorIndex)
     {
-        for (var i = 0; i < totalDifferentBrickColors && pointer < this.dataContainer.brickDataList.Count; i++)
+        var elementBrickData = dataContainer.brickDataList.Find(b => b.color == colorIndex && b.coloredAmount > 0);
+        if (elementBrickData == null)
+        {
+            return null;
+        }
+        return GetBrick(elementBrickData, elementBrickData.GetBrickIndex(BrickState.Colored));
+    }
+
+    public Transform GetBrick(BrickData find, int index)
+    {
+        Assert.IsTrue(find.max > index, "Index should be less than max amount of the brick data");
+        var j = 0;
+        foreach (var bd in dataContainer.brickDataList)
+        {
+            if (bd == find)
+            {
+                return SortedBricks[j + index];
+            }
+            else
+            {
+                j += bd.max;
+            }
+        }
+        return null;
+    }
+
+
+    /*public void ShowNextColoredBricks(int totalDifferentBrickColors)
+    {
+        var lastColoredBrickIndex = this.brickLayersContainer.sortedBricks.FindLastIndex(b => this.brickState[b] == BrickState.Colored);
+        var pointer = lastColoredBrickIndex + 1;
+        for (var i = 0; i < totalDifferentBrickColors && lastColoredBrickIndex < this.dataContainer.brickDataList.Count; i++)
         {
             var next = this.dataContainer.brickDataList[pointer];
             this.SetNextBrickColor(next.amount);
@@ -163,11 +160,14 @@ public class CityElement : MonoBehaviour
             var nextTransparentBrick = this.GetNextTransparentBrick();
             this.SetBrickState(nextTransparentBrick, BrickState.Colored);
         }
-    }
+    }*/
 
-    public void SetBrickState(Transform t, BrickState state)
+    private void ShowBrickState(Transform t, BrickState state)
     {
-        Assert.IsTrue(this.brickState.ContainsKey(t), "Brick transform not found in city element");
+        if (this.brickState.ContainsKey(t) && this.brickState[t] == state)
+        {
+            return;
+        }
         this.brickState[t] = state;
         var mr = t.GetComponent<MeshRenderer>();
         switch (state)
@@ -175,7 +175,7 @@ public class CityElement : MonoBehaviour
             case BrickState.Transparent:
                 mr.material = GetMaterialByName("BrickMatTransparent");
                 break;
-            case BrickState.Flying:
+            case BrickState.Emitting:
                 break;
             case BrickState.Full:
                 mr.material = GetMaterialByName("BrickMatFull");
@@ -188,7 +188,7 @@ public class CityElement : MonoBehaviour
 
     public void EnableAllBricks(bool enable)
     {
-        foreach (var brick in this.brickLayersContainer.sortedBricks)
+        foreach (var brick in this.SortedBricks)
         {
             brick.gameObject.SetActive(enable);
         }
@@ -234,14 +234,13 @@ public class CityElement : MonoBehaviour
 
     public Vector3 GetAveragePosition()
     {
-        var bricks = this.brickLayersContainer.sortedBricks;
         var sum = Vector3.zero;
-        foreach (var brick in bricks)
+        foreach (var brick in SortedBricks)
         {
             sum += brick.transform.position;
         }
 
-        return sum / bricks.Count;
+        return sum / SortedBricks.Count;
     }
 
 }

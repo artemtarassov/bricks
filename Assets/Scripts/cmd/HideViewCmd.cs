@@ -8,7 +8,6 @@ public class HideViewCmd
     public void Run()
     {
         var views = ViewModel.Instance.GetViews().ToList();
-        Debug.Log($"HideViewCmd: Hiding {views.Count} views.");
         foreach (var view in views)
         {
             ViewModel.Instance.HideView(view.viewName);
@@ -21,7 +20,12 @@ public class HideViewCmd
         {
             return;
         }
-        Debug.Log($"HideViewCmd: Hiding view {viewName}");
+
         ViewModel.Instance.HideView(viewName);
+        var views = ViewModel.Instance.GetViews().ToList();
+        if (views.Count > 0)
+        {
+            ViewModel.Instance.ShowView(views[0].viewName);
+        }
     }
 }

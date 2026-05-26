@@ -15,12 +15,12 @@ public class Main : MonoBehaviour
 
     void OnDestroy()
     {
-        DOTween.Kill(this);
+        DOTween.KillAll();
     }
 
     private void OnSecUpdate()
     {
-        new CheckOutOfSpaceCmd().Run();
+        new SecUpdateCmd().Run();
     }
 
     //on Application Quit, save player data

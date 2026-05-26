@@ -17,7 +17,7 @@ public class DefaultView : MonoBehaviour
         Debug.Log("DefaultView OnHidden called");
     }
 
-    public virtual void OnShown(bool animate)
+    public virtual void OnShown()
     {
         Debug.Log("DefaultView OnShown called");
     }

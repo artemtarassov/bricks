@@ -12,8 +12,11 @@ public class SlotElement : MonoBehaviour
 
     public BrickData brickData;
 
+    public SlotElementData slotElementData;
+
     public void Setup(SlotElementData data)
     {
+        this.slotElementData = data;
         if (data == null)
         {
             SetupAsEmpty();
@@ -37,7 +40,7 @@ public class SlotElement : MonoBehaviour
         //this.brick.SetData(brickData);
         //this.brick.gameObject.SetActive(true);
         this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(brickData.color);
-        this.count.text = brickData.amount.ToString();
+        this.count.text = brickData.coloredAmount.ToString();
         this.addMoreBricks.SetActive(false);
     }
 
