@@ -20,7 +20,9 @@ public class BtnCmd
     {
         if (action == BtnAction.Restart)
         {
-
+            playerModel.playerData.currentGroup.Reset();
+            cityModel.LockAllElements();
+            new UnlockCityElementCmd().Run();
             return;
         }
         if (action == BtnAction.RefillAttempts)
@@ -53,6 +55,7 @@ public class BtnCmd
             var cityElement = cityModel.GetCurrentElement();
             var dataContainer = cityElement.dataContainer;
             dataContainer.Reset();
+            dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
 
             cityElement.ShowBrickStates();
             slotModel.Fill(dataContainer.slotElementDataList);

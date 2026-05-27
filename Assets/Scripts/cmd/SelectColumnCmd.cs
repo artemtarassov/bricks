@@ -12,6 +12,11 @@ public class SelectColumnCmd
 
     public void Run()
     {
+        if (this.data.type == SlotElementType.Coins)
+        {
+            
+            return;
+        }
         var element = CityModel.Instance.GetCurrentElement();
         if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
         {

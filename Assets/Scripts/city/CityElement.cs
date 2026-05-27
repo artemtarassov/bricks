@@ -3,6 +3,11 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+class BrickInfo
+{
+    public BrickState state;
+    public ColorIndex color;
+}
 
 public class CityElement : MonoBehaviour
 {
@@ -14,23 +19,23 @@ public class CityElement : MonoBehaviour
 
     [HideInInspector]
     public CityElementDataContainer dataContainer;
-
-    private Dictionary<Transform, BrickState> brickState = new Dictionary<Transform, BrickState>();
-    private Dictionary<Transform, ColorIndex> brickColors = new Dictionary<Transform, ColorIndex>();
-
+    private Dictionary<Transform, BrickInfo> brickInfo = new Dictionary<Transform, BrickInfo>();
     private BrickLayersContainer brickLayersContainer;
+
+    private BrickTopDownExplosion explosion;
 
     void Awake()
     {
-        // brickState = new Dictionary<Transform, BrickState>();
-        //brickColors = new Dictionary<Transform, ColorIndex>();
-
         var bricks = this.FindAllBricks();
         this.brickLayersContainer = new BrickLayersContainer(bricks);
-
-        this.EnableVisuals(false);
-        this.EnableAllBricks(true);
-        //this.cityElementColors = new CityElementColors(this.CountBricks());
+        foreach (var brick in bricks)
+        {
+            this.brickInfo[brick] = new BrickInfo()
+            {
+                state = BrickState.Transparent,
+                color = ColorIndex.Undefined
+            };
+        }
     }
 
     public void Setup(CityElementDataContainer dataContainer)
@@ -52,8 +57,8 @@ public class CityElement : MonoBehaviour
 
     public ColorIndex GetColorOfBrick(Transform brick)
     {
-        Assert.IsTrue(this.brickColors.ContainsKey(brick), "Brick transform not found in city element");
-        return this.brickColors[brick];
+        Assert.IsTrue(this.brickInfo.ContainsKey(brick), "Brick transform not found in city element");
+        return this.brickInfo[brick].color;
     }
 
     public HashSet<ColorIndex> GetBrickColors()
@@ -82,7 +87,8 @@ public class CityElement : MonoBehaviour
         {
             for (var i = 0; i < bd.max && j < SortedBricks.Count; i++)
             {
-                this.brickColors[SortedBricks[j]] = bd.color;
+                var t = SortedBricks[j];
+                this.brickInfo[t].color = bd.color;
                 j++;
             }
         }
@@ -105,7 +111,14 @@ public class CityElement : MonoBehaviour
         }
         if (this.dataContainer.ElementCompleted() && !this.HasVisuals())
         {
-            this.gameObject.AddComponent<BrickTopDownExplosion>();
+            if (this.explosion == null)
+            {
+                this.explosion = this.gameObject.AddComponent<BrickTopDownExplosion>();
+            }
+            else
+            {
+                this.explosion.Play();
+            }
             this.EnableVisuals(true);
         }
     }
@@ -164,11 +177,11 @@ public class CityElement : MonoBehaviour
 
     private void ShowBrickState(Transform t, BrickState state)
     {
-        if (this.brickState.ContainsKey(t) && this.brickState[t] == state)
+        if (this.brickInfo.ContainsKey(t) && this.brickInfo[t].state == state)
         {
             return;
         }
-        this.brickState[t] = state;
+        this.brickInfo[t].state = state;
         var mr = t.GetComponent<MeshRenderer>();
         switch (state)
         {
@@ -191,6 +204,10 @@ public class CityElement : MonoBehaviour
         foreach (var brick in this.SortedBricks)
         {
             brick.gameObject.SetActive(enable);
+        }
+        if (enable && this.explosion != null)
+        {
+            this.explosion.ResetExplosion();
         }
     }
 

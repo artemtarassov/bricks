@@ -24,6 +24,17 @@ public class BrickData
         }
     }
 
+    public void ResetEmittingStates()
+    {
+        for (var i = 0; i < states.Count; i++)
+        {
+            if (states[i] == BrickState.Emitting)
+            {
+                states[i] = BrickState.Full;
+            }
+        }
+    }
+
     public void SetAllTransparent()
     {
         for (int i = 0; i < this.states.Count; i++)

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class FlyData
+public class FlyBrickData
 {
     public Vector3 from;
     public Transform targetBrick;
@@ -22,7 +22,7 @@ public class CityModel
 {
     public static CityModel Instance;
 
-    public Action<FlyData> OnFlyBrick;
+    public Action<FlyBrickData> OnFlyBrick;
     public Action<CityElement> OnCityElementUnlocked;
 
     private List<CityElement> cityElements;
@@ -50,7 +50,18 @@ public class CityModel
 
     public void FlyBrick(Vector3 from, Transform targetBrick, ColorIndex colorIndex = ColorIndex.Undefined)
     {
-        OnFlyBrick?.Invoke(new FlyData { from = from, targetBrick = targetBrick, colorIndex = colorIndex });
+        OnFlyBrick?.Invoke(new FlyBrickData { from = from, targetBrick = targetBrick, colorIndex = colorIndex });
+    }
+
+
+    public void LockAllElements()
+    {
+        Assert.IsNotNull(cityElements, "CityModel LockAllElements: cityElements list is null");
+        Assert.IsTrue(cityElements.Count > 0, "CityModel LockAllElements: cityElements list is empty");
+        foreach (var ce in cityElements)
+        {
+            ce.gameObject.SetActive(false);
+        }
     }
 
     public CityElement UnlockElement(string dataKey)

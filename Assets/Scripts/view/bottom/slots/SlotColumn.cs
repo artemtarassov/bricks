@@ -71,7 +71,7 @@ public class SlotColumn : MonoBehaviour
 
     private SlotElement GetSlotElementByBrickData(BrickData bd)
     {
-        return this.slotElements.Find(e => e.brickData == bd);
+        return this.slotElements.Find(e => e.slotElementData.brickData == bd);
     }
 
     public SlotElement Remove(BrickData bd)

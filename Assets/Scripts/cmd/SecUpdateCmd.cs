@@ -14,26 +14,16 @@ public class SecUpdateCmd
     {
         if (ViewModel.Instance.OutOfSpaceFlag)
         {
-            Debug.Log("SecUpdateCmd OutOfSpaceFlag is already set, skipping");
             return;
         }
         var currentElement = CityModel.Instance.GetCurrentElement();
-        if (currentElement == null || currentElement.dataContainer.ElementCountColoredBricks() > 0)
-        {
-            return;
-        }
 
         if (ViewModel.Instance.HasAnyView())
         {
-            Debug.Log("SecUpdateCmd A view is already active, skipping");
             return;
         }
 
         var cntEmitterSpace = SlotModel.Instance.CountEmptyEmitters();
-
-        Debug.Log($"SecUpdateCmd cntEmitterSpace: {cntEmitterSpace}");
-
-
         if (cntEmitterSpace > 0)
         {
             return;

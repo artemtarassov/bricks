@@ -23,7 +23,7 @@ public class EmitBricksCmd
 public class EmitBrickCmd
 {
     private CityElement cityElement;
-    private CityElementDataContainer dataContainer => cityElement.dataContainer;
+    private CityElementDataContainer elementDataContainer => cityElement.dataContainer;
     private Transform nextBrick;
     private ColorIndex colorIndex => emitter.brickData.color;
     private EmitterSpace emitter;
@@ -36,7 +36,7 @@ public class EmitBrickCmd
         this.cityElement = CityModel.Instance.GetCurrentElement();
         this.emitter = emitter;
         this.emitterBrickData = emitter.brickData;
-        this.elementBrickData = dataContainer.brickDataList.Find(b => b.color == this.colorIndex && b.coloredAmount > 0);
+        this.elementBrickData = elementDataContainer.brickDataList.Find(b => b.color == this.colorIndex && b.coloredAmount > 0);
         Assert.IsNotNull(this.elementBrickData, $"No brick data found in city element for color {this.colorIndex}");
         Assert.IsNotNull(this.cityElement, "No current city element found");
         Assert.AreNotEqual(this.colorIndex, ColorIndex.Undefined, "Color index must be defined");
@@ -51,16 +51,6 @@ public class EmitBrickCmd
 
     public void Run()
     {
-        if (this.cityElement == null)
-        {
-            return;
-        }
-        var coloredBricksInElement = dataContainer.ElementCountColoredBricks(this.colorIndex);
-        if (coloredBricksInElement == 0)
-        {
-            return;
-        }
-
         this.nextBrick = cityElement.GetColoredBrick(this.colorIndex);
         if (nextBrick == null)
         {
@@ -81,10 +71,9 @@ public class EmitBrickCmd
     private void OnFlyComplete()
     {
         elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Emitting), BrickState.Full);
-
-        var cityElementCompleted = dataContainer.ElementCompleted();
         cityElement.ShowBrickStates();
 
+        var cityElementCompleted = elementDataContainer.ElementCompleted();
         if (cityElementCompleted)
         {
             new UnlockCityElementCmd().Run();
@@ -92,10 +81,9 @@ public class EmitBrickCmd
         }
 
 
-
-        if (dataContainer.ElementCountColoredBricks() == 0 && dataContainer.ElementCountEmittingBricks() == 0)
+        if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
-            dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
+            elementDataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
             cityElement.ShowBrickStates();
         }
 

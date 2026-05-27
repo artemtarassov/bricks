@@ -11,6 +11,7 @@ public class EmitterBrick : MonoBehaviour
     [SerializeField] private TMP_Text count;
     [SerializeField] private TMP_Text timeout;
     [SerializeField] private Image colorImg;
+    [SerializeField] private GameObject content;
 
 
     private Tween timeoutUpdateSequence;
@@ -21,6 +22,7 @@ public class EmitterBrick : MonoBehaviour
 
     void Awake()
     {
+        this.content.transform.localPosition = Vector3.zero;
         this.timeoutUpdateSequence = null;
         this.timeoutTimestamp = 0;
         this.timeout.gameObject.SetActive(false);
@@ -49,6 +51,7 @@ public class EmitterBrick : MonoBehaviour
         }
         this.timeout.gameObject.SetActive(false);
         this.timeoutTimestamp = 0;
+        this.content.transform.localPosition = Vector3.zero;
     }
 
     private void OnTimeoutUpdate()
@@ -70,6 +73,7 @@ public class EmitterBrick : MonoBehaviour
             this.timeout.text = TimeUtils.GetTimeLeft(remaining, "en");
         }
         this.timeout.gameObject.SetActive(true);
+        this.content.transform.localPosition = new Vector3(0, 20, 0);
     }
 
     public void Setup(BrickData eb = null, bool animate = false)

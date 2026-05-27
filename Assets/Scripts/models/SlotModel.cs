@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 public class SlotModel
 {
     public static readonly int MaxColumns = 3;
-    public static readonly int MaxEmitters = 3;
+    public static readonly int MaxEmitters = 4;
     public static readonly int AdditionalEmitterIndex = MaxEmitters - 1;
 
     public static SlotModel Instance;

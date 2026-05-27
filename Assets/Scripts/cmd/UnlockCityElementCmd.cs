@@ -25,7 +25,6 @@ public class UnlockCityElementCmd
         var hasBricks = currentGroup.HasBricks();
         if (!hasBricks)
         {
-            //next group.
             var nextGroupName = balancingModel.GetNextGroup(currentGroup.groupName);
             cityModel.SetCurrentGroupName(nextGroupName);
             this.currentGroup = balancingModel.GetDataCopy(nextGroupName);
@@ -36,7 +35,9 @@ public class UnlockCityElementCmd
         }
         var firstCityElementWithBricks = currentGroup.cityElementDataList.FirstOrDefault(e => e.SlotsHaveBricks());
         Assert.IsNotNull(firstCityElementWithBricks, "UnlockCityElementCmd: no city element with bricks found in current group");
+        AddCoinsIfAbsent(firstCityElementWithBricks);
 
+        //Debug.Log("UnlockCityElementCmd firstCityElementWithBricks " + firstCityElementWithBricks.dataKey);
         firstCityElementWithBricks.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
 
         var cityElement = cityModel.UnlockElement(firstCityElementWithBricks.dataKey);
@@ -51,10 +52,22 @@ public class UnlockCityElementCmd
     {
         var cityElement = CityModel.Instance.UnlockNextElement();
         var dataContainer = BalancingModel.Instance.GetDataCopy(currentGroup.groupName, cityElement.dataKey);
+        AddCoinsIfAbsent(dataContainer);
         cityElement.Setup(dataContainer);
         slotModel.Fill(dataContainer.slotElementDataList);
-
         this.MoveCam(cityElement);
+    }
+
+    private void AddCoinsIfAbsent(CityElementDataContainer dataContainer)
+    {
+        var hasCoins = dataContainer.slotElementDataList.Any(s => s.list.Any(e => e.type == SlotElementType.Coins));
+        if (hasCoins)
+        {
+            return;
+        }
+        var randColumn = RandHelper.GetRandomElement(dataContainer.slotElementDataList);
+        Debug.Log("UnlockCityElementCmd AddCoins for element " + dataContainer.dataKey + ", random column: " + randColumn.columnIndex);
+        randColumn.list.Add(new SlotElementData { type = SlotElementType.Coins });
     }
 
     private void MoveCam(CityElement cityElement)

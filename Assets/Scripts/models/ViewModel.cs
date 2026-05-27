@@ -56,6 +56,8 @@ public class ViewModel
 
     public bool OutOfSpaceFlag = false;
 
+    public Action<Vector3> OnFlyCoin;
+
     public ViewModel()
     {
         UILockedTime = 0;

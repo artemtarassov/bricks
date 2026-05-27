@@ -104,7 +104,7 @@ public class SlotController : MonoBehaviour
 
     private void OnEmitterChanged(EmitterSpace es = null)
     {
-        Debug.Log("SlotController: OnEmitterChanged called");
+        //Debug.Log("SlotController: OnEmitterChanged called");
         var slotModel = SlotModel.Instance;
 
         if (es == null)

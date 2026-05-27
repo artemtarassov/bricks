@@ -1,14 +1,15 @@
 using System.Linq;
-using DG.Tweening;
 using UnityEngine;
 
 public class CityController : MonoBehaviour
 {
     [SerializeField] private GameObject flyingBrickPrefab;
 
+    private FlyingBricks flyingBricks;
 
     void Start()
     {
+        this.flyingBricks = new FlyingBricks(this.flyingBrickPrefab, this.transform);
         CityModel.Instance.OnFlyBrick += OnFlyBrick;
         var cityElementGroups = GetComponentsInChildren<CityElementGroup>(true).ToList();
         new SetupCityCmd().Run(cityElementGroups);
@@ -18,23 +19,11 @@ public class CityController : MonoBehaviour
     void OnDestroy()
     {
         CityModel.Instance.OnFlyBrick -= OnFlyBrick;
+        this.flyingBricks?.Dispose();
     }
 
-    private void OnFlyBrick(FlyData data)
+    private void OnFlyBrick(FlyBrickData data)
     {
-        var t = Durations.FlyBrickDuration;
-        var go = Instantiate(flyingBrickPrefab, data.from, Quaternion.identity);
-        go.transform.SetParent(this.transform);
-        go.GetComponent<Renderer>().material.color = ColoredMaterials.Instance.GetColorByColorIndex(data.colorIndex);
-        go.transform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear).OnComplete(() =>
-        {
-            Destroy(go);
-        });
-    }
-
-
-    private void GenerateCity()
-    {
-
+        this.flyingBricks.Fly(data);
     }
 }

@@ -6,12 +6,13 @@ public class SlotElement : MonoBehaviour
 {
     //[SerializeField] private UIBrick brick;
     [SerializeField] private GameObject addMoreBricks;
+    [SerializeField] private GameObject coins;
+    [SerializeField] private GameObject hiddenBricks;
 
     [SerializeField] private TMP_Text count;
     [SerializeField] private Image colorImg;
 
-    public BrickData brickData;
-
+    [HideInInspector]
     public SlotElementData slotElementData;
 
     public void Setup(SlotElementData data)
@@ -24,7 +25,7 @@ public class SlotElement : MonoBehaviour
         }
         if (data.type == SlotElementType.Bricks)
         {
-            SetupWithBricks(data.brickData);
+            SetupWithBricks();
             return;
         }
         if (data.type == SlotElementType.AddMoreBricks)
@@ -32,31 +33,62 @@ public class SlotElement : MonoBehaviour
             SetupWithAddMoreBricks();
             return;
         }
+        if (data.type == SlotElementType.Coins)
+        {
+            SetupWithCoins();
+            return;
+        }
+        if (data.type == SlotElementType.HiddenBricks)
+        {
+            SetupWithHiddenBricks();
+            return;
+        }
     }
 
-    public void SetupWithBricks(BrickData brickData)
+    private void SetupWithHiddenBricks()
     {
-        this.brickData = brickData;
-        //this.brick.SetData(brickData);
-        //this.brick.gameObject.SetActive(true);
-        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(brickData.color);
-        this.count.text = brickData.coloredAmount.ToString();
-        this.addMoreBricks.SetActive(false);
+        this.SetupAsEmpty();
+        this.ShowAmount();
+        this.hiddenBricks.SetActive(true);
     }
 
-    public void SetupWithAddMoreBricks()
+    private void ShowColor()
     {
-        this.brickData = null;
-        //this.brick.SetData(null);
-        //this.brick.gameObject.SetActive(false);
+        this.colorImg.gameObject.SetActive(true);
+        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(this.slotElementData.brickData.color);
+    }
+
+    private void ShowAmount()
+    {
+        this.count.text = this.slotElementData.brickData.coloredAmount.ToString();
+        this.count.gameObject.SetActive(true);
+    }
+
+    private void SetupWithCoins()
+    {
+        this.SetupAsEmpty();
+        this.coins.SetActive(true);
+    }
+
+    private void SetupWithBricks()
+    {
+        this.SetupAsEmpty();
+        this.ShowColor();
+        this.ShowAmount();
+    }
+
+    private void SetupWithAddMoreBricks()
+    {
+        this.SetupAsEmpty();
         this.addMoreBricks.SetActive(true);
     }
 
-    public void SetupAsEmpty()
+    private void SetupAsEmpty()
     {
-        this.brickData = null;
-        //this.brick.SetData(null);
-        //this.brick.gameObject.SetActive(false);
+        this.colorImg.gameObject.SetActive(false);
         this.addMoreBricks.SetActive(false);
+        this.coins.SetActive(false);
+        this.hiddenBricks.SetActive(false);
+        this.count.gameObject.SetActive(false);
     }
 }

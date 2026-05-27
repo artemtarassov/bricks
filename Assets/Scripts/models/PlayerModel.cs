@@ -113,6 +113,10 @@ public class PlayerModel
             this.CreateNewPlayerData();
         }
 
-
+        foreach (var bd in playerData.currentGroup.cityElementDataList)
+        {
+            bd.brickDataList.ForEach((e) => e.ResetEmittingStates());
+            bd.slotElementDataList.ForEach((s) => s.ResetEmittingStates());
+        }
     }
 }

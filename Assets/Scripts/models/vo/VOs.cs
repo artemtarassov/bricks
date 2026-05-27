@@ -12,6 +12,7 @@ public enum SlotElementType
     Bricks,
     HiddenBricks,
     AddMoreBricks,
+    Coins
 }
 
 [Serializable]
@@ -27,6 +28,13 @@ public class SlotElementData
             return false;
         }
         return this.brickData.emittingAmount > 0;
+    }
+    public void ResetEmittingStates()
+    {
+        if (brickData != null)
+        {
+            brickData.ResetEmittingStates();
+        }
     }
 
     public SlotElementData()
@@ -69,6 +77,10 @@ public class SlotElementDataList
             clone.list.Add(item.Clone());
         }
         return clone;
+    }
+    public void ResetEmittingStates()
+    {
+        this.list.ForEach((e) => e.ResetEmittingStates());
     }
 }
 
@@ -123,6 +135,14 @@ public class GroupDataList
     {
         this.groupName = n;
         this.cityElementDataList = new List<CityElementDataContainer>();
+    }
+
+    public void Reset()
+    {
+        foreach (var cityElementDataContainer in this.cityElementDataList)
+        {
+            cityElementDataContainer.Reset();
+        }
     }
 
     public GroupDataList Clone()
