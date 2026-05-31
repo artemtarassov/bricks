@@ -14,35 +14,51 @@ public class BalancingWindow : EditorWindow
 
     private void OnGUI()
     {
-        if (GUILayout.Button("Add balancing data for city element"))
+        GameObject activeSelectedObject = Selection.activeGameObject;
+        bool canAddBalancingData = activeSelectedObject != null && activeSelectedObject.GetComponent<CityElementGroup>() != null;
+
+        using (new EditorGUI.DisabledScope(!canAddBalancingData))
         {
-            BalancingModel.Instance = new BalancingModel();
-            BalancingModel.Instance.Load();
-            var selectedObjects = Selection.gameObjects;
-            foreach (var obj in selectedObjects)
+            if (GUILayout.Button("Add balancing data for city element"))
             {
-                var cityElement = obj.GetComponent<CityElement>();
-                if (cityElement != null)
+                var model = new BalancingWriter();
+
+                var ngroups = model.GetAllGroups();
+                Assert.IsTrue(ngroups.Count == 0, "BalancingWindow: expected no groups in model after delete, but found " + ngroups.Count);
+
+
+                var selectedObjects = Selection.gameObjects;
+                foreach (var obj in selectedObjects)
                 {
-                    OnAddBalancingDataClicked(cityElement);
+                    var group = obj.GetComponent<CityElementGroup>();
+                    if (group != null)
+                    {
+                        var elements = group.GetElements();
+                        Debug.Log($"BalancingWindow: found group {group.GroupName} with {elements.Count()} elements in selected objects, adding balancing data for each element.");
+                        foreach (var cityElement in elements)
+                        {
+                            OnAddBalancingDataClicked(model, group, cityElement);
+                        }
+                    }
                 }
+                model.Save();
             }
         }
     }
 
 
-    public void ApplyDifficulty(string groupName, string dataKey, int difficulty = 1)//0-3
+    public void ApplyDifficulty(BalancingWriter model, string groupName, string dataKey, int difficulty = 1)//0-3
     {
         Assert.IsTrue(difficulty >= 0 && difficulty <= 3, "ApplyDifficulty: difficulty should be between 0 and 3");
         var counter = 0;
-        var data = BalancingModel.Instance.GetDataCopy(groupName, dataKey);
+        var data = model.GetData(groupName, dataKey);
         var columnIndexList = new List<int>();
         for (var i = 0; i < SlotModel.MaxColumns; i++)
         {
             columnIndexList.Add(i);
         }
         var shuffledColumnIndexes = new NonRepeatingShuffleBag<int>(columnIndexList);
-        var lastCommonRowIndex = data.slotElementDataList.Min(s => s.list.Count - 1);
+        var lastCommonRowIndex = data.columns.Min(s => s.list.Count - 1);
         var startRowIndex = 1;
 
         if (difficulty == 0)
@@ -56,7 +72,7 @@ public class BalancingWindow : EditorWindow
             for (var d = 0; d < difficulty; d++)
             {
                 var randColumnIndex = shuffledColumnIndexes.GetNext();
-                var randColumn = data.slotElementDataList.Find(s => s.columnIndex == randColumnIndex);
+                var randColumn = data.columns.Find(s => s.columnIndex == randColumnIndex);
 
                 var from = randColumn.list[i];
                 var to = randColumn.list[i - 1];
@@ -84,10 +100,10 @@ public class BalancingWindow : EditorWindow
             }
         }
 
-        Debug.Log($"BalancingWindow ApplyDifficulty: total swaps applied: {counter}, difficulty: {difficulty}   ");
+        //Debug.Log($"BalancingWindow ApplyDifficulty: total swaps applied: {counter}, difficulty: {difficulty}   ");
     }
 
-    private void OnAddBalancingDataClicked(CityElement cityElement)
+    private void OnAddBalancingDataClicked(BalancingWriter model, CityElementGroup group, CityElement cityElement)
     {
 
         var data = cityElement.dataKey;
@@ -95,7 +111,7 @@ public class BalancingWindow : EditorWindow
         var predefinedBricks = cec.predefinedBricks.ToList();
         Assert.IsTrue(predefinedBricks.Count > 0, "predefinedBricks is empty");
 
-        var slotElementDataList = new List<SlotElementDataList>();
+        var slotElementDataList = new List<SlotColumnData>();
 
         var maxColumns = SlotModel.MaxColumns;
 
@@ -104,24 +120,21 @@ public class BalancingWindow : EditorWindow
             for (var c = 0; c < maxColumns && predefinedBricks.Count > 0; c++)
             {
                 var b = predefinedBricks.First().Clone();
-                b.SetAllColored();
+                b.SetAll(BrickState.Colored);
                 predefinedBricks.RemoveAt(0);
                 if (slotElementDataList.Count <= c)
                 {
-                    slotElementDataList.Add(new SlotElementDataList() { columnIndex = c });
+                    slotElementDataList.Add(new SlotColumnData() { columnIndex = c });
                 }
                 slotElementDataList[c].list.Add(new SlotElementData(b));
             }
         }
-        var group = cityElement.transform.parent.GetComponent<CityElementGroup>();
         var groupName = group.GroupName;
-        BalancingModel.Instance.InsertData(groupName, data, cec.predefinedBricks, slotElementDataList);
-        var entries = BalancingModel.Instance.CountEntries();
-        Debug.Log($"BalancingWindow: total entries in BalancingModel: {entries}");
+        model.AddDataForElement(groupName, data, cec.predefinedBricks, slotElementDataList);
 
 
         var cityElementIndex = cityElement.transform.GetSiblingIndex();//0-n
-        Debug.Log($"BalancingWindow: city element index: {cityElementIndex}");
+        //Debug.Log($"BalancingWindow: city element index: {cityElementIndex}");
         //0= difficulty easy
         //1= difficulty medium
         //2= difficulty hard
@@ -129,13 +142,16 @@ public class BalancingWindow : EditorWindow
         //4= difficulty medium
         //5= difficulty hard
         //etc
-        var difficulty = (cityElementIndex / 2) % 3 + 1;
+        /*var difficulty = (cityElementIndex / 2) % 3 + 1;
         if (cityElementIndex == 0)
         {
             difficulty = 0;
-        }
-        this.ApplyDifficulty(groupName, data, difficulty);
-        BalancingModel.Instance.Save();
+        }*/
+        var difficulty = cityElementIndex % 2 == 0 ? 0 : 1;
+        this.ApplyDifficulty(model, groupName, data, difficulty);
+
+        Debug.Log($"BalancingWindow: added balancing data for element {data} in group {groupName} with difficulty {difficulty}");
+
     }
 
 }

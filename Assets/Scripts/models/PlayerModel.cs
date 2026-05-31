@@ -10,19 +10,25 @@ public class PlayerModel
 
     public Action OnPlayerDataChanged;
 
+    private readonly string savekey = "playerdata";
+
     public void Save()
     {
         if (this.playerData == null || !this.playerData.isDirty)
         {
             return;
         }
-        var data = JsonUtility.ToJson(this.playerData);
-        FilePrefs.SetString("player_data", data);
+        var data = JsonUtility.ToJson(this.playerData, true);
+        FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
+        Debug.Log("PlayerModel saved. bytes " + data.Length);
+        Debug.Log("PlayerModel json: " + data);
+        FilePrefs.Save();
     }
 
     private void CreateNewPlayerData()
     {
+        Debug.Log("PlayerModel CreateNewPlayerData");
         this.playerData = new PlayerData()
         {
             coins = 10000,
@@ -97,7 +103,7 @@ public class PlayerModel
 
     public void Load()
     {
-        var data = FilePrefs.GetString("player_data", "");
+        var data = FilePrefs.GetString(savekey, "");
         if (string.IsNullOrEmpty(data))
         {
             this.CreateNewPlayerData();
@@ -105,6 +111,7 @@ public class PlayerModel
         }
         try
         {
+            Debug.Log("PlayerModel loaded " + data.Length + " bytes");
             this.playerData = JsonUtility.FromJson<PlayerData>(data);
         }
         catch (System.Exception e)
@@ -113,10 +120,10 @@ public class PlayerModel
             this.CreateNewPlayerData();
         }
 
-        foreach (var bd in playerData.currentGroup.cityElementDataList)
+        if (playerData.currentElement != null)
         {
-            bd.brickDataList.ForEach((e) => e.ResetEmittingStates());
-            bd.slotElementDataList.ForEach((s) => s.ResetEmittingStates());
+            this.playerData.currentElement.brickDataList.ForEach((e) => e.ResetEmittingStates());
+            this.playerData.currentElement.columns.ForEach((s) => s.ResetEmittingStates());
         }
     }
 }

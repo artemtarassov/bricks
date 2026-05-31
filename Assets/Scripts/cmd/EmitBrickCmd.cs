@@ -45,7 +45,7 @@ public class EmitBrickCmd
     private Vector3 GetFromPos()
     {
         var screenPos = ViewModel.Instance.Emitters[emitter.index].position;
-        var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 10));
+        var worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 1));
         return worldPos;
     }
 
@@ -57,6 +57,7 @@ public class EmitBrickCmd
             Debug.LogError("No next brick found in city element for color " + this.colorIndex);
             return;
         }
+        PlayerModel.Instance.playerData.isDirty = true;
         //from pos is 10 in front of camera
         var fromPos = GetFromPos();
         CityModel.Instance.FlyBrick(fromPos, nextBrick, this.colorIndex);
@@ -66,25 +67,31 @@ public class EmitBrickCmd
 
         SlotModel.Instance.UpdateEmitters(emitter);
         DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete);
+
+        if (emitterBrickData.coloredAmount == 0)
+        {
+            SlotModel.Instance.Replace(emitterBrickData, SlotElementType.Undefined);
+        }
     }
 
     private void OnFlyComplete()
     {
         elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Emitting), BrickState.Full);
-        cityElement.ShowBrickStates();
+        cityElement.ShowCurrentState();
 
+        /*
         var cityElementCompleted = elementDataContainer.ElementCompleted();
         if (cityElementCompleted)
         {
             new UnlockCityElementCmd().Run();
             return;
-        }
+        }*/
 
 
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
             elementDataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-            cityElement.ShowBrickStates();
+            cityElement.ShowCurrentState();
         }
 
 

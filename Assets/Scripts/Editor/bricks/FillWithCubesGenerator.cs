@@ -5,11 +5,17 @@ using UnityEngine;
 
 internal static class FillWithCubesGenerator
 {
-    private const string UndoLabel = "Add Bricks";
     private const float PlacementPrecision = 1000f;
-    private const float TouchingEpsilon = 0.0001f;
+    private const float MinimumOverlapEpsilon = 0.000001f;
+    private const float RelativeOverlapEpsilon = 0.001f;
     private const int VisibilityRayRows = 180;
     private const float VisibilityRayDistancePadding = 0.05f;
+
+    private enum VisibilityCameraSource
+    {
+        MainCamera,
+        SceneView
+    }
 
     public static void AddBricks(GameObject targetObject, FillWithCubesSettings settings)
     {
@@ -18,8 +24,11 @@ internal static class FillWithCubesGenerator
             return;
         }
 
-        Undo.IncrementCurrentGroup();
-        Undo.SetCurrentGroupName(UndoLabel);
+        if (HasGeneratedBricksRoot(targetObject))
+        {
+            Debug.Log($"Skipping brick generation for {targetObject.name} because {FillWithCubesSettings.GeneratedGroupName} already exists.");
+            return;
+        }
 
         ClearBricks(targetObject);
 
@@ -49,11 +58,7 @@ internal static class FillWithCubesGenerator
 
         if (generatedRoot.childCount == 0)
         {
-            Undo.DestroyObjectImmediate(generatedRoot.gameObject);
-        }
-        else
-        {
-            CleanupTouchingBricks(targetObject);
+            Object.DestroyImmediate(generatedRoot.gameObject);
         }
 
         EditorUtility.SetDirty(targetObject);
@@ -67,112 +72,74 @@ internal static class FillWithCubesGenerator
         }
 
         List<GameObject> generatedBricks = GetGeneratedBricks(targetObject);
-        var occupiedCells = new Dictionary<Vector3Int, List<BrickBounds>>();
-        var bricksToRemove = new HashSet<GameObject>();
-
-        foreach (GameObject generatedBrick in generatedBricks)
-        {
-            if (generatedBrick == null || bricksToRemove.Contains(generatedBrick))
-            {
-                continue;
-            }
-
-            if (!TryGetBrickBounds(generatedBrick, out Bounds worldBounds))
-            {
-                continue;
-            }
-
-            Vector3Int minCell = WorldToCell(worldBounds.min);
-            Vector3Int maxCell = WorldToCell(worldBounds.max);
-            bool touchesExistingBrick = false;
-
-            for (int x = minCell.x; x <= maxCell.x && !touchesExistingBrick; x++)
-            {
-                for (int y = minCell.y; y <= maxCell.y && !touchesExistingBrick; y++)
-                {
-                    for (int z = minCell.z; z <= maxCell.z; z++)
-                    {
-                        var cell = new Vector3Int(x, y, z);
-                        if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
-                        {
-                            continue;
-                        }
-
-                        foreach (BrickBounds candidate in candidates)
-                        {
-                            if (bricksToRemove.Contains(candidate.GameObject))
-                            {
-                                continue;
-                            }
-
-                            if (!DoBoundsTouchOrOverlap(worldBounds, candidate.WorldBounds))
-                            {
-                                continue;
-                            }
-
-                            bricksToRemove.Add(generatedBrick);
-                            touchesExistingBrick = true;
-                            break;
-                        }
-
-                        if (touchesExistingBrick)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (touchesExistingBrick)
-            {
-                continue;
-            }
-
-            BrickBounds brickBounds = new BrickBounds(generatedBrick, worldBounds);
-            for (int x = minCell.x; x <= maxCell.x; x++)
-            {
-                for (int y = minCell.y; y <= maxCell.y; y++)
-                {
-                    for (int z = minCell.z; z <= maxCell.z; z++)
-                    {
-                        var cell = new Vector3Int(x, y, z);
-                        if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
-                        {
-                            candidates = new List<BrickBounds>();
-                            occupiedCells.Add(cell, candidates);
-                        }
-
-                        candidates.Add(brickBounds);
-                    }
-                }
-            }
-        }
-
-        foreach (GameObject brick in bricksToRemove)
-        {
-            Undo.DestroyObjectImmediate(brick);
-        }
+        int removedCount = RemoveTouchingBricks(generatedBricks);
 
         CleanupEmptyGeneratedHierarchy(targetObject);
         EditorUtility.SetDirty(targetObject);
+        Debug.Log($"Removed {removedCount} touching bricks from {targetObject.name}.");
     }
 
-    public static void CleanupNonVisibleBricks(GameObject targetObject)
+    public static void CleanupTouchingBricksAgainstScene(GameObject targetObject)
     {
         if (targetObject == null)
         {
             return;
         }
 
+        List<GameObject> targetBricks = GetVisibleBricks(GetGeneratedBricks(targetObject));
+        if (targetBricks.Count == 0)
+        {
+            Debug.Log($"No visible generated bricks found under {targetObject.name}.");
+            return;
+        }
+
+        List<GameObject> sceneBricks = GetVisibleBricks(GetSceneBricksByTag());
+        if (sceneBricks.Count == 0)
+        {
+            Debug.Log("No visible bricks with tag Brick found in the scene.");
+            return;
+        }
+
+        int removedCount = RemoveTouchingSourceBricks(targetBricks, sceneBricks);
+        CleanupEmptyGeneratedHierarchy(targetObject);
+        EditorUtility.SetDirty(targetObject);
+        Debug.Log($"Removed {removedCount} touching bricks from {targetObject.name} using scene-wide brick checks.");
+    }
+
+    public static void CleanupNonVisibleBricksViaCamera(GameObject targetObject)
+    {
+        CleanupNonVisibleBricks(targetObject, VisibilityCameraSource.MainCamera);
+    }
+
+    public static void CleanupNonVisibleBricksViaSceneView(GameObject targetObject)
+    {
+        CleanupNonVisibleBricks(targetObject, VisibilityCameraSource.SceneView);
+    }
+
+    public static void CleanupNonVisibleBricks(GameObject targetObject)
+    {
+        CleanupNonVisibleBricks(targetObject, VisibilityCameraSource.SceneView);
+    }
+
+    private static void CleanupNonVisibleBricks(GameObject targetObject, VisibilityCameraSource cameraSource)
+    {
+        if (targetObject == null)
+        {
+            Debug.LogWarning("CleanupNonVisibleBricks was called with a null targetObject.");
+            return;
+        }
+
         CityElement cityElement = targetObject.GetComponent<CityElement>();
         if (cityElement == null)
         {
+            Debug.LogWarning($"CleanupNonVisibleBricks requires a CityElement on {targetObject.name}.");
             return;
         }
 
         List<GameObject> generatedBricks = GetGeneratedBricks(targetObject);
         if (generatedBricks.Count == 0)
         {
+            Debug.Log($"CleanupNonVisibleBricks found no generated bricks under {targetObject.name}.");
             return;
         }
 
@@ -202,7 +169,14 @@ internal static class FillWithCubesGenerator
                 HideFlags.HideAndDontSave,
                 typeof(Camera));
             visibilityCamera = cameraObject.GetComponent<Camera>();
-            ApplyCameraSettings(visibilityCamera, CameraSettings.From(Camera.main), cityElement.camPos, cityElement.camRot);
+            if (!TryGetVisibilityCameraSetup(cameraSource, out CameraSettings cameraSettings, out Vector3 cameraPosition, out Vector3 cameraRotation))
+            {
+                Debug.LogWarning(cameraSource == VisibilityCameraSource.SceneView
+                    ? "CleanupNonVisibleBricks via Scene View requires an open Scene view with an active Scene camera."
+                    : "CleanupNonVisibleBricks via Camera requires a Main Camera in the scene.");
+                return;
+            }
+            ApplyCameraSettings(visibilityCamera, cameraSettings, cameraPosition, cameraRotation);
 
             for (int i = 0; i < generatedBricks.Count; i++)
             {
@@ -228,6 +202,7 @@ internal static class FillWithCubesGenerator
                 RegisterBrickColliders(brick, colliderOwners, brickColliders, temporaryColliders);
             }
 
+            Physics.SyncTransforms();
             int layerMask = 1 << isolationLayer;
             CollectVisibleBricksFromViewportRays(visibilityCamera, layerMask, colliderOwners, visibleBricks);
             CollectVisibleBricksFromSampleRays(visibilityCamera, layerMask, brickBounds, brickColliders, colliderOwners, visibleBricks);
@@ -266,7 +241,7 @@ internal static class FillWithCubesGenerator
                 continue;
             }
 
-            Undo.DestroyObjectImmediate(brick);
+            Object.DestroyImmediate(brick);
             removedCount++;
         }
 
@@ -274,6 +249,89 @@ internal static class FillWithCubesGenerator
         EditorUtility.SetDirty(targetObject);
 
         Debug.Log($"Removed {removedCount} non-visible bricks from {targetObject.name}.");
+    }
+
+    private static bool TryGetVisibilityCameraSetup(
+        VisibilityCameraSource cameraSource,
+        out CameraSettings cameraSettings,
+        out Vector3 cameraPosition,
+        out Vector3 cameraRotation)
+    {
+        if (cameraSource == VisibilityCameraSource.SceneView)
+        {
+            SceneView sceneView = GetSceneView();
+            Camera sceneCamera = sceneView != null ? sceneView.camera : null;
+            if (sceneCamera != null)
+            {
+                cameraSettings = CameraSettings.From(sceneCamera);
+                cameraPosition = sceneCamera.transform.position;
+                cameraRotation = sceneCamera.transform.eulerAngles;
+                return true;
+            }
+        }
+        else
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                cameraSettings = CameraSettings.From(mainCamera);
+                cameraPosition = mainCamera.transform.position;
+                cameraRotation = mainCamera.transform.eulerAngles;
+                return true;
+            }
+        }
+
+        cameraSettings = CameraSettings.From(null);
+        cameraPosition = Vector3.zero;
+        cameraRotation = Vector3.zero;
+        return false;
+    }
+
+    private static SceneView GetSceneView()
+    {
+        if (SceneView.lastActiveSceneView != null)
+        {
+            return SceneView.lastActiveSceneView;
+        }
+
+        foreach (object sceneView in SceneView.sceneViews)
+        {
+            if (sceneView is SceneView view)
+            {
+                return view;
+            }
+        }
+
+        return null;
+    }
+
+    public static void ToggleGeneratedBricksActive(GameObject targetObject)
+    {
+        if (targetObject == null)
+        {
+            return;
+        }
+
+        List<GameObject> generatedRoots = GetGeneratedRootObjects(targetObject);
+        if (generatedRoots.Count == 0)
+        {
+            Debug.Log($"No {FillWithCubesSettings.GeneratedGroupName} object found under {targetObject.name}.");
+            return;
+        }
+
+        bool newActiveState = !generatedRoots[0].activeSelf;
+        foreach (GameObject generatedRoot in generatedRoots)
+        {
+            if (generatedRoot == null)
+            {
+                continue;
+            }
+
+            generatedRoot.SetActive(newActiveState);
+            EditorUtility.SetDirty(generatedRoot);
+        }
+
+        EditorUtility.SetDirty(targetObject);
     }
 
     public static void ClearBricks(GameObject targetObject)
@@ -296,7 +354,7 @@ internal static class FillWithCubesGenerator
 
         foreach (GameObject container in uniqueContainers)
         {
-            Undo.DestroyObjectImmediate(container);
+            Object.DestroyImmediate(container);
         }
     }
 
@@ -419,8 +477,15 @@ internal static class FillWithCubesGenerator
     {
         GameObject brick = CreateBrickObject(settings);
         Material brickMaterial = AssetDatabase.LoadAssetAtPath<Material>(FillWithCubesSettings.BrickMaterialPath);
-        Undo.SetTransformParent(brick.transform, parent, UndoLabel);
-        brick.name = "Brick";
+        brick.transform.SetParent(parent, false);
+        brick.name = FillWithCubesSettings.BrickTagName;
+        brick.tag = FillWithCubesSettings.BrickTagName;
+        int brickLayer = LayerMask.NameToLayer(FillWithCubesSettings.GeneratedGroupLayerName);
+        if (brickLayer >= 0)
+        {
+            brick.layer = brickLayer;
+        }
+
         brick.transform.localPosition = localPosition;
         brick.transform.localRotation = Quaternion.identity;
         brick.transform.localScale = localScale;
@@ -458,15 +523,19 @@ internal static class FillWithCubesGenerator
             brick = GameObject.CreatePrimitive(PrimitiveType.Cube);
         }
 
-        Undo.RegisterCreatedObjectUndo(brick, UndoLabel);
         return brick;
     }
 
     private static Transform CreateGeneratedRoot(Transform parent)
     {
         GameObject root = new GameObject(FillWithCubesSettings.GeneratedGroupName);
-        Undo.RegisterCreatedObjectUndo(root, UndoLabel);
-        Undo.SetTransformParent(root.transform, parent, UndoLabel);
+        int generatedLayer = LayerMask.NameToLayer(FillWithCubesSettings.GeneratedGroupLayerName);
+        if (generatedLayer >= 0)
+        {
+            root.layer = generatedLayer;
+        }
+
+        root.transform.SetParent(parent, false);
         root.transform.localPosition = Vector3.zero;
         root.transform.localRotation = Quaternion.identity;
         root.transform.localScale = Vector3.one;
@@ -496,8 +565,7 @@ internal static class FillWithCubesGenerator
             mirroredParents);
 
         GameObject mirrorObject = new GameObject(sourceTransform.name);
-        Undo.RegisterCreatedObjectUndo(mirrorObject, UndoLabel);
-        Undo.SetTransformParent(mirrorObject.transform, mirroredParent, UndoLabel);
+        mirrorObject.transform.SetParent(mirroredParent, false);
         mirrorObject.transform.localPosition = sourceTransform.localPosition;
         mirrorObject.transform.localRotation = sourceTransform.localRotation;
         mirrorObject.transform.localScale = sourceTransform.localScale;
@@ -509,8 +577,7 @@ internal static class FillWithCubesGenerator
     private static Transform CreateColliderGroup(Transform parent, Collider collider)
     {
         GameObject group = new GameObject(FillWithCubesSettings.GeneratedGroupName + "_" + collider.name + "_" + collider.GetType().Name);
-        Undo.RegisterCreatedObjectUndo(group, UndoLabel);
-        Undo.SetTransformParent(group.transform, parent, UndoLabel);
+        group.transform.SetParent(parent, false);
         group.transform.localPosition = Vector3.zero;
         group.transform.localRotation = Quaternion.identity;
         group.transform.localScale = Vector3.one;
@@ -522,7 +589,7 @@ internal static class FillWithCubesGenerator
         Collider[] colliders = brick.GetComponentsInChildren<Collider>(true);
         foreach (Collider brickCollider in colliders)
         {
-            Undo.DestroyObjectImmediate(brickCollider);
+            Object.DestroyImmediate(brickCollider);
         }
     }
 
@@ -545,6 +612,31 @@ internal static class FillWithCubesGenerator
         }
 
         return false;
+    }
+
+    private static bool HasGeneratedBricksRoot(GameObject targetObject)
+    {
+        return GetGeneratedRootObjects(targetObject).Count > 0;
+    }
+
+    private static List<GameObject> GetGeneratedRootObjects(GameObject targetObject)
+    {
+        var generatedRoots = new List<GameObject>();
+        if (targetObject == null)
+        {
+            return generatedRoots;
+        }
+
+        Transform[] transforms = targetObject.GetComponentsInChildren<Transform>(true);
+        foreach (Transform current in transforms)
+        {
+            if (current != null && current.name == FillWithCubesSettings.GeneratedGroupName)
+            {
+                generatedRoots.Add(current.gameObject);
+            }
+        }
+
+        return generatedRoots;
     }
 
     private static void CleanupEmptyGeneratedHierarchy(GameObject targetObject)
@@ -577,7 +669,7 @@ internal static class FillWithCubesGenerator
                 continue;
             }
 
-            Undo.DestroyObjectImmediate(transform.gameObject);
+            Object.DestroyImmediate(transform.gameObject);
         }
     }
 
@@ -601,19 +693,74 @@ internal static class FillWithCubesGenerator
                     continue;
                 }
 
-                if (!current.name.StartsWith(FillWithCubesSettings.GeneratedGroupName + "_"))
+                if (current.CompareTag("Brick"))
                 {
-                    continue;
-                }
-
-                for (int i = 0; i < current.childCount; i++)
-                {
-                    bricks.Add(current.GetChild(i).gameObject);
+                    bricks.Add(current.gameObject);
                 }
             }
         }
 
         return bricks;
+    }
+
+    private static List<GameObject> GetSceneBricksByTag()
+    {
+        var sceneBricks = new List<GameObject>();
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+        foreach (GameObject gameObject in allObjects)
+        {
+            if (gameObject == null || !gameObject.scene.IsValid())
+            {
+                continue;
+            }
+
+            if (!gameObject.CompareTag("Brick"))
+            {
+                continue;
+            }
+
+            sceneBricks.Add(gameObject);
+        }
+
+        return sceneBricks;
+    }
+
+    private static List<GameObject> GetVisibleBricks(IEnumerable<GameObject> bricks)
+    {
+        var visibleBricks = new List<GameObject>();
+        foreach (GameObject brick in bricks)
+        {
+            if (IsBrickVisibleInScene(brick))
+            {
+                visibleBricks.Add(brick);
+            }
+        }
+
+        return visibleBricks;
+    }
+
+    private static bool IsBrickVisibleInScene(GameObject brick)
+    {
+        if (brick == null || !brick.scene.IsValid() || !brick.activeInHierarchy)
+        {
+            return false;
+        }
+
+        if (SceneVisibilityManager.instance.IsHidden(brick, false))
+        {
+            return false;
+        }
+
+        Renderer[] renderers = brick.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer != null && renderer.enabled && renderer.gameObject.activeInHierarchy)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsUnderGeneratedRoot(Transform transform)
@@ -983,6 +1130,201 @@ internal static class FillWithCubesGenerator
         return true;
     }
 
+    private static int RemoveTouchingBricks(List<GameObject> bricks)
+    {
+        var occupiedCells = new Dictionary<Vector3Int, List<BrickBounds>>();
+        var bricksToRemove = new HashSet<GameObject>();
+
+        foreach (GameObject brick in bricks)
+        {
+            if (brick == null || bricksToRemove.Contains(brick))
+            {
+                continue;
+            }
+
+            if (!TryGetBrickBounds(brick, out Bounds worldBounds))
+            {
+                continue;
+            }
+
+            Vector3Int minCell = WorldToCell(worldBounds.min);
+            Vector3Int maxCell = WorldToCell(worldBounds.max);
+            bool touchesExistingBrick = false;
+
+            for (int x = minCell.x; x <= maxCell.x && !touchesExistingBrick; x++)
+            {
+                for (int y = minCell.y; y <= maxCell.y && !touchesExistingBrick; y++)
+                {
+                    for (int z = minCell.z; z <= maxCell.z; z++)
+                    {
+                        var cell = new Vector3Int(x, y, z);
+                        if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
+                        {
+                            continue;
+                        }
+
+                        foreach (BrickBounds candidate in candidates)
+                        {
+                            if (bricksToRemove.Contains(candidate.GameObject))
+                            {
+                                continue;
+                            }
+
+                            if (!DoBoundsOverlap(worldBounds, candidate.WorldBounds))
+                            {
+                                continue;
+                            }
+
+                            bricksToRemove.Add(brick);
+                            touchesExistingBrick = true;
+                            break;
+                        }
+
+                        if (touchesExistingBrick)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (touchesExistingBrick)
+            {
+                continue;
+            }
+
+            BrickBounds brickBounds = new BrickBounds(brick, worldBounds);
+            for (int x = minCell.x; x <= maxCell.x; x++)
+            {
+                for (int y = minCell.y; y <= maxCell.y; y++)
+                {
+                    for (int z = minCell.z; z <= maxCell.z; z++)
+                    {
+                        var cell = new Vector3Int(x, y, z);
+                        if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
+                        {
+                            candidates = new List<BrickBounds>();
+                            occupiedCells.Add(cell, candidates);
+                        }
+
+                        candidates.Add(brickBounds);
+                    }
+                }
+            }
+        }
+
+        foreach (GameObject brick in bricksToRemove)
+        {
+            Object.DestroyImmediate(brick);
+        }
+
+        return bricksToRemove.Count;
+    }
+
+    private static int RemoveTouchingSourceBricks(List<GameObject> sourceBricks, List<GameObject> candidateBricks)
+    {
+        var occupiedCells = new Dictionary<Vector3Int, List<BrickBounds>>();
+        foreach (GameObject candidateBrick in candidateBricks)
+        {
+            if (candidateBrick == null || !TryGetBrickBounds(candidateBrick, out Bounds candidateBounds))
+            {
+                continue;
+            }
+
+            AddBrickBoundsToCells(candidateBrick, candidateBounds, occupiedCells);
+        }
+
+        var bricksToRemove = new HashSet<GameObject>();
+        foreach (GameObject sourceBrick in sourceBricks)
+        {
+            if (sourceBrick == null || bricksToRemove.Contains(sourceBrick))
+            {
+                continue;
+            }
+
+            if (!TryGetBrickBounds(sourceBrick, out Bounds sourceBounds))
+            {
+                continue;
+            }
+
+            Vector3Int minCell = WorldToCell(sourceBounds.min);
+            Vector3Int maxCell = WorldToCell(sourceBounds.max);
+            bool touchesOtherBrick = false;
+
+            for (int x = minCell.x; x <= maxCell.x && !touchesOtherBrick; x++)
+            {
+                for (int y = minCell.y; y <= maxCell.y && !touchesOtherBrick; y++)
+                {
+                    for (int z = minCell.z; z <= maxCell.z; z++)
+                    {
+                        var cell = new Vector3Int(x, y, z);
+                        if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
+                        {
+                            continue;
+                        }
+
+                        foreach (BrickBounds candidate in candidates)
+                        {
+                            if (candidate.GameObject == sourceBrick || bricksToRemove.Contains(candidate.GameObject))
+                            {
+                                continue;
+                            }
+
+                            if (!DoBoundsOverlap(sourceBounds, candidate.WorldBounds))
+                            {
+                                continue;
+                            }
+
+                            bricksToRemove.Add(sourceBrick);
+                            touchesOtherBrick = true;
+                            break;
+                        }
+
+                        if (touchesOtherBrick)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (GameObject brick in bricksToRemove)
+        {
+            Object.DestroyImmediate(brick);
+        }
+
+        return bricksToRemove.Count;
+    }
+
+    private static void AddBrickBoundsToCells(
+        GameObject brick,
+        Bounds worldBounds,
+        Dictionary<Vector3Int, List<BrickBounds>> occupiedCells)
+    {
+        BrickBounds brickBounds = new BrickBounds(brick, worldBounds);
+        Vector3Int minCell = WorldToCell(worldBounds.min);
+        Vector3Int maxCell = WorldToCell(worldBounds.max);
+
+        for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            for (int y = minCell.y; y <= maxCell.y; y++)
+            {
+                for (int z = minCell.z; z <= maxCell.z; z++)
+                {
+                    var cell = new Vector3Int(x, y, z);
+                    if (!occupiedCells.TryGetValue(cell, out List<BrickBounds> candidates))
+                    {
+                        candidates = new List<BrickBounds>();
+                        occupiedCells.Add(cell, candidates);
+                    }
+
+                    candidates.Add(brickBounds);
+                }
+            }
+        }
+    }
+
     private static Vector3Int WorldToCell(Vector3 worldPoint)
     {
         return new Vector3Int(
@@ -991,14 +1333,30 @@ internal static class FillWithCubesGenerator
             Mathf.FloorToInt(worldPoint.z / TouchingCellSize));
     }
 
-    private static bool DoBoundsTouchOrOverlap(Bounds a, Bounds b)
+    private static bool DoBoundsOverlap(Bounds a, Bounds b)
     {
-        return a.min.x <= b.max.x + TouchingEpsilon &&
-            a.max.x >= b.min.x - TouchingEpsilon &&
-            a.min.y <= b.max.y + TouchingEpsilon &&
-            a.max.y >= b.min.y - TouchingEpsilon &&
-            a.min.z <= b.max.z + TouchingEpsilon &&
-            a.max.z >= b.min.z - TouchingEpsilon;
+        float overlapEpsilon = GetOverlapEpsilon(a, b);
+        return GetAxisOverlap(a.min.x, a.max.x, b.min.x, b.max.x) > overlapEpsilon &&
+            GetAxisOverlap(a.min.y, a.max.y, b.min.y, b.max.y) > overlapEpsilon &&
+            GetAxisOverlap(a.min.z, a.max.z, b.min.z, b.max.z) > overlapEpsilon;
+    }
+
+    private static float GetOverlapEpsilon(Bounds a, Bounds b)
+    {
+        float smallestExtent = Mathf.Min(
+            a.extents.x,
+            a.extents.y,
+            a.extents.z,
+            b.extents.x,
+            b.extents.y,
+            b.extents.z);
+
+        return Mathf.Max(MinimumOverlapEpsilon, smallestExtent * RelativeOverlapEpsilon);
+    }
+
+    private static float GetAxisOverlap(float minA, float maxA, float minB, float maxB)
+    {
+        return Mathf.Min(maxA, maxB) - Mathf.Max(minA, minB);
     }
 
     private static int FindUnusedLayer()

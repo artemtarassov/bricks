@@ -14,6 +14,8 @@ public class CityElement : MonoBehaviour
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
 
+    [SerializeField] public Transform __GeneratedBricks = null;
+    [SerializeField] public Transform __EnclosingGameObject = null;
 
     public string dataKey => this.transform.parent.name + "_" + this.name;
 
@@ -24,33 +26,47 @@ public class CityElement : MonoBehaviour
 
     private BrickTopDownExplosion explosion;
 
+    //private readonly string genereatedBrickGameObjectName = "__GeneratedBricks";
+
     void Awake()
     {
-        var bricks = this.FindAllBricks();
-        this.brickLayersContainer = new BrickLayersContainer(bricks);
-        foreach (var brick in bricks)
+        Assert.IsNotNull(__GeneratedBricks, "Generated bricks container not assigned in inspector for " + this.gameObject.name);
+        this.EnableBricks(false);
+        this.EnableVisuals(true);
+    }
+
+    public BrickLayersContainer GetBrickLayersContainer()
+    {
+        if (brickLayersContainer != null)
+        {
+            return brickLayersContainer;
+        }
+
+        this.brickLayersContainer = new BrickLayersContainer(__GeneratedBricks.transform);
+        foreach (var brick in this.brickLayersContainer.sortedBricks)
         {
             this.brickInfo[brick] = new BrickInfo()
             {
-                state = BrickState.Transparent,
+                state = BrickState.Undefined,
                 color = ColorIndex.Undefined
             };
         }
+        return brickLayersContainer;
     }
 
     public void Setup(CityElementDataContainer dataContainer)
     {
-        Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.dataKey}");
+        //Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.dataKey}");
         this.dataContainer = dataContainer;
-        this.EnableAllBricks(true);
+        this.EnableBricks(true);
         this.EnableVisuals(false);
         this.SetBrickColors();
-        this.ShowBrickStates();
+        this.ShowCurrentState();
     }
 
     public List<Transform> FindAllBricks()
     {
-        return GetBricksContainer().GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
+        return __GeneratedBricks.GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
     }
 
 
@@ -78,7 +94,7 @@ public class CityElement : MonoBehaviour
         return ColoredMaterials.Instance.GetMaterialByColorIndex(colorIndex);
     }
 
-    private List<Transform> SortedBricks => this.brickLayersContainer.sortedBricks;
+    private List<Transform> SortedBricks => this.GetBrickLayersContainer().sortedBricks;
 
     private void SetBrickColors()
     {
@@ -94,7 +110,7 @@ public class CityElement : MonoBehaviour
         }
     }
 
-    public void ShowBrickStates()
+    public void ShowCurrentState()
     {
         Assert.IsNotNull(this.dataContainer, "Data container is null. Cannot show brick states.");
         Assert.IsTrue(this.dataContainer.brickDataList.Count > 0, "Brick data list is empty. Cannot show brick states.");
@@ -152,68 +168,77 @@ public class CityElement : MonoBehaviour
         return null;
     }
 
-
-    /*public void ShowNextColoredBricks(int totalDifferentBrickColors)
-    {
-        var lastColoredBrickIndex = this.brickLayersContainer.sortedBricks.FindLastIndex(b => this.brickState[b] == BrickState.Colored);
-        var pointer = lastColoredBrickIndex + 1;
-        for (var i = 0; i < totalDifferentBrickColors && lastColoredBrickIndex < this.dataContainer.brickDataList.Count; i++)
-        {
-            var next = this.dataContainer.brickDataList[pointer];
-            this.SetNextBrickColor(next.amount);
-            pointer++;
-        }
-    }
-
-    private void SetNextBrickColor(int amount)
-    {
-        Assert.IsTrue(amount > 0, "invalid amount");
-        for (var i = 0; i < amount; i++)
-        {
-            var nextTransparentBrick = this.GetNextTransparentBrick();
-            this.SetBrickState(nextTransparentBrick, BrickState.Colored);
-        }
-    }*/
-
     private void ShowBrickState(Transform t, BrickState state)
     {
         if (this.brickInfo.ContainsKey(t) && this.brickInfo[t].state == state)
         {
             return;
         }
+        //Debug.Log("ShowBrickState " + state);
         this.brickInfo[t].state = state;
         var mr = t.GetComponent<MeshRenderer>();
         switch (state)
         {
+            case BrickState.Undefined:
             case BrickState.Transparent:
+                mr.enabled = false;
+                break;
+            case BrickState.SemiTransparent:
+                mr.enabled = true;
                 mr.material = GetMaterialByName("BrickMatTransparent");
                 break;
             case BrickState.Emitting:
                 break;
             case BrickState.Full:
+                mr.enabled = true;
                 mr.material = GetMaterialByName("BrickMatFull");
                 break;
             case BrickState.Colored:
+                mr.enabled = true;
                 mr.material = GetMaterialByColorIndex(GetColorOfBrick(t));
                 break;
         }
     }
 
-    public void EnableAllBricks(bool enable)
+    private void ActivateChildren(Transform t, bool activate)
     {
-        foreach (var brick in this.SortedBricks)
+        for (var i = 0; i < t.transform.childCount; i++)
         {
-            brick.gameObject.SetActive(enable);
+            t.GetChild(i).gameObject.SetActive(activate);
         }
+    }
+
+    private void EnableBricks(bool enable)
+    {
+        __GeneratedBricks.gameObject.SetActive(enable);
         if (enable && this.explosion != null)
         {
             this.explosion.ResetExplosion();
         }
+        if (enable && __EnclosingGameObject != null)
+        {
+            __EnclosingGameObject.gameObject.SetActive(true);
+        }
     }
 
-    public void EnableVisuals(bool enable)
+    public Transform GetChildByName(string name)
     {
-        for (var i = 0; i < this.transform.childCount; i++)
+        var n = this.transform.childCount;
+        for (var i = 0; i < n; i++)
+        {
+            var child = this.transform.GetChild(i);
+            if (child.name.StartsWith(name))
+            {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private void EnableVisuals(bool enable)
+    {
+        var n = this.transform.childCount;
+        for (var i = 0; i < n; i++)
         {
             var child = this.transform.GetChild(i);
             if (!child.name.StartsWith("__"))
@@ -221,9 +246,13 @@ public class CityElement : MonoBehaviour
                 child.gameObject.SetActive(enable);
             }
         }
+        if (enable && __EnclosingGameObject != null)
+        {
+            __EnclosingGameObject.gameObject.SetActive(false);
+        }
     }
 
-    public bool HasVisuals()
+    private bool HasVisuals()
     {
         for (var i = 0; i < this.transform.childCount; i++)
         {
@@ -236,28 +265,17 @@ public class CityElement : MonoBehaviour
         return false;
     }
 
-    private Transform GetBricksContainer()
-    {
-        for (var i = 0; i < this.transform.childCount; i++)
-        {
-            var child = this.transform.GetChild(i);
-            if (child.name.StartsWith("__"))
-            {
-                return child;
-            }
-        }
-        return null;
-    }
 
     public Vector3 GetAveragePosition()
     {
+        Assert.IsTrue(this.SortedBricks.Count > 0, "No bricks found in city element. Cannot calculate average position. object " + this.gameObject.name);
         var sum = Vector3.zero;
         foreach (var brick in SortedBricks)
         {
             sum += brick.transform.position;
         }
-
         return sum / SortedBricks.Count;
     }
+
 
 }

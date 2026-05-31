@@ -38,6 +38,7 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
+        SlotModel.Instance.OnRemovedFromColumn += OnRemovedFromColumn;
         CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
 
         this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
@@ -45,6 +46,14 @@ public class SlotController : MonoBehaviour
         if (CityModel.Instance.HasGroups())
         {
             this.Setup();
+        }
+    }
+
+    private void OnRemovedFromColumn(SlotElementData data)
+    {
+        foreach (var column in this.columns)
+        {
+            column.Remove(data);
         }
     }
 
@@ -89,11 +98,12 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnColumnsChanged -= OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
         CityModel.Instance.OnCityElementUnlocked -= OnCityElementUnlocked;
+        SlotModel.Instance.OnRemovedFromColumn -= OnRemovedFromColumn;
     }
 
     private void OnCityElementUnlocked(CityElement ce)
     {
-        this.Setup();
+        //this.Setup();
     }
 
     private void Setup()

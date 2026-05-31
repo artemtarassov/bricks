@@ -1,36 +1,57 @@
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class SecUpdateCmd
 {
+    private CityElement currentElement;
+    public SecUpdateCmd()
+    {
+        this.currentElement = CityModel.Instance.GetCurrentElement();
+        Assert.IsNotNull(this.currentElement, "current element in cityModel not set");
+    }
     public void Run()
     {
+        PlayerModel.Instance.Save();
+        if (ViewModel.Instance.HasAnyView())
+        {
+            return;
+        }
         UpdateOutOfSpace();
         UpdateAdditionalEmitter();
+        UpdateNextCityElement();
+    }
+
+
+    private void UpdateNextCityElement()
+    {
+        var da = currentElement.dataContainer;
+        Assert.IsNotNull(da, "Current city element data container is null");
+
+        //Debug.Log($"SecUpdateCmd: UpdateNextCityElement: element={currentElement.name}, emittingBricks={da.ElementCountEmittingBricks()}, coloredBricks={da.ElementCountColoredBricks()}, allSlotsEmpty={da.AllSlotsEmpty()}");
+        if (da.ElementCompleted() && da.AllSlotsEmpty())
+        {
+            DOVirtual.DelayedCall(1, new UnlockNextCmd().Run);
+        }
     }
 
 
     private void UpdateOutOfSpace()
     {
-        if (ViewModel.Instance.OutOfSpaceFlag)
-        {
-            return;
-        }
-        var currentElement = CityModel.Instance.GetCurrentElement();
-
-        if (ViewModel.Instance.HasAnyView())
-        {
-            return;
-        }
-
         var cntEmitterSpace = SlotModel.Instance.CountEmptyEmitters();
         if (cntEmitterSpace > 0)
         {
             return;
         }
 
-        var colorsInEmitters = SlotModel.Instance.Emitters.FindAll(e => e.HasColoredBricks).Select(e => e.brickData.color).ToHashSet();
-        var colorsInCityElement = CityModel.Instance.GetCurrentElement().GetBrickColors();
+        var hasEmittingBricks = currentElement.dataContainer.ElementCountEmittingBricks() > 0;
+        if (hasEmittingBricks)
+        {
+            return;
+        }
+        /*var colorsInEmitters = SlotModel.Instance.Emitters.FindAll(e => e.HasColoredBricks).Select(e => e.brickData.color).ToHashSet();
+        var colorsInCityElement = currentElement.GetBrickColors();
 
         foreach (var c in colorsInEmitters)
         {
@@ -39,10 +60,13 @@ public class SecUpdateCmd
                 Debug.Log($"SecUpdateCmd color {c} is still present in emitters, skipping");
                 return;
             }
-        }
+        }*/
 
-        ViewModel.Instance.OutOfSpaceFlag = true;
-        new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+        ViewModel.Instance.OutOfSpaceSeconds++;
+        if (ViewModel.Instance.OutOfSpaceSeconds == 2)
+        {
+            new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+        }
     }
 
     private void UpdateAdditionalEmitter()

@@ -15,12 +15,21 @@ public class Main : MonoBehaviour
 
     void OnDestroy()
     {
+
+    }
+
+    void OnApplicationQuit()
+    {
+        Debug.Log("Main OnApplicationQuit: killing all tweens");
+        PlayerModel.Instance.Save();
         DOTween.KillAll();
     }
 
     private void OnSecUpdate()
     {
-        new SecUpdateCmd().Run();
+        var groupsLoaded = CityModel.Instance.HasGroups();
+        if (groupsLoaded)
+            new SecUpdateCmd().Run();
     }
 
     //on Application Quit, save player data
@@ -28,13 +37,10 @@ public class Main : MonoBehaviour
     {
         if (!hasFocus)
         {
-            PlayerModel.Instance.Save();
+            PlayerModel.Instance.Save(); 
         }
     }
 
-    void OnApplicationQuit()
-    {
-        PlayerModel.Instance.Save();
-    }
+
 
 }

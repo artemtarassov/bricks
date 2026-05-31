@@ -27,7 +27,7 @@ public class CompleteAdRewardCmd
             var additionalEmitterSec = RemoteConfigModel.Instance.RemoteConfig.AdditionalEmitterSec;
             PlayerModel.Instance.UnlockAdditionalEmitter(curTimestamp + additionalEmitterSec);
             SlotModel.Instance.UnlockAdditionalEmitter();
-            ViewModel.Instance.OutOfSpaceFlag = false;
+            ViewModel.Instance.OutOfSpaceSeconds = 0;
         }
 
         if (rd.rewardName == RewardName.ADD_ATTEMPT)

@@ -13,6 +13,7 @@ public class FlyingBricks
     {
         public GameObject gameObject;
         public Renderer renderer;
+        public Vector3 initialLocalScale;
     }
 
     public FlyingBricks(GameObject flyingBrickPrefab, Transform parent)
@@ -29,9 +30,14 @@ public class FlyingBricks
         brickTransform.SetParent(this.parent);
         brickTransform.position = data.from;
         brickTransform.rotation = Quaternion.identity;
+        brickTransform.localScale = brick.initialLocalScale * 0.25f;
         brick.renderer.material.color = ColoredMaterials.Instance.GetColorByColorIndex(data.colorIndex);
         brick.gameObject.SetActive(true);
-        brickTransform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear).OnComplete(() =>
+
+        var targetLocalScale = GetLocalScaleForWorldScale(this.parent, data.targetBrick.lossyScale);
+
+        brickTransform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear);
+        brickTransform.DOScale(targetLocalScale, t).SetEase(Ease.Linear).OnComplete(() =>
         {
             ReleaseFlyingBrick(brick);
         });
@@ -71,10 +77,30 @@ public class FlyingBricks
         var brick = new FlyingBrickCacheItem
         {
             gameObject = go,
-            renderer = go.GetComponent<Renderer>()
+            renderer = go.GetComponent<Renderer>(),
+            initialLocalScale = go.transform.localScale
         };
         this.createdBricks.Add(brick);
         return brick;
+    }
+
+    private static Vector3 GetLocalScaleForWorldScale(Transform parentTransform, Vector3 worldScale)
+    {
+        if (parentTransform == null)
+        {
+            return worldScale;
+        }
+
+        var parentWorldScale = parentTransform.lossyScale;
+        return new Vector3(
+            SafeScaleDivision(worldScale.x, parentWorldScale.x),
+            SafeScaleDivision(worldScale.y, parentWorldScale.y),
+            SafeScaleDivision(worldScale.z, parentWorldScale.z));
+    }
+
+    private static float SafeScaleDivision(float value, float divisor)
+    {
+        return Mathf.Approximately(divisor, 0f) ? value : value / divisor;
     }
 
     private void ReleaseFlyingBrick(FlyingBrickCacheItem brick)

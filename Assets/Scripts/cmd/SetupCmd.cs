@@ -4,6 +4,7 @@ public class SetupCmd
 {
     public void Run(Transform root)
     {
+        Debug.Log("SetupCmd: initializing models and services");
         FilePrefs.DeleteAll(); //for testing only, remove in production
 
         PlayerModel.Instance = new PlayerModel();

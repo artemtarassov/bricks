@@ -1,20 +1,27 @@
 
+using DG.Tweening;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 public class SelectColumnCmd
 {
     private SlotElementData data;
+    private SlotElement element;
 
-    public SelectColumnCmd(SlotElementData data)
+    public SelectColumnCmd(SlotElement se)
     {
-        this.data = data;
+        this.element = se;
+        this.data = se.slotElementData;
     }
 
     public void Run()
     {
+        Debug.Log($"SelectColumnCmd: type={this.data.type}, brickData={this.data.brickData}");
         if (this.data.type == SlotElementType.Coins)
         {
-            
+            Debug.Log("SelectColumnCmd: Coins selected");
+            ViewModel.Instance.FlyCoin(this.element.coins.transform.position);
+            SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
         var element = CityModel.Instance.GetCurrentElement();
@@ -27,7 +34,10 @@ public class SelectColumnCmd
         if (this.data.type == SlotElementType.Bricks)
         {
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
-            Assert.IsTrue(hasEmitterSpace, "No space for new emitter");
+            if (!hasEmitterSpace)
+            {
+                return;
+            }
 
             SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
             return;
@@ -36,7 +46,7 @@ public class SelectColumnCmd
         {
             SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
             element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-            element.ShowBrickStates();
+            element.ShowCurrentState();
             return;
         }
     }

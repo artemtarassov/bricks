@@ -32,7 +32,7 @@ public class CompleteIapCmd
             {
                 PlayerModel.Instance.UnlockAdditionalEmitter();
                 SlotModel.Instance.UnlockAdditionalEmitter();
-                ViewModel.Instance.OutOfSpaceFlag = false;
+                ViewModel.Instance.OutOfSpaceSeconds = 0;
             }
         }
 

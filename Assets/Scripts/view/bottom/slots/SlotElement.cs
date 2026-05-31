@@ -4,10 +4,9 @@ using UnityEngine.UI;
 
 public class SlotElement : MonoBehaviour
 {
-    //[SerializeField] private UIBrick brick;
-    [SerializeField] private GameObject addMoreBricks;
-    [SerializeField] private GameObject coins;
-    [SerializeField] private GameObject hiddenBricks;
+    [SerializeField] public GameObject addMoreBricks;
+    [SerializeField] public GameObject coins;
+    [SerializeField] public GameObject hiddenBricks;
 
     [SerializeField] private TMP_Text count;
     [SerializeField] private Image colorImg;
@@ -68,6 +67,8 @@ public class SlotElement : MonoBehaviour
     {
         this.SetupAsEmpty();
         this.coins.SetActive(true);
+        this.count.text = "100";
+        this.count.gameObject.SetActive(true);
     }
 
     private void SetupWithBricks()

@@ -54,13 +54,20 @@ public class ViewModel
 
     private float UILockedTime;
 
-    public bool OutOfSpaceFlag = false;
+    public int OutOfSpaceSeconds = 0;
 
     public Action<Vector3> OnFlyCoin;
 
     public ViewModel()
     {
         UILockedTime = 0;
+    }
+
+
+
+    public void FlyCoin(Vector3 startPos)
+    {
+        OnFlyCoin?.Invoke(startPos);
     }
 
     public List<ViewData> GetViews()

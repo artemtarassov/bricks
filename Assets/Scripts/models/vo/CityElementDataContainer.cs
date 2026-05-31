@@ -10,17 +10,11 @@ public class CityElementDataContainer
 {
     public string dataKey;
     public List<BrickData> brickDataList;
-    public List<SlotElementDataList> slotElementDataList;
+    public List<SlotColumnData> columns;
 
     public int ElementCountColoredBricks(ColorIndex colorIndex)
     {
         return this.brickDataList.Sum(bd => bd.color == colorIndex ? bd.coloredAmount : 0);
-    }
-
-    public int ElementCountTransparentBricks()
-    {
-        return this.brickDataList.Sum(bd => bd.transparentAmount);
-
     }
 
     public int ElementCountColoredBricks()
@@ -43,39 +37,34 @@ public class CityElementDataContainer
         return this.brickDataList.Find(bd => bd.state == BrickState.Colored && bd.color == colorIndex && bd.amount > 0);
     }*/
 
-    public bool SlotsHaveBricks()
+    public bool AllSlotsEmpty()
     {
-        Assert.IsNotNull(this.slotElementDataList, "slotElementDataList should not be null");
-        Assert.IsTrue(this.slotElementDataList.Count > 0, "slotElementDataList should not be empty");
-        foreach (var slotElementDataList in this.slotElementDataList)
-        {
-            Assert.IsNotNull(slotElementDataList.list, "slotElementDataList.list should not be null");
-            Assert.IsTrue(slotElementDataList.list.Count > 0, "slotElementDataList.list should not be empty");
-            if (slotElementDataList.list.Exists(s => s.brickData != null && s.brickData.coloredAmount > 0))
-            {
-                return true;
-            }
-        }
-        return false;
+        Assert.IsNotNull(this.columns, "slotElementDataList should not be null");
+        Assert.IsTrue(this.columns.Count > 0, "slotElementDataList should not be empty");
+        return this.columns.All(c => c.IsEmpty());
     }
 
 
     public void EnableDifferentColors(int amountOfColors)
     {
         var transparentBricks = this.brickDataList.FindAll(bd => bd.AllTransparent);
-        for (var i = 0; i < amountOfColors && i < transparentBricks.Count; i++)
+        var last = Math.Min(amountOfColors, transparentBricks.Count);
+        for (var i = 0; i < last; i++)
         {
-            transparentBricks[i].SetAllColored();
+            transparentBricks[i].SetAll(BrickState.Colored);
+            var n = i + amountOfColors;
+            if (n < transparentBricks.Count)
+                transparentBricks[n].SetAll(BrickState.SemiTransparent);
         }
     }
 
-    public void Reset()
+    /*public void Reset()
     {
         foreach (var brickData in this.brickDataList)
         {
             brickData.SetAllTransparent();
         }
-        foreach (var slotData in this.slotElementDataList)
+        foreach (var slotData in this.columns)
         {
             foreach (var col in slotData.list)
             {
@@ -85,7 +74,7 @@ public class CityElementDataContainer
                 }
             }
         }
-    }
+    }*/
 
     public HashSet<ColorIndex> GetBrickColors()
     {
@@ -110,10 +99,10 @@ public class CityElementDataContainer
         {
             clone.brickDataList.Add(item.Clone());
         }
-        clone.slotElementDataList = new List<SlotElementDataList>();
-        foreach (var item in this.slotElementDataList)
+        clone.columns = new List<SlotColumnData>();
+        foreach (var item in this.columns)
         {
-            clone.slotElementDataList.Add(item.Clone());
+            clone.columns.Add(item.Clone());
         }
         return clone;
     }

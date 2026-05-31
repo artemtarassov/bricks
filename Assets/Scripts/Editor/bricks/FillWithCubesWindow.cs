@@ -14,8 +14,12 @@ public class FillWithCubesWindow : EditorWindow
 
     private void OnGUI()
     {
+
+
         List<GameObject> validSelectedObjects = GetValidSelectedObjects();
         int ignoredSelectionCount = Selection.gameObjects.Length - validSelectedObjects.Count;
+        GameObject activeSelectedObject = Selection.activeGameObject;
+        bool canToggleGeneratedBricks = activeSelectedObject != null && activeSelectedObject.GetComponent<CityElementGroup>() != null;
 
         EditorGUILayout.LabelField("Brick Settings", EditorStyles.boldLabel);
         settings.BrickSize = EditorGUILayout.FloatField("Brick Size", settings.BrickSize);
@@ -52,23 +56,82 @@ public class FillWithCubesWindow : EditorWindow
         {
             if (GUILayout.Button("Add Bricks"))
             {
-                Debug.Log("Generating bricks for " + validSelectedObjects.Count + " selected GameObjects...");
-                ApplyToSelection(validSelectedObjects, target => FillWithCubesGenerator.AddBricks(target, settings));
+                ApplyToSelection(validSelectedObjects, target => new FillWithBricks2().Run(target, settings));
             }
 
-            if (GUILayout.Button("Cleanup Touching Bricks"))
+            if (GUILayout.Button("Preview Colored Bricks"))
             {
-                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupTouchingBricks);
-            }
-
-            if (GUILayout.Button("clean up non visible bricks"))
-            {
-                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupNonVisibleBricks);
+                OnPreviewColoredBricksClicked(validSelectedObjects);
             }
 
             if (GUILayout.Button("Clear Bricks"))
             {
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.ClearBricks);
+            }
+
+            /*if (GUILayout.Button("Cleanup Touching Bricks"))
+            {
+                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupTouchingBricks);
+            }
+
+            if (GUILayout.Button("clean up non visible bricks via camera"))
+            {
+                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupNonVisibleBricksViaCamera);
+            }
+
+            if (GUILayout.Button("clean up non visible bricks via scene view"))
+            {
+                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupNonVisibleBricksViaSceneView);
+            }
+
+            if (GUILayout.Button("Clear Bricks"))
+            {
+                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.ClearBricks);
+            }
+
+            if (GUILayout.Button("Cleanup Selected Bricks Against Scene"))
+            {
+                ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupTouchingBricksAgainstScene);
+            }*/
+
+        }
+
+        EditorGUILayout.Space();
+
+        using (new EditorGUI.DisabledScope(!canToggleGeneratedBricks))
+        {
+            if (GUILayout.Button("Toggle Generated Bricks"))
+            {
+                FillWithCubesGenerator.ToggleGeneratedBricksActive(activeSelectedObject);
+            }
+        }
+    }
+
+    private static void OnPreviewColoredBricksClicked(List<GameObject> validSelectedObjects)
+    {
+        foreach (var obj in validSelectedObjects)
+        {
+            var cityElement = obj.GetComponent<CityElement>();
+            var containerChild = cityElement.GetChildByName("__GeneratedBricks");
+            containerChild.gameObject.SetActive(true);
+            var container = new BrickLayersContainer(containerChild);
+            var n = container.sortedBricks.FindAll(b => b.gameObject.activeSelf).Count;
+            Debug.Log("Currently active bricks: " + n + " out of " + container.sortedBricks.Count);
+
+            if (n == container.sortedBricks.Count)
+            {
+                for (var i = 0; i < container.sortedBricks.Count; i++)
+                {
+                    var brick = container.sortedBricks[i];
+                    brick.gameObject.SetActive(false);
+                }
+                n = 0;
+            }
+
+            for (var i = n; i < n + 10 && i < container.sortedBricks.Count; i++)
+            {
+                var brick = container.sortedBricks[i];
+                brick.gameObject.SetActive(true);
             }
         }
     }

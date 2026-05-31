@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 
 [Serializable]
@@ -13,14 +14,14 @@ public class BrickData
     public int fullAmount => this.states.Count(s => s == BrickState.Full);
     public int max => this.states.Count;
 
-    public bool AllTransparent => this.states.All(s => s == BrickState.Transparent);
+    public bool AllTransparent => this.states.All(s => s == BrickState.Transparent || s == BrickState.SemiTransparent);
     public bool AllFull => this.states.All(s => s == BrickState.Full);
 
-    public void SetAllColored()
+    public void SetAll(BrickState bs)
     {
         for (int i = 0; i < this.states.Count; i++)
         {
-            this.states[i] = BrickState.Colored;
+            this.states[i] = bs;
         }
     }
 
@@ -32,14 +33,6 @@ public class BrickData
             {
                 states[i] = BrickState.Full;
             }
-        }
-    }
-
-    public void SetAllTransparent()
-    {
-        for (int i = 0; i < this.states.Count; i++)
-        {
-            this.states[i] = BrickState.Transparent;
         }
     }
 

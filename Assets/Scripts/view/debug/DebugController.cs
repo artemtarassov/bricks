@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class DebugController : MonoBehaviour
 {
     [SerializeField] Button nextBtn;
+    [SerializeField] Button autoSolve;
 
     void Start()
     {
@@ -12,7 +13,9 @@ public class DebugController : MonoBehaviour
 
     public void OnNextBtnClicked()
     {
-        new ShowViewCmd().Run(ViewName.OutOfSpaceView);
-        //new UnlockCityElementCmd().Run();
+        new FinishCurrentCityElementCmd().Run();
+        //PlayerModel.Instance.playerData.currentElement.brickDataList.ForEach((bd) => bd.SetAllFull());
+        //PlayerModel.Instance.playerData.currentElement.columns.ForEach((bd) => bd.SetAllFull());
+        //new UnlockNextCmd().Run();
     }
 }

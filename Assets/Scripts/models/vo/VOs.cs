@@ -8,11 +8,11 @@ using System.Linq;
 [Serializable]
 public enum SlotElementType
 {
-    Empty,
-    Bricks,
-    HiddenBricks,
-    AddMoreBricks,
-    Coins
+    Undefined = 0,
+    Bricks = 1,
+    HiddenBricks = 2,
+    AddMoreBricks = 3,
+    Coins = 4
 }
 
 [Serializable]
@@ -39,7 +39,7 @@ public class SlotElementData
 
     public SlotElementData()
     {
-        this.type = SlotElementType.Empty;
+        this.type = SlotElementType.Undefined;
         this.brickData = null;
     }
     public SlotElementData(BrickData brickData)
@@ -63,14 +63,14 @@ public class SlotElementData
 }
 
 [Serializable]
-public class SlotElementDataList
+public class SlotColumnData
 {
     public int columnIndex;
     public List<SlotElementData> list = new List<SlotElementData>();
 
-    public SlotElementDataList Clone()
+    public SlotColumnData Clone()
     {
-        var clone = new SlotElementDataList();
+        var clone = new SlotColumnData();
         clone.columnIndex = this.columnIndex;
         foreach (var item in this.list)
         {
@@ -81,6 +81,29 @@ public class SlotElementDataList
     public void ResetEmittingStates()
     {
         this.list.ForEach((e) => e.ResetEmittingStates());
+    }
+
+
+
+    public bool IsEmpty()
+    {
+        foreach (var e in this.list)
+        {
+            switch (e.type)
+            {
+                case SlotElementType.Bricks:
+                case SlotElementType.HiddenBricks:
+                    if (e.brickData.coloredAmount > 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case SlotElementType.AddMoreBricks:
+                case SlotElementType.Coins:
+                    return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -103,6 +126,7 @@ public enum BrickState
 {
     Undefined = 0,
     Transparent = 1,
+    SemiTransparent = 2,
     Emitting = 3,
     Full = 4,
     Colored = 5,
@@ -137,14 +161,6 @@ public class GroupDataList
         this.cityElementDataList = new List<CityElementDataContainer>();
     }
 
-    public void Reset()
-    {
-        foreach (var cityElementDataContainer in this.cityElementDataList)
-        {
-            cityElementDataContainer.Reset();
-        }
-    }
-
     public GroupDataList Clone()
     {
         var clone = new GroupDataList(this.groupName);
@@ -153,17 +169,5 @@ public class GroupDataList
             clone.cityElementDataList.Add(item.Clone());
         }
         return clone;
-    }
-
-    public bool HasBricks()
-    {
-        foreach (var cityElementDataContainer in this.cityElementDataList)
-        {
-            if (cityElementDataContainer.SlotsHaveBricks())
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }

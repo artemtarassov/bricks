@@ -12,6 +12,11 @@ public class GroupWindow : EditorWindow
 
     private void OnGUI()
     {
+
+        if (GUILayout.Button("group bricks into layer"))
+        {
+            OnGroupIntoLayersClicked();
+        }
         if (GUILayout.Button("group"))
         {
             OnGroupClicked();
@@ -31,6 +36,58 @@ public class GroupWindow : EditorWindow
         {
             OnEnableNextGroup();
         }
+
+        if (GUILayout.Button("Delete selected bricks"))
+        {
+            //delete ony selected bricks.
+            var selection = Selection.gameObjects;
+            foreach (var obj in selection)
+            {
+                var tag = obj.tag;
+                if (tag == "Brick")
+                {
+                    GameObject.DestroyImmediate(obj);
+                }
+            }
+        }
+    }
+
+
+    private void OnGroupIntoLayersClicked()
+    {
+        var selectedBricks = Selection.gameObjects;
+        var bricks = new List<GameObject>();
+        foreach (var obj in selectedBricks)
+        {
+            if (obj.tag == "Brick")
+            {
+                bricks.Add(obj);
+            }
+        }
+        if (bricks.Count == 0)
+        {
+            throw new System.Exception("No bricks found in selection");
+        }
+        //ensure all bricks have the same parent
+        var firstParent = bricks[0].transform.parent;
+        foreach (var brick in bricks)
+        {
+            if (brick.transform.parent != firstParent)
+            {
+                throw new System.Exception("All bricks should have the same parent");
+            }
+        }
+
+        var layer = new GameObject();
+        layer.name = "Layer_" + firstParent.childCount;
+        layer.transform.SetParent(firstParent);
+        layer.transform.localPosition = Vector3.zero;
+        foreach (var brick in bricks)
+        {
+            brick.transform.SetParent(layer.transform);
+        }
+        layer.gameObject.SetActive(false);
+        layer.gameObject.AddComponent<BricksLayer>();
     }
 
     private List<GameObject> GetGroups(GameObject house)

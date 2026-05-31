@@ -1,3 +1,5 @@
+using UnityEngine.Assertions;
+
 public class BtnCmd
 {
 
@@ -20,9 +22,9 @@ public class BtnCmd
     {
         if (action == BtnAction.Restart)
         {
-            playerModel.playerData.currentGroup.Reset();
-            cityModel.LockAllElements();
-            new UnlockCityElementCmd().Run();
+            playerModel.playerData.currentElement = null;
+            cityModel.DeactivateAllElements();
+            new UnlockNextCmd().Run();
             return;
         }
         if (action == BtnAction.RefillAttempts)
@@ -52,14 +54,22 @@ public class BtnCmd
                 Toast("No attempts left");
                 return;
             }
+            var pd = playerModel.playerData;
+            var currentGroup = pd.currentGroupName;
+            var currentElement = pd.currentElement;
+            currentElement = BalancingModel.Instance.GetDataCopy(currentGroup, currentElement.dataKey);
+            pd.currentElement = currentElement;
+            pd.isDirty = true;
+       
             var cityElement = cityModel.GetCurrentElement();
-            var dataContainer = cityElement.dataContainer;
-            dataContainer.Reset();
-            dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
+            Assert.AreEqual(cityElement.dataKey, currentElement.dataKey, "BtnCmd: ContinueNextAttempt: current city element data key should match player data current element data key");
+            
+            cityElement.Setup(currentElement);
+            currentElement.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
 
-            cityElement.ShowBrickStates();
-            slotModel.Fill(dataContainer.slotElementDataList);
-            ViewModel.Instance.OutOfSpaceFlag = false;
+            cityElement.ShowCurrentState();
+            slotModel.Fill(currentElement.columns);
+            ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
 
