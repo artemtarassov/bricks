@@ -22,7 +22,7 @@ public class SoundCmd
             DOVirtual.DelayedCall(delay, () =>
             {
                 SoundModel.Instance.Play(sndName);
-            });
+            }, false);
         }
         else
         {

@@ -66,7 +66,7 @@ public class EmitBrickCmd
         elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Colored), BrickState.Emitting);
 
         SlotModel.Instance.UpdateEmitters(emitter);
-        DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete);
+        DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete, false);
 
         if (emitterBrickData.coloredAmount == 0)
         {
@@ -76,17 +76,9 @@ public class EmitBrickCmd
 
     private void OnFlyComplete()
     {
+        //Debug.Log("EmitBricksCmd OnFlyComplete Fly complete for color " + this.colorIndex + " time " + Time.time);
         elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Emitting), BrickState.Full);
         cityElement.ShowCurrentState();
-
-        /*
-        var cityElementCompleted = elementDataContainer.ElementCompleted();
-        if (cityElementCompleted)
-        {
-            new UnlockCityElementCmd().Run();
-            return;
-        }*/
-
 
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
@@ -94,15 +86,5 @@ public class EmitBrickCmd
             cityElement.ShowCurrentState();
         }
 
-
-        /*else
-        {
-            var coloredBricks = cityElement.CountColoredBricks();
-            var transparentBricks = cityElement.CountTransparentBricks();
-            if (coloredBricks < 20 && transparentBricks > 0)
-            {
-                new SetNextBricksColorsCmd(cityElement).Run();
-            }
-        }*/
     }
 }

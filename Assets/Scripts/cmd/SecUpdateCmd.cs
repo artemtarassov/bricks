@@ -6,14 +6,17 @@ using UnityEngine.Assertions;
 public class SecUpdateCmd
 {
     private CityElement currentElement;
+    private int currentTimestamp;
     public SecUpdateCmd()
     {
         this.currentElement = CityModel.Instance.GetCurrentElement();
+        this.currentTimestamp = TimeUtils.GetUnixTimestamp();
         Assert.IsNotNull(this.currentElement, "current element in cityModel not set");
     }
     public void Run()
     {
         PlayerModel.Instance.Save();
+        IAPModel.Instance.Save();
         if (ViewModel.Instance.HasAnyView())
         {
             return;
@@ -21,6 +24,36 @@ public class SecUpdateCmd
         UpdateOutOfSpace();
         UpdateAdditionalEmitter();
         UpdateNextCityElement();
+        UpdateDailyReward();
+    }
+
+    private void UpdateDailyReward()
+    {
+        var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket);
+        var hasGoldenTicketTemp = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicketTemp);
+        if (!hasGoldenTicket && !hasGoldenTicketTemp)
+        {
+            return;
+        }
+        var timestamp = PlayerModel.Instance.playerData.lastDailyRewardTimestamp;
+        var curTime = this.currentTimestamp;
+        var timeSinceLastReward = curTime - timestamp;
+        var secInDay = 12 * 60 * 60;
+        if (timeSinceLastReward >= secInDay)
+        {
+            var coins = 0;
+            if (hasGoldenTicket)
+            {
+                coins = RemoteConfigModel.Instance.RemoteConfig.DailyRewardCoinsGoldenTicket;
+            }
+            else if (hasGoldenTicketTemp)
+            {
+
+                coins = RemoteConfigModel.Instance.RemoteConfig.DailyRewardCoinsGoldenTicketTemp;
+            }
+            PlayerModel.Instance.AddDailyRewardCoins(coins);
+            new ToastCmd("Daily reward coins: +" + coins).Run();
+        }
     }
 
 
@@ -32,7 +65,7 @@ public class SecUpdateCmd
         //Debug.Log($"SecUpdateCmd: UpdateNextCityElement: element={currentElement.name}, emittingBricks={da.ElementCountEmittingBricks()}, coloredBricks={da.ElementCountColoredBricks()}, allSlotsEmpty={da.AllSlotsEmpty()}");
         if (da.ElementCompleted() && da.AllSlotsEmpty())
         {
-            DOVirtual.DelayedCall(1, new UnlockNextCmd().Run);
+            DOVirtual.DelayedCall(1, new UnlockNextCmd().Run, false);
         }
     }
 
@@ -42,12 +75,14 @@ public class SecUpdateCmd
         var cntEmitterSpace = SlotModel.Instance.CountEmptyEmitters();
         if (cntEmitterSpace > 0)
         {
+            ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
 
         var hasEmittingBricks = currentElement.dataContainer.ElementCountEmittingBricks() > 0;
         if (hasEmittingBricks)
         {
+            ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
         /*var colorsInEmitters = SlotModel.Instance.Emitters.FindAll(e => e.HasColoredBricks).Select(e => e.brickData.color).ToHashSet();
@@ -63,9 +98,10 @@ public class SecUpdateCmd
         }*/
 
         ViewModel.Instance.OutOfSpaceSeconds++;
-        if (ViewModel.Instance.OutOfSpaceSeconds == 2)
+        if (ViewModel.Instance.OutOfSpaceSeconds == 3)
         {
             new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+            ViewModel.Instance.OutOfSpaceSeconds = 0;
         }
     }
 
@@ -78,7 +114,7 @@ public class SecUpdateCmd
             return;
         }
 
-        var curTimestamp = TimeUtils.GetUnixTimestamp();
+        var curTimestamp = this.currentTimestamp;
         var timeoutReached = playerData.additionalEmitterUnlockTimeoutTimestamp <= curTimestamp;
         if (!timeoutReached)
         {

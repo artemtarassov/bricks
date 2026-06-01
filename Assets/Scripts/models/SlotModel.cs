@@ -83,6 +83,15 @@ public class SlotModel
         this.OnColumnsChanged?.Invoke();
     }
 
+    public void RemoveAds()
+    {
+        var slotsToRemove = this.Columns.SelectMany(c => c.list).Where(e => e.type == SlotElementType.Ad).ToList();
+        foreach (var slot in slotsToRemove)
+        {
+            Replace(slot, SlotElementType.Undefined);
+        }
+    }
+
     public bool HasEmitterSpace()
     {
         return this.Emitters.FindAll((e) => e.IsEmpty).Count > 0;
@@ -99,10 +108,33 @@ public class SlotModel
         return e != null ? e.index : -1;
     }
 
+    public bool IsBrickInEmitter(BrickData brickData)
+    {
+        if (brickData == null)
+        {
+            return false;
+        }
+        return this.Emitters.Any(e => e.brickData == brickData);
+    }
+
+    public SlotElementData GetNextSlotElementDataInColumn(int columnIndex, int rowIndex = 0)
+    {
+        var slotColumn = Columns.Find(c => c.columnIndex == columnIndex);
+        var list = slotColumn.list.FindAll(e => e.type != SlotElementType.Undefined && !IsBrickInEmitter(e.brickData));
+        if (list.Count <= rowIndex)
+        {
+            return null;
+        }
+        var elementData = list[rowIndex];
+        return elementData;
+    }
+
     private int AddToUnlockedEmitter(BrickData brickData)
     {
         Assert.IsTrue(brickData.coloredAmount > 0);
         Assert.IsTrue(brickData.color != ColorIndex.Undefined);
+        var inEmitter = this.Emitters.Exists(e => e.brickData == brickData);
+        Assert.IsFalse(inEmitter, "Brick data is already in emitter");
         var emptyIndex = GetEmptyEmitterIndex();
         Assert.IsTrue(emptyIndex >= 0, "No empty emitter found");
         this.Emitters[emptyIndex].brickData = brickData;

@@ -8,6 +8,8 @@ public class SlotElement : MonoBehaviour
     [SerializeField] public GameObject coins;
     [SerializeField] public GameObject hiddenBricks;
 
+    [SerializeField] public GameObject ad;
+
     [SerializeField] private TMP_Text count;
     [SerializeField] private Image colorImg;
 
@@ -91,5 +93,6 @@ public class SlotElement : MonoBehaviour
         this.coins.SetActive(false);
         this.hiddenBricks.SetActive(false);
         this.count.gameObject.SetActive(false);
+        this.ad.SetActive(false);
     }
 }

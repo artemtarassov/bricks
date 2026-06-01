@@ -18,6 +18,8 @@ public class SlotColumn : MonoBehaviour
     [SerializeField]
     private GameObject topSlot;
 
+    private SlotColumnData columnData;
+
     void Awake()
     {
         this.slotElements = new List<SlotElement>();
@@ -31,7 +33,7 @@ public class SlotColumn : MonoBehaviour
     {
         var activeSlotElement = this.slotElements.Find(e => e.gameObject.activeSelf);
         Assert.IsNotNull(activeSlotElement, "SlotColumn: OnClick: activeSlotElement should not be null. total slots " + this.slotElements.Count);
-        new SelectColumnCmd(activeSlotElement).Run();
+        new SelectColumnCmd(this.columnData.columnIndex).Run();
     }
 
     private SlotElement CreateSlotElementByIndex(int index)
@@ -47,6 +49,7 @@ public class SlotColumn : MonoBehaviour
 
     public void Setup(SlotColumnData sc)
     {
+        this.columnData = sc;
         var nextIndex = 0;
         //Debug.Log($"SlotColumn: Setup: columnIndex={sc.columnIndex}, elements={sc.list.Count}");
         var list = sc.list.FindAll((e) => e.type != SlotElementType.Undefined);

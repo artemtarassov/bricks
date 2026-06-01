@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -21,16 +22,38 @@ public class PlayerModel
         var data = JsonUtility.ToJson(this.playerData, true);
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
-        Debug.Log("PlayerModel saved. bytes " + data.Length);
-        Debug.Log("PlayerModel json: " + data);
         FilePrefs.Save();
+    }
+
+
+    public void EnableSetting(SettingsKey key, bool enable)
+    {
+        var isEnabled = IsSettingEnabled(key);
+        if (enable && !isEnabled)
+        {
+            playerData.enabledSettings.Add(key);
+            playerData.isDirty = true;
+            OnPlayerDataChanged?.Invoke();
+        }
+        else if (!enable && isEnabled)
+        {
+            playerData.enabledSettings.Remove(key);
+            playerData.isDirty = true;
+            OnPlayerDataChanged?.Invoke();
+        }
+    }
+
+    public bool IsSettingEnabled(SettingsKey key)
+    {
+        return playerData.enabledSettings.Contains(key);
     }
 
     private void CreateNewPlayerData()
     {
-        Debug.Log("PlayerModel CreateNewPlayerData");
+        var allSettingsKeys = Enum.GetValues(typeof(SettingsKey)).Cast<SettingsKey>().ToList().FindAll(s => s != SettingsKey.Undefined);
         this.playerData = new PlayerData()
         {
+            enabledSettings = allSettingsKeys,
             coins = 10000,
             unlockedBuildings = 0,
             attempts = 1,
@@ -71,6 +94,15 @@ public class PlayerModel
     {
         Debug.Log($"PlayerModel: adding {amount} coins");
         this.playerData.coins += amount;
+        this.playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+    }
+
+    public void AddDailyRewardCoins(int amount)
+    {
+        Debug.Log($"PlayerModel: adding {amount} daily reward coins");
+        this.playerData.coins += amount;
+        this.playerData.lastDailyRewardTimestamp = TimeUtils.GetUnixTimestamp();
         this.playerData.isDirty = true;
         OnPlayerDataChanged?.Invoke();
     }

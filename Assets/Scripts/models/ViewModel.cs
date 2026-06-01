@@ -12,6 +12,8 @@ public enum ViewName
     AddSpaceView,
     LoadingView,
     OutOfSpaceView,
+    SettingsView,
+    GoldenTicketView
 }
 
 public class ViewData
@@ -57,6 +59,8 @@ public class ViewModel
     public int OutOfSpaceSeconds = 0;
 
     public Action<Vector3> OnFlyCoin;
+
+    public Action OnAndroidReviewRequest;
 
     public ViewModel()
     {

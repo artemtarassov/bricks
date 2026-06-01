@@ -3,6 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 
 
+[Serializable]
+public enum SettingsKey
+{
+    Undefined = 0,
+    Sounds = 1,
+    Music = 2,
+    Vibrations = 3
+}
+
+
+[Serializable]
+public enum IAPProductName
+{
+    Undefined = 0,
+    GoldenTicket = 1,
+    GoldenTicketTemp = 2,
+    AdditionalSpace = 3
+}
+
 
 
 [Serializable]
@@ -12,7 +31,8 @@ public enum SlotElementType
     Bricks = 1,
     HiddenBricks = 2,
     AddMoreBricks = 3,
-    Coins = 4
+    Coins = 4,
+    Ad = 5
 }
 
 [Serializable]

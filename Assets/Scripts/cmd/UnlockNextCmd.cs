@@ -82,6 +82,7 @@ public class UnlockNextCmd
         Assert.IsTrue(cityElementData.columns.Count > 1, "UnlockCityElementCmd UnlockElement: city element should have at least 2 columns to be unlocked. " + cityElementData.dataKey);
 
         AddCoinsIfAbsent(cityElementData);
+        AddBicksMultiplier(cityElementData);
         if (cityElementData.ElementCountColoredBricks() == 0)
             cityElementData.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
         var cityElement = cityModel.GetElementByDataKey(cityElementData.dataKey);
@@ -99,6 +100,26 @@ public class UnlockNextCmd
 
     }
 
+    private void AddBicksMultiplier(CityElementDataContainer dataContainer)
+    {
+        var hasMult = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.AddMoreBricks));
+        if (hasMult)
+        {
+            return;
+        }
+        var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.type == SlotElementType.Bricks)).ToList();
+        var randColumn = RandHelper.GetRandomElement(columnsWithBricks);
+        var prevLength = randColumn.list.Count;
+        if (prevLength <= 2)
+        {
+            return;
+        }
+        //var randIndex = Random.Range(1, randColumn.list.Count - 2);
+        var randIndex = 0;
+        randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.AddMoreBricks));
+        Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddBicksMultiplier: failed to add additional bricks multiplier to column");
+    }
+
     private void AddCoinsIfAbsent(CityElementDataContainer dataContainer)
     {
         var hasCoins = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.Coins));
@@ -109,6 +130,26 @@ public class UnlockNextCmd
         var randColumn = RandHelper.GetRandomElement(dataContainer.columns);
         //Debug.Log("UnlockCityElementCmd AddCoins for element " + dataContainer.dataKey + ", random column: " + randColumn.columnIndex);
         randColumn.list.Add(new SlotElementData { type = SlotElementType.Coins });
+    }
+
+    private void AddAd(CityElementDataContainer dataContainer)
+    {
+        var hasAd = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.Ad));
+        if (hasAd)
+        {
+            return;
+        }
+        var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.type == SlotElementType.Bricks)).ToList();
+        var randColumn = RandHelper.GetRandomElement(columnsWithBricks);
+        var prevLength = randColumn.list.Count;
+        if (prevLength <= 2)
+        {
+            return;
+        }
+        //var randIndex = Random.Range(1, randColumn.list.Count - 2);
+        var randIndex = 0;
+        randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Ad));
+        Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddAd: failed to add ad to column");
     }
 
     private void MoveCam(CityElement cityElement)

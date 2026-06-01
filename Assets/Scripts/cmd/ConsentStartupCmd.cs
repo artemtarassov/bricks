@@ -3,10 +3,10 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 #if UNITY_IOS
-using Unity.Advertisement.IosSupport; 
+using Unity.Advertisement.IosSupport;
 #endif
 
-public class ConsentStartupCmd 
+public class ConsentStartupCmd
 {
     public void Run(Action callback)
     {
@@ -124,7 +124,7 @@ class ConsentRequest
         {
             var c = this.callback;
             this.callback = null;
-            DOVirtual.DelayedCall(0.1f, c.Invoke);
+            DOVirtual.DelayedCall(0.1f, c.Invoke,false);
         }
     }
 

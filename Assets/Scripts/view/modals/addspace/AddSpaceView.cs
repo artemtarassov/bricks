@@ -4,7 +4,7 @@ public class AddSpaceView : DefaultView
 {
 
     [SerializeField] private BtnAddSpaceAd btnAddSpaceAd;
-    [SerializeField] private BtnAddSpaceIAP btnAddSpaceIAP;
+    [SerializeField] private BtnIAP btnAddSpaceIAP;
 
     void Start()
     {

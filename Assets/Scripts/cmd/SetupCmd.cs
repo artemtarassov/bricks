@@ -13,6 +13,9 @@ public class SetupCmd
         RemoteConfigModel.Instance = new RemoteConfigModel();
 
         IAPModel.Instance = new IAPModel();
+        IAPModel.Instance.Load();
+
+
         AdModel.Instance = new AdModel();
         AdModel.Instance.Load();
 

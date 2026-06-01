@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class PlayerData
 {
+    public int lastDailyRewardTimestamp = 0;
     public int installTimestamp = 0;
     public int unlockedBuildings = 0;
     public int coins = 0;
@@ -12,6 +13,8 @@ public class PlayerData
 
     public CityElementDataContainer currentElement = null;
     public string currentGroupName = null;
+
+    public List<SettingsKey> enabledSettings;
 
     [System.NonSerialized]
     public bool isDirty;

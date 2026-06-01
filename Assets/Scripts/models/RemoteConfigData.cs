@@ -11,7 +11,9 @@ public enum RemoteConfigProperty
     MaxAttempts = 1,
     RefillCoins = 2,
     Reward1Coins = 3,
-    AdditionalEmitterSec = 4
+    AdditionalEmitterSec = 4,
+    DailyRewardCoinsGoldenTicket = 5,
+    DailyRewardCoinsGoldenTicketTemp = 6,
 }
 
 [Serializable]
@@ -58,6 +60,9 @@ public class RemoteConfigData
     //reward for completing one cityElement.
     public int Reward1Coins => GetValue(RemoteConfigProperty.Reward1Coins, 50);
     public int AdditionalEmitterSec => GetValue(RemoteConfigProperty.AdditionalEmitterSec, 1 * 60);
+
+    public int DailyRewardCoinsGoldenTicket => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicket, 2000);
+    public int DailyRewardCoinsGoldenTicketTemp => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicketTemp, 1000);
 
     public static RemoteConfigData Load()
     {

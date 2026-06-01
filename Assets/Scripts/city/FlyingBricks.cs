@@ -36,7 +36,11 @@ public class FlyingBricks
 
         var targetLocalScale = GetLocalScaleForWorldScale(this.parent, data.targetBrick.lossyScale);
 
-        brickTransform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear);
+        
+        brickTransform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            Debug.Log("Brick reached target at time " + Time.time);
+        });
         brickTransform.DOScale(targetLocalScale, t).SetEase(Ease.Linear).OnComplete(() =>
         {
             ReleaseFlyingBrick(brick);

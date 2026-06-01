@@ -86,7 +86,8 @@ public class EmitterBrick : MonoBehaviour
             this.colorImg.transform.DOKill();
             if (animate)
             {
-                this.colorImg.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc);
+                this.isAnimating = true;
+                this.colorImg.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc).OnComplete(() => this.isAnimating = false);
             }
             else
             {
@@ -100,11 +101,7 @@ public class EmitterBrick : MonoBehaviour
         this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(eb.color);
         if (animate)
         {
-            if (this.isAnimating)
-            {
-                return;
-            }
-            this.colorImg.transform.localScale = Vector3.zero;
+            //this.colorImg.transform.localScale = Vector3.zero;
             this.isAnimating = true;
             this.colorImg.transform.DOKill();
             this.colorImg.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack).OnComplete(() => this.isAnimating = false);
@@ -115,6 +112,7 @@ public class EmitterBrick : MonoBehaviour
             {
                 //this.colorImg.transform.localScale = Vector3.one;
             }
+            this.colorImg.transform.localScale = Vector3.one;
 
         }
     }

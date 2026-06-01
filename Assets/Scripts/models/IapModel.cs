@@ -10,6 +10,25 @@ public class PriceData
     public float price;
 }
 
+[Serializable]
+public class CompletedPurchase
+{
+    public string productId;
+    public int timestamp;
+}
+
+
+[Serializable]
+public class CompletedPurchaseContainer
+{
+    public List<CompletedPurchase> purchases = new List<CompletedPurchase>();
+
+    [System.NonSerialized]
+    public bool dirty = false;
+}
+
+
+
 public class IAPModel
 {
     public static IAPModel Instance;
@@ -17,6 +36,7 @@ public class IAPModel
     public readonly List<string> productIds = new List<string>();
     private Dictionary<string, PriceData> prices = new Dictionary<string, PriceData>();
 
+    public const string GoldenTicketTemp = "com.badmonkee.stones.goldentickettemp";
     public const string GoldenTicket = "com.badmonkee.stones.goldenticket";
     public const string AdditionalSpace = "com.badmonkee.stones.morespace";
 
@@ -36,6 +56,9 @@ public class IAPModel
 
     public Action<string> OnPricesSet;
 
+
+    private CompletedPurchaseContainer completedPurchaseContainer;
+
     public IAPModel()
     {
         productIds.Add(GoldenTicket);
@@ -45,6 +68,71 @@ public class IAPModel
         productIds.Add(AdditionalSpace);
         var pricesJson = FilePrefs.GetString("IAPModel.prices", "{}");
         prices = JsonUtility.FromJson<Dictionary<string, PriceData>>(pricesJson);
+    }
+
+    public static string GetProductIdByIAPProductName(IAPProductName productName)
+    {
+        switch (productName)
+        {
+            case IAPProductName.GoldenTicket:
+                return GoldenTicket;
+            case IAPProductName.GoldenTicketTemp:
+                return GoldenTicketTemp;
+            case IAPProductName.AdditionalSpace:
+                return AdditionalSpace;
+            default:
+                return null;
+        }
+    }
+
+    public bool HasGoldenTicket()
+    {
+        return DidPurchaseComplete(GoldenTicket) || DidPurchaseComplete(GoldenTicketTemp);
+    }
+
+    public void Load()
+    {
+        if (FilePrefs.HasKey("IAPModel.completedPurchases"))
+        {
+            try
+            {
+                completedPurchaseContainer = JsonUtility.FromJson<CompletedPurchaseContainer>(FilePrefs.GetString("IAPModel.completedPurchases"));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("IAPModel Load: " + e.Message);
+                completedPurchaseContainer = new CompletedPurchaseContainer();
+            }
+        }
+        else
+        {
+            completedPurchaseContainer = new CompletedPurchaseContainer();
+        }
+    }
+
+    public void Save()
+    {
+        if (this.completedPurchaseContainer.dirty == false)
+        {
+            return;
+        }
+        FilePrefs.SetString("IAPModel.completedPurchases", JsonUtility.ToJson(completedPurchaseContainer));
+        this.completedPurchaseContainer.dirty = false;
+    }
+
+    public bool DidPurchaseComplete(string productId)
+    {
+        return completedPurchaseContainer.purchases.Exists(p => p.productId == productId);
+    }
+
+    public bool DidPurchaseComplete(IAPProductName productName)
+    {
+        var productId = GetProductIdByIAPProductName(productName);
+        if (string.IsNullOrEmpty(productId))
+        {
+            return false;
+        }
+        return DidPurchaseComplete(productId);
     }
 
     public void RequestRestore()
@@ -63,6 +151,12 @@ public class IAPModel
     {
         //Debug.Log("IAPModel.SetPurchaseCompleted: " + productUd);
         OnPurchaseSuccess?.Invoke(productUd);
+        this.completedPurchaseContainer.purchases.Add(new CompletedPurchase()
+        {
+            productId = productUd,
+            timestamp = TimeUtils.GetUnixTimestamp()
+        });
+        this.completedPurchaseContainer.dirty = true;
     }
 
     public void SetPurchaseFailed(string productUd)

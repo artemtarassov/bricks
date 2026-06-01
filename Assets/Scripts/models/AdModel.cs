@@ -17,6 +17,7 @@ public enum RewardName
     UNDEFINED = 0,
     SPACE1 = 1,
     ADD_ATTEMPT = 2,
+    INTERSTITIAL = 3
 }
 
 [Serializable]

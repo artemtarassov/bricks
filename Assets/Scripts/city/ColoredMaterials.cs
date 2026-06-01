@@ -71,13 +71,21 @@ public class ColoredMaterials : MonoBehaviour
 
             new Color32( 90, 220, 220, 255)  // #5ADCDC Bright Teal
         };
-        GetMaterialByColorIndex(ColorIndex.C0).color = colors[0];
+        /*GetMaterialByColorIndex(ColorIndex.C0).color = colors[0];
         GetMaterialByColorIndex(ColorIndex.C1).color = colors[1];
         GetMaterialByColorIndex(ColorIndex.C2).color = colors[2];
         GetMaterialByColorIndex(ColorIndex.C3).color = colors[3];
         GetMaterialByColorIndex(ColorIndex.C4).color = colors[4];
         GetMaterialByColorIndex(ColorIndex.C5).color = colors[5];
-        GetMaterialByColorIndex(ColorIndex.C6).color = colors[6];
+        GetMaterialByColorIndex(ColorIndex.C6).color = colors[6];*/
+
+        GetMaterialByColorIndex(ColorIndex.C0).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C1).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C2).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C3).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C4).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C5).color = Color.white;
+        GetMaterialByColorIndex(ColorIndex.C6).color = Color.white;
     }
 
 }
