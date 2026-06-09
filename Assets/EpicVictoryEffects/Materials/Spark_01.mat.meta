@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 777e2dff30b15d6418b8b0f3eb808889
+timeCreated: 1483246181
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Materials/Spark_01.mat
+  uploadId: 180046

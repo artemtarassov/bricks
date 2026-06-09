@@ -16,14 +16,14 @@ public class AddSpaceView : DefaultView
     private void OnAddSpaceIAPClicked()
     {
         Debug.Log("AddSpaceView: OnAddSpaceIAPClicked");
-        new HideViewCmd().Run(ViewName.AddSpaceView);
+        new HideViewCmd(ViewName.AddSpaceView).Run();
         new RequestPurchaseCmd(IAPModel.AdditionalSpace).Run();
     }
 
     private void OnAddSpaceAdClicked()
     {
         Debug.Log("AddSpaceView: OnAddSpaceAdClicked");
-        new HideViewCmd().Run(ViewName.AddSpaceView);
+        new HideViewCmd(ViewName.AddSpaceView).Run();
         new ShowAdCmd().Run(RewardName.SPACE1);
     }
     public override void OnShown()
@@ -37,7 +37,7 @@ public class AddSpaceView : DefaultView
     }
     public override void OnBackgroundTap()
     {
-        new HideViewCmd().Run(ViewName.AddSpaceView);
+        new HideViewCmd(ViewName.AddSpaceView).Run();
     }
 
 }

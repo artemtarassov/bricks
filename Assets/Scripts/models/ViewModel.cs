@@ -13,8 +13,19 @@ public enum ViewName
     LoadingView,
     OutOfSpaceView,
     SettingsView,
-    GoldenTicketView
+    GoldenTicketView,
+    CompleteView
 }
+
+
+public enum BottomNav
+{
+    None,
+    Slots,
+    MainNav,
+}
+
+
 
 public class ViewData
 {
@@ -26,6 +37,13 @@ public class ViewData
         this.viewName = viewName;
         this.data = data;
     }
+}
+
+public enum FadeType
+{
+    In,
+    Out,
+    Flash
 }
 
 public class ViewModel
@@ -41,10 +59,8 @@ public class ViewModel
 
     public Transform root;
     public Action OnShake;
-    public Action OnZoom;
     public Action<string, Vector2> OnShowParticles;
     public bool SetupCompleted { get; private set; } = false;
-    public Action<ViewData, bool> OnViewChange;
 
     public Action<string> OnToastMsg;
 
@@ -58,20 +74,48 @@ public class ViewModel
 
     public int OutOfSpaceSeconds = 0;
 
-    public Action<Vector3> OnFlyCoin;
+    public Action<Vector3, int, int> OnFlyCoin;
+
+    public Action<Vector3, Vector3> OnFlyRocket;
+
 
     public Action OnAndroidReviewRequest;
+
+    public Action<FadeType> OnFade;
+
+    public Action<BottomNav> OnBottomNavChange;
+
+    public BottomNav CurrentBottomNav { get; private set; } = BottomNav.None;
+
 
     public ViewModel()
     {
         UILockedTime = 0;
     }
 
-
-
-    public void FlyCoin(Vector3 startPos)
+    public void ChangeBottomNav(BottomNav nav)
     {
-        OnFlyCoin?.Invoke(startPos);
+        if(CurrentBottomNav == nav)
+        {
+            return;
+        }
+        CurrentBottomNav = nav;
+        OnBottomNavChange?.Invoke(nav);
+    }
+
+    public void Fade(FadeType fadeType)
+    {
+        OnFade?.Invoke(fadeType);
+    }
+
+    public void FlyRocket(Vector3 fromFlyPos, Vector3 toFlyPos)
+    {
+        OnFlyRocket?.Invoke(fromFlyPos, toFlyPos);
+    }
+
+    public void FlyCoin(Vector3 fromFlyPos, int fromAmount, int toAmount)
+    {
+        OnFlyCoin?.Invoke(fromFlyPos, fromAmount, toAmount);
     }
 
     public List<ViewData> GetViews()

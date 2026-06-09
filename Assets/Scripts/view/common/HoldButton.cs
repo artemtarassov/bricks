@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -8,12 +9,20 @@ using UnityEngine.UI;
 public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
     public UnityEvent OnHold;
+    public UnityEvent OnFirstTouch;//tbd.
 
     [SerializeField] private float holdIntervalSeconds = 0.2f;
+    [SerializeField] private bool triggerHoldEvent = false;
 
     private Button button;
     private Coroutine holdCoroutine;
     private bool isHolding;
+
+    public bool TriggerHoldEvent
+    {
+        get => triggerHoldEvent;
+        set => triggerHoldEvent = value;
+    }
 
     private void Awake()
     {
@@ -22,12 +31,25 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!button.interactable || !isActiveAndEnabled)
+        if (!CanProcessInput())
         {
             return;
         }
 
         isHolding = true;
+
+        if (!TryInvokeEvent(OnFirstTouch, nameof(OnFirstTouch)) || !CanContinueHolding())
+        {
+            StopHolding();
+            return;
+        }
+
+        if (!triggerHoldEvent)
+        {
+            StopHolding();
+            return;
+        }
+
         holdCoroutine ??= StartCoroutine(HoldRoutine());
     }
 
@@ -54,12 +76,16 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         {
             yield return wait;
 
-            if (!isHolding || !button.interactable)
+            if (!CanContinueHolding())
             {
+                StopHolding();
                 continue;
             }
 
-            OnHold?.Invoke();
+            if (!TryInvokeEvent(OnHold, nameof(OnHold)) || !CanContinueHolding())
+            {
+                StopHolding();
+            }
         }
 
         holdCoroutine = null;
@@ -76,5 +102,39 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
         StopCoroutine(holdCoroutine);
         holdCoroutine = null;
+    }
+
+    private bool CanProcessInput()
+    {
+        return this != null
+               && button != null
+               && button.interactable
+               && isActiveAndEnabled
+               && gameObject.activeInHierarchy;
+    }
+
+    private bool CanContinueHolding()
+    {
+        return isHolding && triggerHoldEvent && CanProcessInput();
+    }
+
+    private bool TryInvokeEvent(UnityEvent unityEvent, string eventName)
+    {
+        if (unityEvent == null)
+        {
+            return true;
+        }
+
+        try
+        {
+            unityEvent.Invoke();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"{nameof(HoldButton)}.{eventName} failed.", this);
+            Debug.LogException(exception, this);
+            return false;
+        }
     }
 }

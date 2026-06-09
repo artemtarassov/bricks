@@ -3,7 +3,7 @@ public class FinishCurrentCityElementCmd
 {
     public void Run()
     {
-        var cityElement = CityModel.Instance.GetCurrentElement();
+        var cityElement = ModelUtils.GetCurrentElement();
         foreach (var c in cityElement.dataContainer.columns)
         {
             foreach (var ci in c.list)

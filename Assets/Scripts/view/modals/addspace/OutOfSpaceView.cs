@@ -21,7 +21,7 @@ public class OutOfSpaceView : DefaultView
     private void OnRestartClicked()
     {
         new BtnCmd().Run(BtnCmd.BtnAction.Restart);
-        new HideViewCmd().Run(ViewName.OutOfSpaceView);
+        new HideViewCmd(ViewName.OutOfSpaceView).Run();
     }
 
     private void UpdateValues()
@@ -41,7 +41,7 @@ public class OutOfSpaceView : DefaultView
     private void OnContinueClicked()
     {
         new BtnCmd().Run(BtnCmd.BtnAction.ContinueNextAttempt);
-        new HideViewCmd().Run(ViewName.OutOfSpaceView);
+        new HideViewCmd(ViewName.OutOfSpaceView).Run();
     }
 
     private void OnRefillAttemptsClicked()
@@ -68,9 +68,12 @@ public class OutOfSpaceView : DefaultView
 
     public override void OnBackgroundTap()
     {
+        new HideViewCmd(ViewName.OutOfSpaceView).Run();
+       // new GoBackBtnCmd().Run();
+        /*
         var a = PlayerModel.Instance.playerData.attempts;
         var isGameOver = a == 0;
         if (!isGameOver)
-            new HideViewCmd().Run(ViewName.OutOfSpaceView);
+            new HideViewCmd(ViewName.OutOfSpaceView).Run();*/
     }
 }

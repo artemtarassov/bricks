@@ -14,6 +14,8 @@ public enum RemoteConfigProperty
     AdditionalEmitterSec = 4,
     DailyRewardCoinsGoldenTicket = 5,
     DailyRewardCoinsGoldenTicketTemp = 6,
+    CompleteRewardCoins = 7,
+    ColumnCoins = 8,
 }
 
 [Serializable]
@@ -63,6 +65,10 @@ public class RemoteConfigData
 
     public int DailyRewardCoinsGoldenTicket => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicket, 2000);
     public int DailyRewardCoinsGoldenTicketTemp => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicketTemp, 1000);
+
+    public int CompleteRewardCoins => GetValue(RemoteConfigProperty.CompleteRewardCoins, 500);
+
+    public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 100);
 
     public static RemoteConfigData Load()
     {

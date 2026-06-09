@@ -26,4 +26,25 @@ public static class GameObjectHelper
         DOVirtual.DelayedCall(delay, () => { d.SetActive(false); }, false);
     }
 
+
+    public static Vector3 GetAveragePosition(List<Transform> list)
+    {
+        var sum = Vector3.zero;
+        foreach (var brick in list)
+        {
+            sum += brick.position;
+        }
+        return sum / list.Count;
+    }
+
+    public static Vector3 GetAveragePosition<T>(HashSet<T> list) where T : MonoBehaviour
+    {
+        var sum = Vector3.zero;
+        foreach (var brick in list)
+        {
+            sum += brick.transform.position;
+        }
+        return sum / list.Count;
+    }
+
 }

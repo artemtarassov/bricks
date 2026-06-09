@@ -26,7 +26,7 @@ public class SlotColumn : MonoBehaviour
         this.slotBrickPrefab.gameObject.SetActive(false);
         this.checkmark.gameObject.SetActive(false);
         this.topSlot.gameObject.SetActive(false);
-        this.GetComponent<Button>().onClick.AddListener(OnClick);
+        this.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnClick);
     }
 
     private void OnClick()
@@ -52,7 +52,7 @@ public class SlotColumn : MonoBehaviour
         this.columnData = sc;
         var nextIndex = 0;
         //Debug.Log($"SlotColumn: Setup: columnIndex={sc.columnIndex}, elements={sc.list.Count}");
-        var list = sc.list.FindAll((e) => e.type != SlotElementType.Undefined);
+        var list = sc.list.FindAll((e) => e.type != SlotElementType.Undefined && e.IsInEmitter() == false);
 
         foreach (var data in list)
         {

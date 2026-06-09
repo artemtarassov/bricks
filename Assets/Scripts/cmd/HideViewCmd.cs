@@ -5,27 +5,32 @@ using UnityEngine;
 
 public class HideViewCmd
 {
+    private ViewName viewName;
+
+    public HideViewCmd(ViewName viewName = ViewName.None)
+    {
+        this.viewName = viewName;
+    }
     public void Run()
     {
-        var views = ViewModel.Instance.GetViews().ToList();
-        foreach (var view in views)
+        if (this.viewName == ViewName.None)
         {
-            ViewModel.Instance.HideView(view.viewName);
+            var views = ViewModel.Instance.GetViews().ToList();
+            foreach (var view in views)
+            {
+                ViewModel.Instance.HideView(view.viewName);
+            }
+            return;
         }
-    }
-
-    public void Run(ViewName viewName)
-    {
         if (!ViewModel.Instance.HasView(viewName))
         {
             return;
         }
-
         ViewModel.Instance.HideView(viewName);
-        var views = ViewModel.Instance.GetViews().ToList();
-        if (views.Count > 0)
+        var views2 = ViewModel.Instance.GetViews().ToList();
+        if (views2.Count > 0)
         {
-            ViewModel.Instance.ShowView(views[0].viewName);
+            ViewModel.Instance.ShowView(views2[0].viewName);
         }
     }
 }

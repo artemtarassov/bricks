@@ -7,6 +7,7 @@ public class SlotElement : MonoBehaviour
     [SerializeField] public GameObject addMoreBricks;
     [SerializeField] public GameObject coins;
     [SerializeField] public GameObject hiddenBricks;
+    [SerializeField] public GameObject explosion;
 
     [SerializeField] public GameObject ad;
 
@@ -44,6 +45,17 @@ public class SlotElement : MonoBehaviour
             SetupWithHiddenBricks();
             return;
         }
+        if (data.type == SlotElementType.Explosion)
+        {
+            SetupWithExplosion();
+            return;
+        }
+    }
+
+    private void SetupWithExplosion()
+    {
+        this.SetupAsEmpty();
+        this.explosion.SetActive(true);
     }
 
     private void SetupWithHiddenBricks()
@@ -56,7 +68,8 @@ public class SlotElement : MonoBehaviour
     private void ShowColor()
     {
         this.colorImg.gameObject.SetActive(true);
-        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(this.slotElementData.brickData.color);
+        this.colorImg.color = Color.white;
+        this.colorImg.sprite = ColoredMaterials.Instance.GetSpriteByColorIndex(this.slotElementData.brickData.color);
     }
 
     private void ShowAmount()
@@ -69,7 +82,7 @@ public class SlotElement : MonoBehaviour
     {
         this.SetupAsEmpty();
         this.coins.SetActive(true);
-        this.count.text = "100";
+        this.count.text = RemoteConfigModel.Instance.RemoteConfig.ColumnCoins.ToString();
         this.count.gameObject.SetActive(true);
     }
 
@@ -94,5 +107,6 @@ public class SlotElement : MonoBehaviour
         this.hiddenBricks.SetActive(false);
         this.count.gameObject.SetActive(false);
         this.ad.SetActive(false);
+        this.explosion.SetActive(false);
     }
 }

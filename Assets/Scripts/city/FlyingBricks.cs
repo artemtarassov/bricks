@@ -31,15 +31,17 @@ public class FlyingBricks
         brickTransform.position = data.from;
         brickTransform.rotation = Quaternion.identity;
         brickTransform.localScale = brick.initialLocalScale * 0.25f;
-        brick.renderer.material.color = ColoredMaterials.Instance.GetColorByColorIndex(data.colorIndex);
+        brick.renderer.material = ColoredMaterials.Instance.GetMaterialByColorIndex(data.colorIndex);
+        //brick.renderer.material.color = ColoredMaterials.Instance.GetColorByColorIndex(data.colorIndex);
         brick.gameObject.SetActive(true);
 
         var targetLocalScale = GetLocalScaleForWorldScale(this.parent, data.targetBrick.lossyScale);
 
-        
+        brickTransform.rotation = data.targetBrick.rotation;
+ 
         brickTransform.DOMove(data.targetBrick.position, t).SetEase(Ease.Linear).OnComplete(() =>
         {
-            Debug.Log("Brick reached target at time " + Time.time);
+            //Debug.Log("Brick reached target at time " + Time.time);
         });
         brickTransform.DOScale(targetLocalScale, t).SetEase(Ease.Linear).OnComplete(() =>
         {

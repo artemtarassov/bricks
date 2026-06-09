@@ -15,20 +15,20 @@ public class UnlockNextCmd
     private string currentGroupName;
     private GroupDataList currentGroupData;
 
-    private readonly int firstCityElementIndex = 0;
+    private readonly int firstCityElementIndex = BalancingModel.FirstCityElementIndex;
 
 
     public UnlockNextCmd()
     {
-        currentElementData = playerModel.playerData.currentElement;
-        currentGroupName = playerModel.playerData.currentGroupName;
-        Assert.IsFalse(string.IsNullOrEmpty(currentGroupName), "UnlockCityElementCmd: currentGroup should not be null or empty");
+        var progress = playerModel.playerData.GetCurrentGroupProgress();
+        currentElementData = progress.currentElement;
+        currentGroupName = progress.groupName;
+        Assert.AreNotEqual(progress.state, GroupState.Completed, "UnlockNextCmd: current group is already completed");
     }
 
     public void Run()
     {
-
-        playerModel.playerData.isDirty = true;
+        Debug.Log("UnlockNextCmd Run with currentGroupName " + currentGroupName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
         this.currentGroupData = balancingModel.GetDataCopy(this.currentGroupName);
 
         if (currentElementData == null)
@@ -39,52 +39,41 @@ public class UnlockNextCmd
             return;
         }
 
-        Assert.IsTrue(currentElementData.ElementCompleted(), "UnlockCityElementCmd Run: current element not completed");
-        Assert.IsTrue(currentElementData.AllSlotsEmpty(), "UnlockCityElementCmd Run: current element still has bricks or coins in slots");
-
-
-        var currentGroupElement = CityModel.Instance.GetGroupByName(this.currentGroupName);
-        var elementsInGroup = currentGroupElement.GetElements().ToList();
-        var elementIndexInGroup = elementsInGroup.FindIndex((e) => e.dataKey == currentElementData.dataKey);
-        var nextElementIndexInGroup = elementIndexInGroup + 1;
-
-
-        Debug.Log("UnlockNextCmd Run nextElementIndexInGroup " + nextElementIndexInGroup);
-
-        if (nextElementIndexInGroup >= elementsInGroup.Count)
+        if (currentElementData.ElementCompleted())
         {
-            var nextGroupName = cityModel.GetNextGroupName();
-            if (nextGroupName == null)
+            var currentGroupElement = CityModel.Instance.GetGroupByName(this.currentGroupName);
+            var elementsInGroup = currentGroupElement.GetElements().ToList();
+            var elementIndexInGroup = elementsInGroup.FindIndex((e) => e.dataKey == currentElementData.dataKey);
+            var nextElementIndexInGroup = elementIndexInGroup + 1;
+
+            if (nextElementIndexInGroup >= elementsInGroup.Count)
             {
-                //out of groups, game completed.
-                Debug.LogError("UnlockNextCmd no groups");
+                //no more elements in group.
+                //new CompleteCurrentGroupCmd().Run();
+                return;
             }
-            else
-            {
-                cityModel.SetCurrentGroupName(nextGroupName);
-                currentElementData = null;
-                currentGroupName = nextGroupName;
-                playerModel.playerData.currentGroupName = nextGroupName;
-                playerModel.playerData.currentElement = null;
-                this.Run();
-            }
+            var nextElement = elementsInGroup[nextElementIndexInGroup];
+            var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
+            UnlockElement(nextElementData);
             return;
         }
-        var nextElement = elementsInGroup[nextElementIndexInGroup];
-        var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
-        UnlockElement(nextElementData);
+
+        UnlockElement(currentElementData);
     }
+
 
     private void UnlockElement(CityElementDataContainer cityElementData)
     {
+        Debug.Log("UnlockNextCmd UnlockElement with city element data " + cityElementData.dataKey);
         Assert.IsNotNull(cityElementData, "UnlockCityElementCmd UnlockElement: cityElementData should not be null");
-        Assert.IsFalse(cityElementData.ElementCompleted(), "UnlockCityElementCmd UnlockElement: city element should not be completed to be unlocked. " + cityElementData.dataKey);
-        Assert.IsTrue(cityElementData.columns.Count > 1, "UnlockCityElementCmd UnlockElement: city element should have at least 2 columns to be unlocked. " + cityElementData.dataKey);
+        //Assert.IsFalse(cityElementData.ElementCompleted(), "UnlockCityElementCmd UnlockElement: city element should not be completed to be unlocked. " + cityElementData.dataKey);
+        Assert.IsTrue(cityElementData.columns.Count > 0, "UnlockCityElementCmd UnlockElement: city element should have at least 1 column to be unlocked. " + cityElementData.dataKey);
 
         AddCoinsIfAbsent(cityElementData);
         AddBicksMultiplier(cityElementData);
+        AddExplosion(cityElementData);
         if (cityElementData.ElementCountColoredBricks() == 0)
-            cityElementData.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
+            cityElementData.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement + 1);
         var cityElement = cityModel.GetElementByDataKey(cityElementData.dataKey);
 
         var elementIndex = cityModel.GetElementIndex(cityElement);
@@ -97,7 +86,23 @@ public class UnlockNextCmd
         playerModel.playerData.currentElement = cityElementData;
         playerModel.playerData.isDirty = true;
 
+        PlayerModel.Instance.OnPlayerDataChanged?.Invoke();
+    }
 
+    private void AddExplosion(CityElementDataContainer dataContainer)
+    {
+        var hasExplosion = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.Explosion));
+        if (hasExplosion)
+        {
+            return;
+        }
+        var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.type == SlotElementType.Bricks)).ToList();
+        if (columnsWithBricks.Count == 0)
+        {
+            return;
+        }
+        var randColumn = RandHelper.GetRandomElement(columnsWithBricks);
+        randColumn.list.Add(new SlotElementData(SlotElementType.Explosion));
     }
 
     private void AddBicksMultiplier(CityElementDataContainer dataContainer)
@@ -108,6 +113,10 @@ public class UnlockNextCmd
             return;
         }
         var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.type == SlotElementType.Bricks)).ToList();
+        if (columnsWithBricks.Count == 0)
+        {
+            return;
+        }
         var randColumn = RandHelper.GetRandomElement(columnsWithBricks);
         var prevLength = randColumn.list.Count;
         if (prevLength <= 2)
@@ -154,7 +163,7 @@ public class UnlockNextCmd
 
     private void MoveCam(CityElement cityElement)
     {
-        new MovCamCmd().Run(cityElement);
+        CamModel.Instance.MoveCameraToCityElement(cityElement);
     }
 
 }

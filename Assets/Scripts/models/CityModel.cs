@@ -25,6 +25,9 @@ public class CityModel
 
     public CityElementGroup GetGroupByName(string groupName)
     {
+        Assert.IsNotNull(this.groups, "CityModel GetGroupByName: groups list is null");
+        Assert.IsTrue(this.groups.Count > 0, "CityModel GetGroupByName: groups list is empty");
+        Assert.IsFalse(string.IsNullOrEmpty(groupName), "CityModel GetGroupByName: groupName should not be null or empty");
         return this.groups.Find((g) => g.GroupName == groupName);
     }
 
@@ -45,6 +48,14 @@ public class CityModel
         Assert.IsNotNull(group, $"CityModel SetCurrentGroupName: failed to find group with name {currentGroupName}");
         this.cityElements = group.GetElements().ToList();
         this.currentGroupName = currentGroupName;
+    }
+
+
+    public List<string> GetAllGroupNames()
+    {
+        Assert.IsNotNull(this.groups, "CityModel GetAllGroupNames: groups list is null");
+        Assert.IsTrue(this.groups.Count > 0, "CityModel GetAllGroupNames: groups list is empty");
+        return this.groups.Select(g => g.GroupName).ToList();
     }
 
     public string GetNextGroupName()
@@ -84,17 +95,30 @@ public class CityModel
 
     public void ActivateElements(int toIndex)
     {
+        Assert.IsNotNull(cityElements, "CityModel ActivateElements: cityElements list is null");
+        Assert.IsTrue(cityElements.Count > 0, "CityModel ActivateElements: cityElements list is empty");
+        Assert.IsTrue(toIndex < cityElements.Count, $"CityModel ActivateElements: toIndex {toIndex} is out of range");
         for (var i = 0; i <= toIndex && i < cityElements.Count; i++)
         {
             cityElements[i].gameObject.SetActive(true);
+            cityElements[i].EnableVisuals(true);
+            cityElements[i].EnableBricks(false);
+
+            if (i == toIndex)
+                this.OnCityElementUnlocked?.Invoke(cityElements[toIndex]);
         }
-        this.OnCityElementUnlocked?.Invoke(cityElements[toIndex]);
+        for (var i = toIndex + 1; i < cityElements.Count; i++)
+        {
+            cityElements[i].gameObject.SetActive(false);
+        }
+
     }
 
     public int GetElementIndex(CityElement element)
     {
         Assert.IsNotNull(cityElements, "CityModel GetElementIndex: cityElements list is null");
         Assert.IsTrue(cityElements.Count > 0, "CityModel GetElementIndex: cityElements list is empty");
+        Assert.IsNotNull(element, "CityModel GetElementIndex: element is null");
         var index = cityElements.FindIndex(e => e == element);
         if (index < 0)
         {
@@ -131,13 +155,7 @@ public class CityModel
         return null;
     }*/
 
-    public CityElement GetCurrentElement()
-    {
-        Assert.IsNotNull(cityElements, "CityModel GetCurrentElement: cityElements list is null");
-        Assert.IsTrue(cityElements.Count > 0, "CityModel GetCurrentElement: cityElements list is empty");
-        var e = cityElements.FindLast(e => e.gameObject.activeSelf);
-        return e;
-    }
+
     public CityElement GetElementByIndex(int index)
     {
         Assert.IsNotNull(cityElements, "CityModel GetElementByIndex: cityElements list is null");

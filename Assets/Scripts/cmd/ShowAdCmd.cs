@@ -13,7 +13,7 @@ public class ShowAdCmd
             return;
         }
         AdModel.Instance.ShowAd(new AdRewardData(rn));
-        new ShowViewCmd().Run(ViewName.LoadingView);
+        new ShowViewCmd(ViewName.LoadingView).Run();
     }
 
 }

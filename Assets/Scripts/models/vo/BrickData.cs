@@ -17,6 +17,8 @@ public class BrickData
     public bool AllTransparent => this.states.All(s => s == BrickState.Transparent || s == BrickState.SemiTransparent);
     public bool AllFull => this.states.All(s => s == BrickState.Full);
 
+    public bool inEmitter = false;
+
     public void SetAll(BrickState bs)
     {
         for (int i = 0; i < this.states.Count; i++)
@@ -77,6 +79,7 @@ public class BrickData
         {
             clone.states[i] = this.states[i];
         }
+        clone.inEmitter = this.inEmitter;
         return clone;
     }
 }

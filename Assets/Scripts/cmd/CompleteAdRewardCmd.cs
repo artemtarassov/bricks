@@ -8,10 +8,11 @@ public class CompleteAdRewardCmd
 {
     public void Run(string unit, bool recorded)
     {
+        new HideViewCmd(ViewName.LoadingView).Run();
+        //
         var rd = AdModel.Instance.GetRewardData(unit);
         AdModel.Instance.SetRewardEarned(unit);
-        new HideViewCmd().Run(ViewName.LoadingView);
-
+        
         Debug.Log("CompleteAdRewardCmd. unit: " + unit + ", recorded: " + recorded);
 
         if (!recorded)
@@ -35,6 +36,7 @@ public class CompleteAdRewardCmd
             var maxAttempts = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
             PlayerModel.Instance.FillAttempts(1, maxAttempts);
         }
+
 
     }
 

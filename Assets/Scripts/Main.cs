@@ -27,9 +27,7 @@ public class Main : MonoBehaviour
 
     private void OnSecUpdate()
     {
-        var groupsLoaded = CityModel.Instance.HasGroups();
-        if (groupsLoaded)
-            new SecUpdateCmd().Run();
+        new SecUpdateCmd().Run();
     }
 
     //on Application Quit, save player data
@@ -37,7 +35,7 @@ public class Main : MonoBehaviour
     {
         if (!hasFocus)
         {
-            PlayerModel.Instance.Save(); 
+            PlayerModel.Instance.Save();
         }
     }
 

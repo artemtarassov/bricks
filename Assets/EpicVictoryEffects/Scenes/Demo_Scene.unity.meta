@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0504fc785c646474fb86f8c17ee83f34
+timeCreated: 1492007124
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Scenes/Demo_Scene.unity
+  uploadId: 180046

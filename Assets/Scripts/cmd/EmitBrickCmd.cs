@@ -6,10 +6,14 @@ using UnityEngine.Assertions;
 
 public class EmitBricksCmd
 {
+    private static CityElement GetCurrentElement()
+    {
+        return ModelUtils.GetCurrentElement();
+    }
     public void Run()
     {
         var emitters = SlotModel.Instance.Emitters;
-        var cityElement = CityModel.Instance.GetCurrentElement();
+        var cityElement = GetCurrentElement();
         foreach (var emitter in emitters)
         {
             if (emitter.HasColoredBricks && cityElement.dataContainer.ElementCountColoredBricks(emitter.brickData.color) > 0)
@@ -33,7 +37,7 @@ public class EmitBrickCmd
     public EmitBrickCmd(EmitterSpace emitter)
     {
         Assert.IsTrue(emitter.HasColoredBricks);
-        this.cityElement = CityModel.Instance.GetCurrentElement();
+        this.cityElement = ModelUtils.GetCurrentElement();
         this.emitter = emitter;
         this.emitterBrickData = emitter.brickData;
         this.elementBrickData = elementDataContainer.brickDataList.Find(b => b.color == this.colorIndex && b.coloredAmount > 0);
@@ -77,8 +81,13 @@ public class EmitBrickCmd
     private void OnFlyComplete()
     {
         //Debug.Log("EmitBricksCmd OnFlyComplete Fly complete for color " + this.colorIndex + " time " + Time.time);
-        elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Emitting), BrickState.Full);
-        cityElement.ShowCurrentState();
+
+        var emittingBrickindex = elementBrickData.GetBrickIndex(BrickState.Emitting);
+        if (emittingBrickindex != -1)
+        {
+            elementBrickData.SetBrickState(emittingBrickindex, BrickState.Full);
+            cityElement.ShowCurrentState();
+        }
 
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {

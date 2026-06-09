@@ -20,18 +20,19 @@ public class SelectColumnCmd
         Debug.Log($"SelectColumnCmd: type={this.data.type}, brickData={this.data.brickData}");
         if (this.data.type == SlotElementType.Coins)
         {
-            Debug.Log("SelectColumnCmd: Coins selected");
-            if (this.element != null)
-                ViewModel.Instance.FlyCoin(this.element.coins.transform.position);
+            var nCoins = RemoteConfigModel.Instance.RemoteConfig.ColumnCoins;
+            if (this.element == null)
+            {
+                new AddCoinsCmd(nCoins).Run();
+            }
+            else
+            {
+                new AddCoinsCmd(nCoins, this.element.coins.transform.position).Run();
+            }
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
-        var element = CityModel.Instance.GetCurrentElement();
-        if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
-        {
-            this.ShowOutOfSpace();
-            return;
-        }
+        var element = ModelUtils.GetCurrentElement();
 
         if (this.data.type == SlotElementType.Bricks)
         {
@@ -46,7 +47,7 @@ public class SelectColumnCmd
         }
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
-            element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement * 2);
+            element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
             element.ShowCurrentState();
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
@@ -59,10 +60,32 @@ public class SelectColumnCmd
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
+
+        if (this.data.type == SlotElementType.Explosion)
+        {
+            if (element.dataContainer.ElementCompleted() && element.HasVisuals() == false)
+            {
+                new FlyRocketCmd().Run();
+                SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            }
+            else
+            {
+                Debug.Log("SelectColumnCmd: explosion column selected but current group is not completed, not flying rocket");
+            }
+            return;
+        }
+
+
+        if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
+        {
+            this.ShowOutOfSpace();
+            return;
+        }
+
     }
 
     private void ShowOutOfSpace()
     {
-        new ShowViewCmd().Run(ViewName.OutOfSpaceView);
+        new ShowViewCmd(ViewName.OutOfSpaceView).Run();
     }
 }

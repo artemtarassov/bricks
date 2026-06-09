@@ -14,36 +14,28 @@ public class BalancingWindow : EditorWindow
 
     private void OnGUI()
     {
-        GameObject activeSelectedObject = Selection.activeGameObject;
-        bool canAddBalancingData = activeSelectedObject != null && activeSelectedObject.GetComponent<CityElementGroup>() != null;
 
-        using (new EditorGUI.DisabledScope(!canAddBalancingData))
+        if (GUILayout.Button("Add balancing data for city element"))
         {
-            if (GUILayout.Button("Add balancing data for city element"))
+            new PrepareScene().Run();
+            var model = new BalancingWriter();
+
+            var ngroups = model.GetAllGroups();
+            Assert.IsTrue(ngroups.Count == 0, "BalancingWindow: expected no groups in model after delete, but found " + ngroups.Count);
+
+            var groups = GameObject.FindObjectsByType<CityElementGroup>().ToList();
+            foreach (var group in groups)
             {
-                var model = new BalancingWriter();
-
-                var ngroups = model.GetAllGroups();
-                Assert.IsTrue(ngroups.Count == 0, "BalancingWindow: expected no groups in model after delete, but found " + ngroups.Count);
-
-
-                var selectedObjects = Selection.gameObjects;
-                foreach (var obj in selectedObjects)
+                var elements = group.GetElements();
+                Debug.Log($"BalancingWindow: found group {group.GroupName} with {elements.Count()} elements in selected objects, adding balancing data for each element.");
+                foreach (var cityElement in elements)
                 {
-                    var group = obj.GetComponent<CityElementGroup>();
-                    if (group != null)
-                    {
-                        var elements = group.GetElements();
-                        Debug.Log($"BalancingWindow: found group {group.GroupName} with {elements.Count()} elements in selected objects, adding balancing data for each element.");
-                        foreach (var cityElement in elements)
-                        {
-                            OnAddBalancingDataClicked(model, group, cityElement);
-                        }
-                    }
+                    OnAddBalancingDataClicked(model, group, cityElement);
                 }
-                model.Save();
             }
+            model.Save();
         }
+
     }
 
 

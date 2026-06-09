@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8b5d88c7afa42cf4cb75b686c96540f0
+timeCreated: 1489938412
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Prefabs/BG_Effects/Firework_02.prefab
+  uploadId: 180046

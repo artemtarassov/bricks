@@ -5,13 +5,11 @@ using UnityEngine.Assertions;
 
 public class SecUpdateCmd
 {
-    private CityElement currentElement;
+
     private int currentTimestamp;
     public SecUpdateCmd()
     {
-        this.currentElement = CityModel.Instance.GetCurrentElement();
         this.currentTimestamp = TimeUtils.GetUnixTimestamp();
-        Assert.IsNotNull(this.currentElement, "current element in cityModel not set");
     }
     public void Run()
     {
@@ -21,9 +19,13 @@ public class SecUpdateCmd
         {
             return;
         }
-        UpdateOutOfSpace();
-        UpdateAdditionalEmitter();
-        UpdateNextCityElement();
+        var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
+        if (progress.state == GroupState.Playing)
+        {
+            UpdateOutOfSpace();
+            UpdateAdditionalEmitter();
+            //UpdateNextCityElement();
+        }
         UpdateDailyReward();
     }
 
@@ -48,7 +50,6 @@ public class SecUpdateCmd
             }
             else if (hasGoldenTicketTemp)
             {
-
                 coins = RemoteConfigModel.Instance.RemoteConfig.DailyRewardCoinsGoldenTicketTemp;
             }
             PlayerModel.Instance.AddDailyRewardCoins(coins);
@@ -57,17 +58,24 @@ public class SecUpdateCmd
     }
 
 
-    private void UpdateNextCityElement()
+    /*private void UpdateNextCityElement()
     {
+        var currentElement = ModelUtils.GetCurrentElement();
+        Assert.IsNotNull(currentElement, "Current city element is null in UpdateNextCityElement");
         var da = currentElement.dataContainer;
         Assert.IsNotNull(da, "Current city element data container is null");
 
         //Debug.Log($"SecUpdateCmd: UpdateNextCityElement: element={currentElement.name}, emittingBricks={da.ElementCountEmittingBricks()}, coloredBricks={da.ElementCountColoredBricks()}, allSlotsEmpty={da.AllSlotsEmpty()}");
-        if (da.ElementCompleted() && da.AllSlotsEmpty())
+        if (da.ElementCompleted() && da.AllSlotsEmpty() && currentElement.HasVisuals())
         {
-            DOVirtual.DelayedCall(1, new UnlockNextCmd().Run, false);
+            var currentGroup = CityModel.Instance.GetGroupByName(PlayerModel.Instance.playerData.currentGroupName);
+            var groupCompleted = currentGroup.GetElements().All(e => e.dataContainer.ElementCompleted());
+            if (groupCompleted)
+            {
+                new CompleteCurrentGroupCmd().Run();
+            }
         }
-    }
+    }*/
 
 
     private void UpdateOutOfSpace()
@@ -78,8 +86,10 @@ public class SecUpdateCmd
             ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
-
+        var currentElement = ModelUtils.GetCurrentElement();
+        Assert.IsNotNull(currentElement, "Current city element is null in UpdateOutOfSpace");
         var hasEmittingBricks = currentElement.dataContainer.ElementCountEmittingBricks() > 0;
+        Debug.Log($"SecUpdateCmd: UpdateOutOfSpace: cntEmitterSpace={cntEmitterSpace}, hasEmittingBricks={hasEmittingBricks}");
         if (hasEmittingBricks)
         {
             ViewModel.Instance.OutOfSpaceSeconds = 0;
@@ -100,8 +110,8 @@ public class SecUpdateCmd
         ViewModel.Instance.OutOfSpaceSeconds++;
         if (ViewModel.Instance.OutOfSpaceSeconds == 3)
         {
-            new ShowViewCmd().Run(ViewName.OutOfSpaceView);
-            ViewModel.Instance.OutOfSpaceSeconds = 0;
+            new ShowViewCmd(ViewName.OutOfSpaceView).Run();
+            ViewModel.Instance.OutOfSpaceSeconds = int.MinValue;
         }
     }
 

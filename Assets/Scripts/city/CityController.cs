@@ -7,12 +7,17 @@ public class CityController : MonoBehaviour
 
     private FlyingBricks flyingBricks;
 
+
+    void Awake()
+    {
+//        var cityElementGroups = GetComponentsInChildren<CityElementGroup>(true).ToList();
+//        new SetupCityCmd().Run(cityElementGroups);
+    }
+    
     void Start()
     {
         this.flyingBricks = new FlyingBricks(this.flyingBrickPrefab, this.transform);
         CityModel.Instance.OnFlyBrick += OnFlyBrick;
-        var cityElementGroups = GetComponentsInChildren<CityElementGroup>(true).ToList();
-        new SetupCityCmd().Run(cityElementGroups);
         this.gameObject.AddComponent<BrickEmissionController>();
     }
 

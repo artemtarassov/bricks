@@ -71,13 +71,36 @@ public class SlotModel
         return this.Emitters.Any(e => e.HasColoredBricks);
     }
 
+    public void Clear()
+    {
+        for (var i = 0; i < this.Emitters.Count; i++)
+        {
+            this.Emitters[i].brickData = null;
+        }
+        this.Columns = new List<SlotColumnData>();
+        this.OnEmitterChanged?.Invoke(null);
+        this.OnColumnsChanged?.Invoke();
+    }
+
     public void Fill(List<SlotColumnData> columns)
     {
         for (var i = 0; i < this.Emitters.Count; i++)
         {
             this.Emitters[i].brickData = null;
         }
-        Assert.IsTrue(columns.Count > 1, "City element should have at least 2 columns of slot data");
+        Assert.IsTrue(columns.Count > 0, "City element should have at least 1 column of slot data");
+        foreach (var column in columns)
+        {
+            foreach (var element in column.list)
+            {
+                if (element.type == SlotElementType.Bricks && element.brickData.inEmitter && element.brickData.coloredAmount > 0)
+                {
+                    var emptyIndex = GetEmptyEmitterIndex();
+                    if (emptyIndex >= 0)
+                        this.Emitters[emptyIndex].brickData = element.brickData;
+                }
+            }
+        }
         this.Columns = columns;
         this.OnEmitterChanged?.Invoke(null);
         this.OnColumnsChanged?.Invoke();
@@ -108,19 +131,11 @@ public class SlotModel
         return e != null ? e.index : -1;
     }
 
-    public bool IsBrickInEmitter(BrickData brickData)
-    {
-        if (brickData == null)
-        {
-            return false;
-        }
-        return this.Emitters.Any(e => e.brickData == brickData);
-    }
 
     public SlotElementData GetNextSlotElementDataInColumn(int columnIndex, int rowIndex = 0)
     {
         var slotColumn = Columns.Find(c => c.columnIndex == columnIndex);
-        var list = slotColumn.list.FindAll(e => e.type != SlotElementType.Undefined && !IsBrickInEmitter(e.brickData));
+        var list = slotColumn.list.FindAll(e => e.type != SlotElementType.Undefined && e.IsInEmitter() == false);
         if (list.Count <= rowIndex)
         {
             return null;
@@ -137,6 +152,7 @@ public class SlotModel
         Assert.IsFalse(inEmitter, "Brick data is already in emitter");
         var emptyIndex = GetEmptyEmitterIndex();
         Assert.IsTrue(emptyIndex >= 0, "No empty emitter found");
+        brickData.inEmitter = true;
         this.Emitters[emptyIndex].brickData = brickData;
         this.OnEmitterChanged?.Invoke(this.Emitters[emptyIndex]);
         return emptyIndex;

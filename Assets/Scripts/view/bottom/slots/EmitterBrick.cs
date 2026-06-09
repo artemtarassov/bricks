@@ -26,8 +26,8 @@ public class EmitterBrick : MonoBehaviour
         this.timeoutUpdateSequence = null;
         this.timeoutTimestamp = 0;
         this.timeout.gameObject.SetActive(false);
+        this.count.gameObject.SetActive(false);
         this.colorImg.transform.localScale = Vector3.zero;
-        this.count.text = "";
     }
 
     public void SetTimeout(int timeoutTimestamp)
@@ -51,7 +51,7 @@ public class EmitterBrick : MonoBehaviour
         }
         this.timeout.gameObject.SetActive(false);
         this.timeoutTimestamp = 0;
-        this.content.transform.localPosition = Vector3.zero;
+        this.UpdateContentPos();
     }
 
     private void OnTimeoutUpdate()
@@ -72,8 +72,39 @@ public class EmitterBrick : MonoBehaviour
         {
             this.timeout.text = TimeUtils.GetTimeLeft(remaining, "en");
         }
-        this.timeout.gameObject.SetActive(true);
-        this.content.transform.localPosition = new Vector3(0, 20, 0);
+        if (this.count.gameObject.activeSelf == false)
+            this.timeout.gameObject.SetActive(true);
+        this.UpdateContentPos();
+    }
+
+    private bool moveContentUp = false;
+    private void UpdateContentPos()
+    {
+        if (this.timeout.gameObject.activeSelf || this.count.gameObject.activeSelf)
+        {
+            if (this.timeout.gameObject.activeSelf && this.count.gameObject.activeSelf)
+            {
+                this.timeout.gameObject.SetActive(false);
+            }
+
+            if (moveContentUp)
+            {
+                return;
+            }
+            moveContentUp = true;
+            this.content.transform.DOKill();
+            this.content.transform.DOLocalMoveY(20, 0.3f).SetEase(Ease.OutQuad);
+        }
+        else
+        {
+            if (!moveContentUp)
+            {
+                return;
+            }
+            moveContentUp = false;
+            this.content.transform.DOKill();
+            this.content.transform.DOLocalMoveY(0, 0.3f).SetEase(Ease.OutBack);
+        }
     }
 
     public void Setup(BrickData eb = null, bool animate = false)
@@ -82,7 +113,7 @@ public class EmitterBrick : MonoBehaviour
 
         if (eb == null)
         {
-            this.count.text = "";
+            this.count.gameObject.SetActive(false);
             this.colorImg.transform.DOKill();
             if (animate)
             {
@@ -93,12 +124,15 @@ public class EmitterBrick : MonoBehaviour
             {
                 this.colorImg.transform.localScale = Vector3.zero;
             }
+            this.UpdateContentPos();
             return;
         }
 
 
         this.count.text = eb.coloredAmount.ToString();
-        this.colorImg.color = ColoredMaterials.Instance.GetColorByColorIndex(eb.color);
+        this.count.gameObject.SetActive(true);
+        this.colorImg.color = Color.white;
+        this.colorImg.sprite = ColoredMaterials.Instance.GetSpriteByColorIndex(eb.color);
         if (animate)
         {
             //this.colorImg.transform.localScale = Vector3.zero;
@@ -113,7 +147,7 @@ public class EmitterBrick : MonoBehaviour
                 //this.colorImg.transform.localScale = Vector3.one;
             }
             this.colorImg.transform.localScale = Vector3.one;
-
         }
+        this.UpdateContentPos();
     }
 }

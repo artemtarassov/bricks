@@ -21,7 +21,7 @@ public class SettingsView : DefaultView
 
     public override void OnBackgroundTap()
     {
-        new HideViewCmd().Run(ViewName.SettingsView);
+        new HideViewCmd(ViewName.SettingsView).Run();
     }
 
     private void OnRestoreBtnClick()

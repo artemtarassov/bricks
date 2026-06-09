@@ -32,7 +32,8 @@ public enum SlotElementType
     HiddenBricks = 2,
     AddMoreBricks = 3,
     Coins = 4,
-    Ad = 5
+    Ad = 5,
+    Explosion = 6,
 }
 
 [Serializable]
@@ -48,6 +49,15 @@ public class SlotElementData
             return false;
         }
         return this.brickData.emittingAmount > 0;
+    }
+
+    public bool IsInEmitter()
+    {
+        if (this.brickData == null)
+        {
+            return false;
+        }
+        return this.brickData.inEmitter;
     }
     public void ResetEmittingStates()
     {

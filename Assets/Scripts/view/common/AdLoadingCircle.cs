@@ -23,6 +23,10 @@ public class AdLoadingCircle : MonoBehaviour
 
     private void OnSecUpdate()
     {
+        if (AdModel.Instance == null)
+        {
+            return;
+        }
         var isReady = AdModel.Instance.IsAdReady(AdUnits.Rewarded);
         this.rotatingCircle.SetActive(!isReady);
         this.ready.SetActive(isReady);

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -61,36 +60,29 @@ public class EnclosingGameObject : EditorWindow
             return;
         }
 
-        List<Transform> descendantTransforms = new List<Transform>();
-        CollectDescendantTransforms(selectedObject.transform, descendantTransforms);
-        if (descendantTransforms.Count == 0)
+        Transform referenceTransform = GetReferenceTransform(selectedObject.transform);
+        if (referenceTransform == null)
         {
             EditorUtility.DisplayDialog(
-                "No Children Found",
-                "The selected GameObject needs at least one child.",
+                "No Geometry Found",
+                "The selected GameObject needs at least one valid collider, mesh, or renderer.",
                 "OK");
             return;
         }
 
-        Vector3 min = Vector3.positiveInfinity;
-        Vector3 max = Vector3.negativeInfinity;
-
-        foreach (Transform childTransform in descendantTransforms)
+        if (!TryGetEnclosingBounds(selectedObject.transform, referenceTransform, out Vector3 center, out Vector3 size))
         {
-            EncapsulateChildBounds(selectedObject.transform, childTransform, ref min, ref max);
+            EditorUtility.DisplayDialog(
+                "No Bounds Found",
+                "The selected GameObject needs at least one valid collider, mesh, or renderer.",
+                "OK");
+            return;
         }
-
-        Vector3 size = max - min;
-        size.x = Mathf.Max(size.x, MinimumAxisSize);
-        size.y = Mathf.Max(size.y, MinimumAxisSize);
-        size.z = Mathf.Max(size.z, MinimumAxisSize);
-        size += Vector3.one * EnclosingGap;
-        Vector3 center = (min + max) * 0.5f;
 
         GameObject enclosingObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
         enclosingObject.name = "__EnclosingGameObject";
         Undo.RegisterCreatedObjectUndo(enclosingObject, "Create Enclosing GameObject");
-        enclosingObject.transform.SetParent(selectedObject.transform, false);
+        enclosingObject.transform.SetParent(referenceTransform, false);
         enclosingObject.transform.localPosition = center;
         enclosingObject.transform.localRotation = Quaternion.identity;
         enclosingObject.transform.localScale = size;
@@ -165,25 +157,229 @@ public class EnclosingGameObject : EditorWindow
         SessionState.SetString(baseKey, Vector3ToString(baseScale));
     }
 
-    private static void EncapsulateChildBounds(Transform selectedTransform, Transform childTransform, ref Vector3 min, ref Vector3 max)
+    private static bool TryGetEnclosingBounds(
+        Transform selectedTransform,
+        Transform referenceTransform,
+        out Vector3 center,
+        out Vector3 size)
     {
+        center = Vector3.zero;
+        size = Vector3.zero;
+
+        bool hasBounds = false;
+        Vector3 min = Vector3.positiveInfinity;
+        Vector3 max = Vector3.negativeInfinity;
+
+        Collider[] colliders = selectedTransform.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider collider = colliders[i];
+            if (ShouldSkipTransform(selectedTransform, collider.transform))
+            {
+                continue;
+            }
+
+            if (collider is BoxCollider boxCollider)
+            {
+                EncapsulateBounds(referenceTransform, boxCollider.transform, new Bounds(boxCollider.center, boxCollider.size), ref min, ref max);
+                hasBounds = true;
+                continue;
+            }
+
+            if (collider is MeshCollider meshCollider && meshCollider.sharedMesh != null)
+            {
+                EncapsulateBounds(referenceTransform, meshCollider.transform, meshCollider.sharedMesh.bounds, ref min, ref max);
+                hasBounds = true;
+                continue;
+            }
+        }
+
+        if (!hasBounds)
+        {
+            MeshFilter[] meshFilters = selectedTransform.GetComponentsInChildren<MeshFilter>(true);
+            for (int i = 0; i < meshFilters.Length; i++)
+            {
+                MeshFilter meshFilter = meshFilters[i];
+                if (meshFilter.sharedMesh == null || ShouldSkipTransform(selectedTransform, meshFilter.transform))
+                {
+                    continue;
+                }
+
+                EncapsulateBounds(referenceTransform, meshFilter.transform, meshFilter.sharedMesh.bounds, ref min, ref max);
+                hasBounds = true;
+            }
+        }
+
+        if (!hasBounds)
+        {
+            Renderer[] renderers = selectedTransform.GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer renderer = renderers[i];
+                if (renderer == null || ShouldSkipTransform(selectedTransform, renderer.transform))
+                {
+                    continue;
+                }
+
+                EncapsulateWorldBounds(referenceTransform, renderer.bounds, ref min, ref max);
+                hasBounds = true;
+            }
+        }
+
+        if (!hasBounds)
+        {
+            return false;
+        }
+
+        size = max - min;
+        size.x = Mathf.Max(size.x, MinimumAxisSize);
+        size.y = Mathf.Max(size.y, MinimumAxisSize);
+        size.z = Mathf.Max(size.z, MinimumAxisSize);
+        size += Vector3.one * EnclosingGap;
+        center = (min + max) * 0.5f;
+        return true;
+    }
+
+    private static Transform GetReferenceTransform(Transform selectedTransform)
+    {
+        Transform bestTransform = null;
+        float bestVolume = float.NegativeInfinity;
+
+        Collider[] colliders = selectedTransform.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider collider = colliders[i];
+            if (ShouldSkipTransform(selectedTransform, collider.transform))
+            {
+                continue;
+            }
+
+            if (collider is BoxCollider boxCollider)
+            {
+                float volume = GetScaledBoundsVolume(boxCollider.transform, new Bounds(boxCollider.center, boxCollider.size));
+                if (volume > bestVolume)
+                {
+                    bestVolume = volume;
+                    bestTransform = boxCollider.transform;
+                }
+                continue;
+            }
+
+            if (collider is MeshCollider meshCollider && meshCollider.sharedMesh != null)
+            {
+                float volume = GetScaledBoundsVolume(meshCollider.transform, meshCollider.sharedMesh.bounds);
+                if (volume > bestVolume)
+                {
+                    bestVolume = volume;
+                    bestTransform = meshCollider.transform;
+                }
+            }
+        }
+
+        MeshFilter[] meshFilters = selectedTransform.GetComponentsInChildren<MeshFilter>(true);
+        for (int i = 0; i < meshFilters.Length; i++)
+        {
+            MeshFilter meshFilter = meshFilters[i];
+            if (meshFilter.sharedMesh == null || ShouldSkipTransform(selectedTransform, meshFilter.transform))
+            {
+                continue;
+            }
+
+            float volume = GetScaledBoundsVolume(meshFilter.transform, meshFilter.sharedMesh.bounds);
+            if (volume > bestVolume)
+            {
+                bestVolume = volume;
+                bestTransform = meshFilter.transform;
+            }
+        }
+
+        Renderer[] renderers = selectedTransform.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (renderer == null || ShouldSkipTransform(selectedTransform, renderer.transform))
+            {
+                continue;
+            }
+
+            float volume = GetWorldBoundsVolume(renderer.bounds);
+            if (volume > bestVolume)
+            {
+                bestVolume = volume;
+                bestTransform = renderer.transform;
+            }
+        }
+
+        return bestTransform;
+    }
+
+    private static void EncapsulateBounds(
+        Transform referenceTransform,
+        Transform sourceTransform,
+        Bounds localBounds,
+        ref Vector3 min,
+        ref Vector3 max)
+    {
+        Vector3 boundsMin = localBounds.min;
+        Vector3 boundsMax = localBounds.max;
+
         foreach (Vector3 corner in UnitCubeCorners)
         {
-            Vector3 worldCorner = childTransform.TransformPoint(corner);
-            Vector3 localCorner = selectedTransform.InverseTransformPoint(worldCorner);
-            min = Vector3.Min(min, localCorner);
-            max = Vector3.Max(max, localCorner);
+            Vector3 sourceLocalCorner = new Vector3(
+                corner.x > 0f ? boundsMax.x : boundsMin.x,
+                corner.y > 0f ? boundsMax.y : boundsMin.y,
+                corner.z > 0f ? boundsMax.z : boundsMin.z);
+            Vector3 worldCorner = sourceTransform.TransformPoint(sourceLocalCorner);
+            Vector3 referenceLocalCorner = referenceTransform.InverseTransformPoint(worldCorner);
+            min = Vector3.Min(min, referenceLocalCorner);
+            max = Vector3.Max(max, referenceLocalCorner);
         }
     }
 
-    private static void CollectDescendantTransforms(Transform parentTransform, List<Transform> descendants)
+    private static void EncapsulateWorldBounds(Transform referenceTransform, Bounds worldBounds, ref Vector3 min, ref Vector3 max)
     {
-        for (int i = 0; i < parentTransform.childCount; i++)
+        Vector3 boundsMin = worldBounds.min;
+        Vector3 boundsMax = worldBounds.max;
+
+        foreach (Vector3 corner in UnitCubeCorners)
         {
-            Transform child = parentTransform.GetChild(i);
-            descendants.Add(child);
-            CollectDescendantTransforms(child, descendants);
+            Vector3 worldCorner = new Vector3(
+                corner.x > 0f ? boundsMax.x : boundsMin.x,
+                corner.y > 0f ? boundsMax.y : boundsMin.y,
+                corner.z > 0f ? boundsMax.z : boundsMin.z);
+            Vector3 referenceLocalCorner = referenceTransform.InverseTransformPoint(worldCorner);
+            min = Vector3.Min(min, referenceLocalCorner);
+            max = Vector3.Max(max, referenceLocalCorner);
         }
+    }
+
+    private static bool ShouldSkipTransform(Transform selectedRoot, Transform transform)
+    {
+        Transform current = transform;
+        while (current != null && current != selectedRoot)
+        {
+            if (current.name.StartsWith("__"))
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private static float GetScaledBoundsVolume(Transform transform, Bounds localBounds)
+    {
+        Vector3 axisScale = BrickVolumeUtility.GetAxisScale(transform);
+        Vector3 scaledSize = Vector3.Scale(localBounds.size, axisScale);
+        return scaledSize.x * scaledSize.y * scaledSize.z;
+    }
+
+    private static float GetWorldBoundsVolume(Bounds worldBounds)
+    {
+        Vector3 size = worldBounds.size;
+        return size.x * size.y * size.z;
     }
 
     private static Mesh LoadEnclosingMesh()

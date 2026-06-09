@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ecef5e720d8d9de4f82270dcda0545c5
+timeCreated: 1490628986
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Meshes/Materials/Mesh_Cash_02Mat.mat
+  uploadId: 180046

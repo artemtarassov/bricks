@@ -6,9 +6,9 @@ public class FlyCoinsAnimationController : MonoBehaviour
 {
     [SerializeField] private GameObject flyCoinPrefab;
     [SerializeField] private Transform target;
-    [SerializeField] private int coinsPerFlight = 8;
-    [SerializeField] private float duration = 0.75f;
-    [SerializeField] private float delayBetweenCoins = 0.04f;
+    [SerializeField] private int coinObjectsPerFlight = 10;
+    [SerializeField] private float duration = Durations.CoinFlyDuration;
+    [SerializeField] private float delayBetweenCoins = 0.03f;
     [SerializeField] private float startSpreadRadius = 18f;
     [SerializeField] private float targetSpreadRadius = 10f;
     [SerializeField] private float curveOffset = 90f;
@@ -21,6 +21,7 @@ public class FlyCoinsAnimationController : MonoBehaviour
 
     private readonly Queue<GameObject> cachedCoins = new Queue<GameObject>();
     private readonly List<GameObject> createdCoins = new List<GameObject>();
+    private int addCoinsPerArrive;
 
     private void Start()
     {
@@ -54,18 +55,18 @@ public class FlyCoinsAnimationController : MonoBehaviour
         createdCoins.Clear();
     }
 
-    private void OnFlyCoin(Vector3 startPos)
+    private void OnFlyCoin(Vector3 startPos, int fromAmount, int toAmount)
     {
         if (target == null)
         {
             Debug.LogWarning("FlyCoinsAnimationController: target is not assigned.");
             return;
         }
-
-        FlyCoins(startPos, target.position, coinsPerFlight);
+        this.addCoinsPerArrive = (toAmount - fromAmount) / coinObjectsPerFlight;
+        FlyCoins(startPos, target.position, coinObjectsPerFlight);
     }
 
-    public void FlyCoins(Vector3 startPos, Vector3 targetPos, int amount)
+    public void FlyCoins(Vector3 startPos, Vector3 targetPos, int coinsPerFlight)
     {
         if (flyCoinPrefab == null)
         {
@@ -73,17 +74,11 @@ public class FlyCoinsAnimationController : MonoBehaviour
             return;
         }
 
-        var coinsToSpawn = Mathf.Max(0, amount);
-        if (coinsToSpawn == 0)
-        {
-            return;
-        }
-
         var planeZ = transform.position.z;
         var start2D = new Vector3(startPos.x, startPos.y, planeZ);
         var target2D = new Vector3(targetPos.x, targetPos.y, planeZ);
 
-        for (var i = 0; i < coinsToSpawn; i++)
+        for (var i = 0; i < coinsPerFlight; i++)
         {
             SpawnCoin(start2D, target2D, i);
         }
@@ -91,6 +86,7 @@ public class FlyCoinsAnimationController : MonoBehaviour
 
     private void SpawnCoin(Vector3 startPos, Vector3 targetPos, int index)
     {
+        //Debug.Log($"Spawning coin {index + 1}/{coinObjectsPerFlight} index {index}");
         var coin = GetCoin();
         var coinTransform = coin.transform;
         coinTransform.SetParent(transform, true);
@@ -139,7 +135,7 @@ public class FlyCoinsAnimationController : MonoBehaviour
         sequence.Join(scaleSequence);
         sequence.OnComplete(() =>
         {
-            OnCoinArrived();
+            OnCoinArrived(index);
             ReleaseCoin(coin);
         });
         sequence.OnKill(() =>
@@ -175,11 +171,9 @@ public class FlyCoinsAnimationController : MonoBehaviour
                + t * t * targetPos;
     }
 
-    private void OnCoinArrived()
+    private void OnCoinArrived(int index)
     {
-        this.target.DOKill();
-        this.target.localScale = Vector3.one;
-        this.target.DOPunchScale(Vector3.one * 0.2f, 0.1f, 5, 0.5f).SetEase(Ease.OutQuad);
+        new AddCoinsCmd(addCoinsPerArrive).Run();
     }
 
     private GameObject GetCoin()

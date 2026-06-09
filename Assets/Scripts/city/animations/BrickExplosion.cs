@@ -188,13 +188,11 @@ public class BrickExplosion : MonoBehaviour
         {
             return Vector3.zero;
         }
-
         var sum = Vector3.zero;
         foreach (var brick in bricks)
         {
             sum += brick.startPosition;
         }
-
         return sum / bricks.Count;
     }
 

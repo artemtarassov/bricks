@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -24,7 +25,7 @@ public class CityElement : MonoBehaviour
     private Dictionary<Transform, BrickInfo> brickInfo = new Dictionary<Transform, BrickInfo>();
     private BrickLayersContainer brickLayersContainer;
 
-    private BrickTopDownExplosion explosion;
+    private BrickExplosion explosion;
 
     //private readonly string genereatedBrickGameObjectName = "__GeneratedBricks";
 
@@ -57,6 +58,7 @@ public class CityElement : MonoBehaviour
     public void Setup(CityElementDataContainer dataContainer)
     {
         //Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.dataKey}");
+        Assert.IsNotNull(dataContainer, "Data container should not be null when setting up city element " + this.gameObject.name);
         this.dataContainer = dataContainer;
         this.EnableBricks(true);
         this.EnableVisuals(false);
@@ -66,7 +68,9 @@ public class CityElement : MonoBehaviour
 
     public List<Transform> FindAllBricks()
     {
-        return __GeneratedBricks.GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.tag == "Brick");
+        var list = __GeneratedBricks.GetComponentsInChildren<Transform>(true).ToList().FindAll(b => b.CompareTag("Brick"));
+        Assert.IsTrue(list.Count > 0, "FindAllBricks found no bricks in city element " + this.gameObject.name);
+        return list;
     }
 
 
@@ -127,16 +131,18 @@ public class CityElement : MonoBehaviour
         }
         if (this.dataContainer.ElementCompleted() && !this.HasVisuals())
         {
-            if (this.explosion == null)
-            {
-                this.explosion = this.gameObject.AddComponent<BrickTopDownExplosion>();
-            }
-            else
-            {
-                this.explosion.Play();
-            }
-            this.EnableVisuals(true);
+            //explode
         }
+    }
+
+    public void Explode()
+    {
+        if (this.explosion == null)
+        {
+            this.explosion = this.gameObject.AddComponent<BrickExplosion>();
+        }
+        this.explosion.Play();
+        this.EnableVisuals(true);
     }
 
 
@@ -148,6 +154,26 @@ public class CityElement : MonoBehaviour
             return null;
         }
         return GetBrick(elementBrickData, elementBrickData.GetBrickIndex(BrickState.Colored));
+    }
+
+    public List<Transform> GetColoredBricks()
+    {
+        var coloredBricks = new List<Transform>();
+        foreach (var brickData in dataContainer.brickDataList)
+        {
+            if (brickData.coloredAmount > 0)
+            {
+                for (var i = 0; i < brickData.coloredAmount; i++)
+                {
+                    var brick = GetBrick(brickData, brickData.GetBrickIndex(BrickState.Colored) + i);
+                    if (brick != null)
+                    {
+                        coloredBricks.Add(brick);
+                    }
+                }
+            }
+        }
+        return coloredBricks;
     }
 
     public Transform GetBrick(BrickData find, int index)
@@ -177,6 +203,7 @@ public class CityElement : MonoBehaviour
         //Debug.Log("ShowBrickState " + state);
         this.brickInfo[t].state = state;
         var mr = t.GetComponent<MeshRenderer>();
+
         switch (state)
         {
             case BrickState.Undefined:
@@ -200,15 +227,7 @@ public class CityElement : MonoBehaviour
         }
     }
 
-    private void ActivateChildren(Transform t, bool activate)
-    {
-        for (var i = 0; i < t.transform.childCount; i++)
-        {
-            t.GetChild(i).gameObject.SetActive(activate);
-        }
-    }
-
-    private void EnableBricks(bool enable)
+    public void EnableBricks(bool enable)
     {
         __GeneratedBricks.gameObject.SetActive(enable);
         if (enable && this.explosion != null)
@@ -235,7 +254,7 @@ public class CityElement : MonoBehaviour
         return null;
     }
 
-    private void EnableVisuals(bool enable)
+    public void EnableVisuals(bool enable)
     {
         var n = this.transform.childCount;
         for (var i = 0; i < n; i++)
@@ -252,7 +271,7 @@ public class CityElement : MonoBehaviour
         }
     }
 
-    private bool HasVisuals()
+    public bool HasVisuals()
     {
         for (var i = 0; i < this.transform.childCount; i++)
         {
@@ -268,13 +287,11 @@ public class CityElement : MonoBehaviour
 
     public Vector3 GetAveragePosition()
     {
-        Assert.IsTrue(this.SortedBricks.Count > 0, "No bricks found in city element. Cannot calculate average position. object " + this.gameObject.name);
-        var sum = Vector3.zero;
-        foreach (var brick in SortedBricks)
+        if (this.SortedBricks.Count == 0)
         {
-            sum += brick.transform.position;
+            return this.transform.position;
         }
-        return sum / SortedBricks.Count;
+        return GameObjectHelper.GetAveragePosition(this.SortedBricks);
     }
 
 

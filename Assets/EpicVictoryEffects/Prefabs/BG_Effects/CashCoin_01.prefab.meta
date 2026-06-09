@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2d3452940eab6364887f48142cbf415d
+timeCreated: 1490532303
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Prefabs/BG_Effects/CashCoin_01.prefab
+  uploadId: 180046

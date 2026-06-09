@@ -11,7 +11,7 @@ public class ColoredMaterials : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            SetMaterialColors();
+            //SetMaterialColors();
         }
         else
         {
@@ -20,6 +20,8 @@ public class ColoredMaterials : MonoBehaviour
     }
     [SerializeField]
     public List<Material> materials;
+
+    private Dictionary<ColorIndex, Sprite> cachedSprites = new Dictionary<ColorIndex, Sprite>();
 
     public Material GetMaterialByColorIndex(ColorIndex colorIndex)
     {
@@ -41,6 +43,19 @@ public class ColoredMaterials : MonoBehaviour
             throw new System.Exception($"Material with name {name} not found");
         }
         return material;
+    }
+
+    public Sprite GetSpriteByColorIndex(ColorIndex colorIndex)
+    {
+        if (cachedSprites.TryGetValue(colorIndex, out var cachedSprite))
+        {
+            return cachedSprite;
+        }
+        var material = GetMaterialByColorIndex(colorIndex);
+        var txt = material.mainTexture;
+        var sprite = Sprite.Create((Texture2D)txt, new Rect(0, 0, txt.width, txt.height), new Vector2(0.5f, 0.5f));
+        cachedSprites[colorIndex] = sprite;
+        return sprite;
     }
 
 
@@ -69,7 +84,7 @@ public class ColoredMaterials : MonoBehaviour
 
             new Color32(155,  65, 255, 255), // #9B41FF Bright Purple
 
-            new Color32( 90, 220, 220, 255)  // #5ADCDC Bright Teal
+            new Color32(220, 220, 220, 255)  // #DCDCDC Light Gray
         };
         /*GetMaterialByColorIndex(ColorIndex.C0).color = colors[0];
         GetMaterialByColorIndex(ColorIndex.C1).color = colors[1];
@@ -78,6 +93,7 @@ public class ColoredMaterials : MonoBehaviour
         GetMaterialByColorIndex(ColorIndex.C4).color = colors[4];
         GetMaterialByColorIndex(ColorIndex.C5).color = colors[5];
         GetMaterialByColorIndex(ColorIndex.C6).color = colors[6];*/
+
 
         GetMaterialByColorIndex(ColorIndex.C0).color = Color.white;
         GetMaterialByColorIndex(ColorIndex.C1).color = Color.white;

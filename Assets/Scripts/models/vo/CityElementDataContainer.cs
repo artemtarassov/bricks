@@ -32,11 +32,6 @@ public class CityElementDataContainer
         return this.brickDataList.All(bd => bd.fullAmount == bd.max);
     }
 
-    /*public BrickData GetNextColoredBrick(ColorIndex colorIndex)
-    {
-        return this.brickDataList.Find(bd => bd.state == BrickState.Colored && bd.color == colorIndex && bd.amount > 0);
-    }*/
-
     public bool AllSlotsEmpty()
     {
         Assert.IsNotNull(this.columns, "slotElementDataList should not be null");
@@ -44,6 +39,13 @@ public class CityElementDataContainer
         return this.columns.All(c => c.IsEmpty());
     }
 
+    public void SetAll(BrickState bs)
+    {
+        foreach (var bd in this.brickDataList)
+        {
+            bd.SetAll(bs);
+        }
+    }
 
     public void EnableDifferentColors(int amountOfColors)
     {
@@ -57,24 +59,6 @@ public class CityElementDataContainer
                 transparentBricks[n].SetAll(BrickState.SemiTransparent);
         }
     }
-
-    /*public void Reset()
-    {
-        foreach (var brickData in this.brickDataList)
-        {
-            brickData.SetAllTransparent();
-        }
-        foreach (var slotData in this.columns)
-        {
-            foreach (var col in slotData.list)
-            {
-                if (col.brickData != null)
-                {
-                    col.brickData.SetAllColored();
-                }
-            }
-        }
-    }*/
 
     public HashSet<ColorIndex> GetBrickColors()
     {

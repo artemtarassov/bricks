@@ -1,4 +1,6 @@
+using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -19,7 +21,7 @@ public class CamAdjustWindow : EditorWindow
 
     private void OnGUI()
     {
-        if (GUILayout.Button("Enable Camera Preview in editor"))
+        /*if (GUILayout.Button("Enable Camera Preview in editor"))
         {
             EnableCameraPreview();
         }
@@ -27,6 +29,11 @@ public class CamAdjustWindow : EditorWindow
         if (GUILayout.Button("Rotate Main Camera To Selection"))
         {
             RotateMainCameraToSelection();
+        }*/
+
+        if (GUILayout.Button("Enable next city element"))
+        {
+            EnableNextCityElement();
         }
 
         if (GUILayout.Button("Copy camera position"))
@@ -35,7 +42,7 @@ public class CamAdjustWindow : EditorWindow
         }
 
 
-        if (GUILayout.Button("Move Camera to selected CityElement"))
+        if (GUILayout.Button("Move Camera to selected object"))
         {
             MoveCameraToSelectedCityElement();
         }
@@ -64,6 +71,125 @@ public class CamAdjustWindow : EditorWindow
         DrawPreviewIntoRect(previewRect);
     }
 
+
+    private void MatchSceneViewToMainCamera(Camera mainCamera, SceneView sceneView, bool showDialogs)
+    {
+        if (mainCamera == null)
+        {
+            if (showDialogs)
+            {
+                EditorUtility.DisplayDialog(
+                    "Main Camera Not Found",
+                    "No camera tagged MainCamera was found in the open scene.",
+                    "OK");
+            }
+            return;
+        }
+
+        if (sceneView == null || sceneView.camera == null)
+        {
+            if (showDialogs)
+            {
+                EditorUtility.DisplayDialog(
+                    "Scene View Not Found",
+                    "Open a Scene view so the tool has a camera to match.",
+                    "OK");
+            }
+            return;
+        }
+
+        Transform mainTransform = mainCamera.transform;
+        float sceneDistance = Mathf.Max(0.0001f, sceneView.cameraDistance);
+        Vector3 scenePivot = mainTransform.position + mainTransform.forward * sceneDistance;
+        float sceneSize = mainCamera.orthographic ? mainCamera.orthographicSize : sceneView.size;
+
+        sceneView.orthographic = mainCamera.orthographic;
+        sceneView.LookAtDirect(scenePivot, mainTransform.rotation, sceneSize);
+        sceneView.Repaint();
+    }
+
+    private void EnableNextCityElement()
+    {
+        var activeGroup = GameObject.FindObjectsByType<CityElementGroup>().ToList().Where(g => g.gameObject.activeSelf).FirstOrDefault();
+        var elements = activeGroup.GetComponentsInChildren<CityElement>(true);
+        var lastActiveElement = elements.ToList().FindLast(e => e.gameObject.activeSelf);
+        var lastActiveIndex = System.Array.IndexOf(elements, lastActiveElement);
+        if (lastActiveIndex == -1)
+        {
+            lastActiveIndex = 0;
+        }
+        for (var i = 0; i < lastActiveIndex; i++)
+        {
+            var ce = elements[i];
+            ce.EnableVisuals(true);
+            ce.__GeneratedBricks.gameObject.SetActive(false);
+            if (ce.__EnclosingGameObject != null)
+                ce.__EnclosingGameObject.gameObject.SetActive(false);
+        }
+
+        for (var i = lastActiveIndex; i < elements.Length; i++)
+        {
+            var ce = elements[i];
+            if (!ce.gameObject.activeSelf)
+            {
+                SelectCityElement(ce);
+                ce.gameObject.SetActive(true);
+                return;
+            }
+
+            if (true)
+            {
+                if (ce.__GeneratedBricks.gameObject.activeSelf == false)
+                {
+                    ce.__GeneratedBricks.gameObject.SetActive(true);
+                    if (ce.__EnclosingGameObject != null)
+                        ce.__EnclosingGameObject.gameObject.SetActive(true);
+                    return;
+                }
+
+                var brickElements = new BrickLayersContainer(ce.__GeneratedBricks).sortedBricks.ToList();
+                brickElements.Reverse();
+                var visibleBricks = brickElements.Where(b => b.gameObject.activeSelf).ToList();
+                if (visibleBricks.Count > 0)
+                {
+                    var len = brickElements.Count / 10;
+                    if (len < 10)
+                    {
+                        len = 10;
+                    }
+                    for (var j = 0; j < len && j < visibleBricks.Count; j++)
+                    {
+                        visibleBricks[j].gameObject.SetActive(false);
+                    }
+                    SelectCityElement(ce);
+                    ce.EnableVisuals(false);
+                    return;
+                }
+            }
+        }
+        for (var i = 0; i < elements.Length; i++)
+        {
+            var ce = elements[i];
+            ce.gameObject.SetActive(false);
+            ce.__GeneratedBricks.gameObject.SetActive(false);
+            if (ce.__EnclosingGameObject != null)
+                ce.__EnclosingGameObject.gameObject.SetActive(false);
+        }
+    }
+
+    private void SelectCityElement(CityElement element)
+    {
+        if (element == null)
+        {
+            return;
+        }
+        Selection.activeGameObject = element.gameObject;
+        EditorGUIUtility.PingObject(element.gameObject);
+        MoveCameraToSelectedCityElement();
+
+        this.MatchSceneViewToMainCamera(Camera.main, SceneView.lastActiveSceneView, false);
+    }
+
     private void MoveCameraToSelectedCityElement()
     {
         Camera mainCamera = Camera.main;
@@ -86,24 +212,45 @@ public class CamAdjustWindow : EditorWindow
         }
 
         GameObject selectedObject = Selection.gameObjects[0];
-        CityElement cityElement = selectedObject.GetComponent<CityElement>();
-        if (cityElement == null)
+        var cityElement = selectedObject.GetComponent<CityElement>();
+        if (cityElement != null)
         {
-            Debug.LogError("select city element first");
+            mainCamera.transform.position = cityElement.camPos;
+            mainCamera.transform.rotation = Quaternion.Euler(cityElement.camRot);
+
+
+            if (s_IsPreviewEnabled)
+            {
+                s_TargetCamera = mainCamera;
+            }
             return;
         }
 
-        Undo.RecordObject(mainCamera.transform, "Move Camera To Selected CityElement");
-        mainCamera.transform.position = cityElement.camPos;
-        mainCamera.transform.rotation = Quaternion.Euler(cityElement.camRot);
-        EditorUtility.SetDirty(mainCamera.transform);
-
-        if (s_IsPreviewEnabled)
+        var group = selectedObject.GetComponent<CameraFlyController>();
+        if (group != null)
         {
-            s_TargetCamera = mainCamera;
+            mainCamera.transform.position = group.camPos;
+            mainCamera.transform.rotation = Quaternion.Euler(group.camRot);
+            if (s_IsPreviewEnabled)
+            {
+                s_TargetCamera = mainCamera;
+            }
+            return;
         }
 
-        SceneView.RepaintAll();
+        var group2 = selectedObject.GetComponent<CameraFlyController2>();
+        if (group2 != null)
+        {
+            mainCamera.transform.position = group2.camPos;
+            mainCamera.transform.rotation = Quaternion.Euler(group2.camRot);
+            if (s_IsPreviewEnabled)
+            {
+                s_TargetCamera = mainCamera;
+            }
+        }
+
+
+
     }
 
     private static void CopyCameraPosition()
@@ -115,9 +262,26 @@ public class CamAdjustWindow : EditorWindow
             var cam = Camera.main;
             ce.camPos = cam.transform.position;
             ce.camRot = cam.transform.eulerAngles;
-            //save scene
-
         }
+
+        var gr = selectedObject.GetComponent<CameraFlyController>();
+        if (gr != null)
+        {
+            var cam = Camera.main;
+            gr.camPos = cam.transform.position;
+            gr.camRot = cam.transform.eulerAngles;
+        }
+
+        var gr2 = selectedObject.GetComponent<CameraFlyController2>();
+        if (gr2 != null)
+        {
+            var cam = Camera.main;
+            gr2.camPos = cam.transform.position;
+            gr2.camRot = cam.transform.eulerAngles;
+        }
+
+        //save scene
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
     }
 
     private static void EnableCameraPreview()

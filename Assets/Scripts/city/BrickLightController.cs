@@ -15,11 +15,6 @@ public class BrickLightController : MonoBehaviour
         this.lightComponent.gameObject.SetActive(false);
         Assert.IsNotNull(this.lightComponent, $"BrickLightController Start: failed to find Light component on {this.name}");
         CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
-
-        if (CityModel.Instance.HasGroups())
-        {
-            OnCityElementUnlocked(CityModel.Instance.GetCurrentElement());
-        }
     }
 
     private void OnCityElementUnlocked(CityElement cityElement)

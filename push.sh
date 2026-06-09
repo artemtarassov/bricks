@@ -38,11 +38,12 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || {
 
 cd "$repo_root"
 
-scene_path="Assets/Scenes/Main.unity"
-zip_path="Assets/Scenes/Main.unity.zip"
+scenes_dir="Assets/Scenes"
 
-if [ ! -f "$scene_path" ]; then
-  echo "Error: scene file not found at $scene_path" >&2
+set -- "$scenes_dir"/*.unity
+
+if [ ! -f "$1" ]; then
+  echo "Error: no scene files found in $scenes_dir" >&2
   exit 1
 fi
 
@@ -51,14 +52,17 @@ branch_name=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || {
   exit 1
 }
 
-rm -f "$zip_path"
-zip -q -j "$zip_path" "$scene_path"
+for scene_path in "$@"; do
+  zip_path="$scene_path.zip"
+  rm -f "$zip_path"
+  zip -q -j "$zip_path" "$scene_path"
+done
 
 git add -A
-git reset -- "$scene_path"
+git reset -- "$@"
 
 if git diff --cached --quiet; then
-  echo "No staged changes to commit after excluding $scene_path."
+  echo "No staged changes to commit after excluding scene files in $scenes_dir."
   echo "Pushing existing commits on $branch_name..."
 else
   git commit -m "$message"

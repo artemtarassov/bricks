@@ -40,20 +40,20 @@ public class BricksLayer : MonoBehaviour
 
         if (xSortAscending && zSortAscending)
         {
-            return bricks.OrderBy(b => RoundPos(b.position.y)).ThenBy(b => RoundPos(b.position.x)).ThenBy(b => RoundPos(b.position.z)).ToList();
+            return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenBy(b => RoundPos(b.localPosition.x)).ThenBy(b => RoundPos(b.localPosition.z)).ToList();
         }
 
         if (xSortAscending && !zSortAscending)
         {
-            return bricks.OrderBy(b => RoundPos(b.position.y)).ThenBy(b => RoundPos(b.position.x)).ThenByDescending(b => RoundPos(b.position.z)).ToList();
+            return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenBy(b => RoundPos(b.localPosition.x)).ThenByDescending(b => RoundPos(b.localPosition.z)).ToList();
         }
 
         if (!xSortAscending && zSortAscending)
         {
-            return bricks.OrderBy(b => RoundPos(b.position.y)).ThenByDescending(b => RoundPos(b.position.x)).ThenBy(b => RoundPos(b.position.z)).ToList();
+            return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenByDescending(b => RoundPos(b.localPosition.x)).ThenBy(b => RoundPos(b.localPosition.z)).ToList();
         }
 
-        return bricks.OrderBy(b => RoundPos(b.position.y)).ThenByDescending(b => RoundPos(b.position.x)).ThenByDescending(b => RoundPos(b.position.z)).ToList();
+        return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenByDescending(b => RoundPos(b.localPosition.x)).ThenByDescending(b => RoundPos(b.localPosition.z)).ToList();
     }
 
     private static int RoundPos(float p)

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 29b11f5c9c3c8164b99c69323384424b
+timeCreated: 1489308779
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Prefabs/Star_01/Star_01_Anim_01.prefab
+  uploadId: 180046

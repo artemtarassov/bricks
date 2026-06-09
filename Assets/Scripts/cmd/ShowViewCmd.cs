@@ -4,7 +4,16 @@ using UnityEngine;
 
 public class ShowViewCmd
 {
-    public void Run(ViewName viewName)
+
+    public ShowViewCmd(ViewName viewName)
+    {
+        this.viewName = viewName;
+    }
+
+    private readonly ViewName viewName;
+
+
+    public void Run()
     {
         ViewModel.Instance.ShowView(viewName);
     }

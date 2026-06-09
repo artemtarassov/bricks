@@ -5,6 +5,9 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class BalancingModel
 {
@@ -18,6 +21,8 @@ public class BalancingModel
     );
 
     public static int AdditionalBricksOnEmptyElement = 3;
+    public static int StartGroupIndex = 1;
+    public static int FirstCityElementIndex = 0;
 
     private GroupDataListContainer groups;
 
@@ -156,6 +161,32 @@ public class BalancingWriter
         return Application.dataPath + $"/Resources/{fileName}.json";
     }
 
+    private string GetAssetPath()
+    {
+        return $"Assets/Resources/{fileName}.json";
+    }
+
+#if UNITY_EDITOR
+    private void RefreshEditorResource()
+    {
+        var assetPath = GetAssetPath();
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+        if (System.IO.File.Exists(GetFilePath()))
+        {
+            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+        }
+    }
+
+    private void ReloadRuntimeModelIfNeeded()
+    {
+        if (Application.isPlaying && BalancingModel.Instance != null)
+        {
+            BalancingModel.Instance.Load();
+            Debug.Log("BalancingModel: reloaded balancing data during play mode.");
+        }
+    }
+#endif
+
     public List<string> GetAllGroups()
     {
         Assert.IsNotNull(this.groups, "BalancingWriter GetAllGroups: groups is null");
@@ -175,7 +206,15 @@ public class BalancingWriter
         {
             Debug.Log($"BalancingModel Delete: deleting file {filePath}");
             System.IO.File.Delete(filePath);
-            Resources.UnloadAsset(Resources.Load<TextAsset>($"{fileName}"));
+            var resource = Resources.Load<TextAsset>($"{fileName}");
+            if (resource != null)
+            {
+                Resources.UnloadAsset(resource);
+            }
+#if UNITY_EDITOR
+            RefreshEditorResource();
+            ReloadRuntimeModelIfNeeded();
+#endif
         }
     }
     public void Save()
@@ -187,7 +226,11 @@ public class BalancingWriter
         if (System.IO.File.Exists(filePath))
         {
             Debug.Log($"BalancingModel Save: deleting existing file {filePath}");
-            Resources.UnloadAsset(Resources.Load<TextAsset>($"{fileName}"));
+            var existingResource = Resources.Load<TextAsset>($"{fileName}");
+            if (existingResource != null)
+            {
+                Resources.UnloadAsset(existingResource);
+            }
             System.IO.File.Delete(filePath);
         }
         Debug.Log($"BalancingModel Save to " + filePath);
@@ -195,7 +238,13 @@ public class BalancingWriter
         var elements = this.groups.groups.Sum(g => g.cityElementDataList.Count);
         Debug.Log($"BalancingModel saved {json.Length} bytes to {filePath}, groups: {this.groups.groups.Count}, elements: {elements}");
 
+#if UNITY_EDITOR
+        RefreshEditorResource();
+#endif
         Resources.Load<TextAsset>($"{fileName}");
+#if UNITY_EDITOR
+        ReloadRuntimeModelIfNeeded();
+#endif
     }
 
 

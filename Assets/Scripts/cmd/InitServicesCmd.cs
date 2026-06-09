@@ -15,9 +15,6 @@ public class InitServicesCmd
     {
         //init unity services
         root.gameObject.AddComponent<InitializeUnityServices>();
-#if UNITY_IOS && !UNITY_EDITOR
-        root.gameObject.AddComponent<AppleGameCenterController>();
-#endif
         new InitFBCmd().Run();
         new InitIAPCmd().Run();
     }

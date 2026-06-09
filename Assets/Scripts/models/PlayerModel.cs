@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -25,6 +26,33 @@ public class PlayerModel
         FilePrefs.Save();
     }
 
+    public List<string> GetPlayableGroupNames()
+    {
+        return playerData.progress.FindAll(g => g.state != GroupState.Locked).ConvertAll(g => g.groupName);
+    }
+
+    public void SetCurrentGroup(GroupState newState)
+    {
+        this.SetCurrentGroup(playerData.currentGroupName, newState);
+    }
+
+    public void SetCurrentGroup(string groupName, GroupState newState)
+    {
+        var progress = playerData.progress.Find(p => p.groupName == groupName);
+        if (progress == null)
+        {
+            Debug.LogError($"PlayerModel: SetCurrentGroup: no progress found for group {groupName}");
+            return;
+        }
+        if (progress.state == GroupState.Playing && newState == GroupState.Completed)
+        {
+            progress.completedCounter += 1;
+        }
+        progress.state = newState;
+        playerData.currentGroupName = groupName;
+        playerData.isDirty = true;
+        OnPlayerDataChanged?.Invoke();
+    }
 
     public void EnableSetting(SettingsKey key, bool enable)
     {
@@ -58,7 +86,8 @@ public class PlayerModel
             unlockedBuildings = 0,
             attempts = 1,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
-            isDirty = true
+            isDirty = true,
+            progress = new List<GroupProgressData>()
         };
     }
 
@@ -92,7 +121,7 @@ public class PlayerModel
 
     public void AddCoins(int amount)
     {
-        Debug.Log($"PlayerModel: adding {amount} coins");
+        //Debug.Log($"PlayerModel: adding {amount} coins");
         this.playerData.coins += amount;
         this.playerData.isDirty = true;
         OnPlayerDataChanged?.Invoke();
@@ -100,7 +129,7 @@ public class PlayerModel
 
     public void AddDailyRewardCoins(int amount)
     {
-        Debug.Log($"PlayerModel: adding {amount} daily reward coins");
+        //Debug.Log($"PlayerModel: adding {amount} daily reward coins");
         this.playerData.coins += amount;
         this.playerData.lastDailyRewardTimestamp = TimeUtils.GetUnixTimestamp();
         this.playerData.isDirty = true;
@@ -158,4 +187,6 @@ public class PlayerModel
             this.playerData.currentElement.columns.ForEach((s) => s.ResetEmittingStates());
         }
     }
+
+
 }

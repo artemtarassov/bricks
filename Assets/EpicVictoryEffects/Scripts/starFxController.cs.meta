@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 01eabf86c4473504f9f444ee4dcb6370
+timeCreated: 1486577561
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Scripts/starFxController.cs
+  uploadId: 180046

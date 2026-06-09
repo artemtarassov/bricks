@@ -24,8 +24,12 @@ public class BrickLayersContainer
         }
         if (looseChildren.Count > 0)
         {
-            var sortedLooseBricks = looseChildren.OrderBy(b => RoundPos(b.position.y)).ThenBy(b => RoundPos(b.position.x)).ThenBy(b => RoundPos(b.position.z));
+            var sortedLooseBricks = looseChildren.OrderBy(b => RoundPos(b.localPosition.y)).ThenBy(b => RoundPos(b.localPosition.x)).ThenBy(b => RoundPos(b.localPosition.z));
             sortedBricks.AddRange(sortedLooseBricks);
+        }
+        foreach (var b in sortedBricks)
+        {
+           // b.transform.localScale = b.transform.localScale * 0.97f; //force scale update to fix any issues with lossy scale not being updated on child bricks
         }
     }
 

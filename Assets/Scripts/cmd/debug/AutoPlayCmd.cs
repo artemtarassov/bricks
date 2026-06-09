@@ -10,7 +10,7 @@ public class AutoPlayCmd
     private static Sequence sequence;
     public void Run()
     {
-        Time.timeScale = 2.0f;
+        //Time.timeScale = 2.0f;
         if (sequence != null)
         {
             sequence.Kill();
@@ -34,7 +34,7 @@ public class AutoPlayCmd
         }
 
         var columns = SlotModel.Instance.Columns;
-        var currentElement = CityModel.Instance.GetCurrentElement();
+        var currentElement = ModelUtils.GetCurrentElement();
 
         if (currentElement.dataContainer.ElementCountEmittingBricks() > 0)
         {

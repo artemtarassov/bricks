@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f60e279a68ed89f41966c8993b9bbc6d
+timeCreated: 1483246181
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88115
+  packageName: Epic Victory Effects
+  packageVersion: 1.0
+  assetPath: Assets/EpicVictoryEffects/Materials/GlowDot_01_Light.mat
+  uploadId: 180046

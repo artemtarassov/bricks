@@ -18,8 +18,10 @@ public class UIBrick : MonoBehaviour
         }
         this.img.gameObject.SetActive(true);
         this.amountTxt.gameObject.SetActive(true);
-        var color = ColoredMaterials.Instance.GetColorByColorIndex(brickData.color);
-        this.img.color = color;
+        //var color = ColoredMaterials.Instance.GetColorByColorIndex(brickData.color);
+        //this.img.color = color;
+        var mat = ColoredMaterials.Instance.GetMaterialByColorIndex(brickData.color);
+        // this.img.sprite= mat.mainTexture.AddComponent<Sprite>();
         this.amountTxt.text = brickData.coloredAmount.ToString();
     }
 }

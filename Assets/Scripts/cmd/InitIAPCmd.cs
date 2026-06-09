@@ -111,8 +111,7 @@ class MyIAPManager
 
         isRestoring = true;
         restoredProductIds.Clear();
-        new HideViewCmd().Run();
-        new ShowViewCmd().Run(ViewName.LoadingView);
+        new ShowViewCmd(ViewName.LoadingView).Run();
 
         storeController.RestoreTransactions(
             (bool b, string error) =>
@@ -128,7 +127,7 @@ class MyIAPManager
     private void FinishRestore(IapResponse response, string message = null)
     {
         isRestoring = false;
-        new HideViewCmd().Run(ViewName.LoadingView);
+        new HideViewCmd(ViewName.LoadingView).Run();
 
         foreach (var productId in restoredProductIds)
         {
@@ -149,7 +148,7 @@ class MyIAPManager
             return;
         }
 
-        new ShowViewCmd().Run(ViewName.LoadingView);
+        new ShowViewCmd(ViewName.LoadingView).Run();
 
         try
         {
@@ -157,7 +156,7 @@ class MyIAPManager
         }
         catch (Exception e)
         {
-            new HideViewCmd().Run(ViewName.LoadingView);
+            new HideViewCmd(ViewName.LoadingView).Run();
             Debug.LogWarning("MyIAPManager PurchaseProduct failed: " + e.Message);
         }
     }
@@ -225,7 +224,7 @@ class MyIAPManager
             new CompleteIapCmd(cartItem.Product.definition.id, message).Run(response);
         }
 
-        new HideViewCmd().Run(ViewName.LoadingView);
+        new HideViewCmd(ViewName.LoadingView).Run();
         storeController.ConfirmPurchase(order);
     }
 
@@ -268,7 +267,7 @@ class MyIAPManager
 
     private void OnPurchaseFailed(FailedOrder failedOrder)
     {
-        new HideViewCmd().Run(ViewName.LoadingView);
+        new HideViewCmd(ViewName.LoadingView).Run();
         var urlEncodedMsg = Uri.EscapeDataString(failedOrder.Details);
 
         foreach (var cartItem in failedOrder.CartOrdered.Items())
@@ -292,7 +291,7 @@ class MyIAPManager
 
     private void OnPurchaseDeferred(DeferredOrder deferredOrder)
     {
-        new HideViewCmd().Run(ViewName.LoadingView);
+        new HideViewCmd(ViewName.LoadingView).Run();
 
         foreach (var cartItem in deferredOrder.CartOrdered.Items())
         {

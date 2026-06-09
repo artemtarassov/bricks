@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class CityElementGroup : MonoBehaviour
 {
     public string GroupName => this.gameObject.name;
     private HashSet<CityElement> elements;
+
+    private Transform centerObj;
 
     public HashSet<CityElement> GetElements()
     {
@@ -12,6 +15,7 @@ public class CityElementGroup : MonoBehaviour
         {
             elements = new HashSet<CityElement>(this.GetComponentsInChildren<CityElement>(true));
         }
+        Assert.IsTrue(elements.Count > 0, $"CityElementGroup {GroupName} has no CityElements");
 #if UNITY_EDITOR
         //ensure that all elements have unique data keys
         var dataKeys = new HashSet<string>();
@@ -29,6 +33,15 @@ public class CityElementGroup : MonoBehaviour
 
 #endif
         return elements;
+    }
+
+    public Transform GetCamCenterPos()
+    {
+        if (centerObj == null)
+        {
+            centerObj = this.transform.Find("CamCenter");
+        }
+        return centerObj != null ? centerObj : this.transform;
     }
 
 

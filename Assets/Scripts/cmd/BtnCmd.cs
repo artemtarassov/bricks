@@ -42,7 +42,7 @@ public class BtnCmd
                 Toast("Not enough coins");
                 return;
             }
-            playerModel.AddCoins(-costs);
+            new AddCoinsCmd(-costs).Run();
             playerModel.FillAttempts(max, max);
             return;
         }
@@ -61,7 +61,7 @@ public class BtnCmd
             pd.currentElement = currentElement;
             pd.isDirty = true;
        
-            var cityElement = cityModel.GetCurrentElement();
+            var cityElement = ModelUtils.GetCurrentElement();
             Assert.AreEqual(cityElement.dataKey, currentElement.dataKey, "BtnCmd: ContinueNextAttempt: current city element data key should match player data current element data key");
             
             cityElement.Setup(currentElement);

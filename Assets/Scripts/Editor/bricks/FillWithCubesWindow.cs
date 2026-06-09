@@ -20,10 +20,11 @@ public class FillWithCubesWindow : EditorWindow
         int ignoredSelectionCount = Selection.gameObjects.Length - validSelectedObjects.Count;
         GameObject activeSelectedObject = Selection.activeGameObject;
         bool canToggleGeneratedBricks = activeSelectedObject != null && activeSelectedObject.GetComponent<CityElementGroup>() != null;
+        bool canFixBrickSpacing = Selection.gameObjects.Length > 0;
 
         EditorGUILayout.LabelField("Brick Settings", EditorStyles.boldLabel);
         settings.BrickSize = EditorGUILayout.FloatField("Brick Size", settings.BrickSize);
-        settings.BrickGap = EditorGUILayout.FloatField("Brick Gap", settings.BrickGap);
+        /*settings.BrickGap = EditorGUILayout.FloatField("Brick Gap", settings.BrickGap);
         settings.IncludeInactiveObjects = EditorGUILayout.Toggle("Include Inactive", settings.IncludeInactiveObjects);
 
         EditorGUILayout.Space();
@@ -32,7 +33,7 @@ public class FillWithCubesWindow : EditorWindow
         EditorGUILayout.LabelField("Brick Material", FillWithCubesSettings.BrickMaterialPath);
         settings.AddBrickColliders = EditorGUILayout.Toggle("Add Brick Colliders", settings.AddBrickColliders);
 
-        EditorGUILayout.Space();
+        EditorGUILayout.Space();*/
 
         if (validSelectedObjects.Count == 0)
         {
@@ -56,7 +57,7 @@ public class FillWithCubesWindow : EditorWindow
         {
             if (GUILayout.Button("Add Bricks"))
             {
-                ApplyToSelection(validSelectedObjects, target => new FillWithBricks2().Run(target, settings));
+                ApplyToSelection(validSelectedObjects, AddBricksAndFixSpacing);
             }
 
             if (GUILayout.Button("Preview Colored Bricks"))
@@ -69,16 +70,18 @@ public class FillWithCubesWindow : EditorWindow
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.ClearBricks);
             }
 
-            /*if (GUILayout.Button("Cleanup Touching Bricks"))
+            if (GUILayout.Button("Cleanup Touching Bricks"))
             {
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupTouchingBricks);
             }
 
+            
             if (GUILayout.Button("clean up non visible bricks via camera"))
             {
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupNonVisibleBricksViaCamera);
             }
 
+            /*
             if (GUILayout.Button("clean up non visible bricks via scene view"))
             {
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupNonVisibleBricksViaSceneView);
@@ -94,6 +97,16 @@ public class FillWithCubesWindow : EditorWindow
                 ApplyToSelection(validSelectedObjects, FillWithCubesGenerator.CleanupTouchingBricksAgainstScene);
             }*/
 
+        }
+
+        EditorGUILayout.Space();
+
+        using (new EditorGUI.DisabledScope(!canFixBrickSpacing))
+        {
+            if (GUILayout.Button("Fix Brick Spacing (Selected Objects)"))
+            {
+                ApplyToSelection(new List<GameObject>(Selection.gameObjects), BrickSpacingFixer.FixSpacing);
+            }
         }
 
         EditorGUILayout.Space();
@@ -156,5 +169,25 @@ public class FillWithCubesWindow : EditorWindow
         {
             action(selectedObject);
         }
+    }
+
+    private void AddBricksAndFixSpacing(GameObject targetObject)
+    {
+        new FillWithBricks3().Run(targetObject, settings);
+
+        var cityElement = targetObject.GetComponent<CityElement>();
+        if (cityElement == null)
+        {
+            return;
+        }
+
+        Transform generatedBricks = cityElement.GetChildByName(FillWithCubesSettings.GeneratedGroupName);
+        if (generatedBricks == null)
+        {
+            Debug.LogWarning($"Add Bricks created no {FillWithCubesSettings.GeneratedGroupName} under {targetObject.name}.");
+            return;
+        }
+
+        BrickSpacingFixer.FixSpacing(generatedBricks.gameObject);
     }
 }

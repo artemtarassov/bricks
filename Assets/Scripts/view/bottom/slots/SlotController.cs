@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
 {
+    [SerializeField] private GameObject content;
     private List<SlotColumn> columns;
     private SlotColumn columnPrefab;
 
@@ -13,6 +15,8 @@ public class SlotController : MonoBehaviour
 
     [SerializeField]
     private Button addSpaceButton;
+
+    private Vector3 startPos;
 
     void Awake()
     {
@@ -24,6 +28,7 @@ public class SlotController : MonoBehaviour
 
     void Start()
     {
+        this.startPos = this.content.transform.localPosition;
         this.emitterPrefab.gameObject.SetActive(false);
         this.columnPrefab.gameObject.SetActive(false);
 
@@ -39,15 +44,43 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
         SlotModel.Instance.OnRemovedFromColumn += OnRemovedFromColumn;
-        CityModel.Instance.OnCityElementUnlocked += OnCityElementUnlocked;
+        ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
 
         this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
 
-        if (CityModel.Instance.HasGroups())
+        this.UpdateVisibility();
+    }
+
+    private void OnBottomNavChange(BottomNav nav)
+    {
+        UpdateVisibility();
+    }
+
+    private void UpdateVisibility()
+    {
+        var nav = ViewModel.Instance.CurrentBottomNav;
+        if (nav == BottomNav.Slots)
         {
-            this.Setup();
+            this.AnimateIn();
+        }
+        else
+        {
+            this.content.SetActive(false);
         }
     }
+
+    private void AnimateIn()
+    {
+        if (this.content.activeSelf)
+        {
+            return;
+        }
+        this.content.SetActive(true);
+        this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
+        this.content.transform.DOLocalMove(this.startPos, 0.5f).SetEase(Ease.OutSine);
+    }
+
+  
 
     private void OnRemovedFromColumn(SlotElementData data)
     {
@@ -64,7 +97,7 @@ public class SlotController : MonoBehaviour
 
     private void OnAddSpaceButtonClicked()
     {
-        new ShowViewCmd().Run(ViewName.AddSpaceView);
+        new ShowViewCmd(ViewName.AddSpaceView).Run();
     }
 
     private SlotColumn GetSlotColumnByIndex(int index)
@@ -97,19 +130,8 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnEmitterChanged -= OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged -= OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
-        CityModel.Instance.OnCityElementUnlocked -= OnCityElementUnlocked;
         SlotModel.Instance.OnRemovedFromColumn -= OnRemovedFromColumn;
-    }
-
-    private void OnCityElementUnlocked(CityElement ce)
-    {
-        //this.Setup();
-    }
-
-    private void Setup()
-    {
-        this.OnEmitterChanged();
-        this.OnColumnsChanged();
+        ViewModel.Instance.OnBottomNavChange -= OnBottomNavChange;
     }
 
     private void OnEmitterChanged(EmitterSpace es = null)
