@@ -28,6 +28,11 @@ public class GoldenTicketView : DefaultView
     {
         new RequestPurchaseCmd(productName).Run();
     }
+
+    public override void OnBackgroundTap()
+    {
+        new HideViewCmd(ViewName.GoldenTicketView).Run();
+    }
     void OnDestroy()
     {
     }

@@ -8,8 +8,7 @@ public class RestartCurrentGroupCmd
     public void Run()
     {
         var pd = PlayerModel.Instance.playerData;
-        var progress = pd.GetCurrentGroupProgress();
-        progress.currentElement = null;
+        pd.currentElement = null;
         PlayerModel.Instance.SetCurrentGroup(GroupState.Unlocked);
         CityModel.Instance.DeactivateAllElements();
         new PlayCurrentGroupCmd().Run();

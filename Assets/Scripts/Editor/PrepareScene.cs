@@ -27,13 +27,9 @@ public class PrepareScene
 
             Assert.IsNotNull(element.__GeneratedBricks, "CityElement " + element.name + " is missing __GeneratedBricks child");
             element.gameObject.SetActive(false);
-            Debug.Log("Deactivating element " + element.name);
 
             if (element.__EnclosingGameObject != null)
                 element.__EnclosingGameObject.gameObject.SetActive(false);
-
-         
-            Debug.Log("Activating element " + element.name);
 
             for (var i = 0; i < element.transform.childCount; i++)
             {

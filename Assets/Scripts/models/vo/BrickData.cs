@@ -45,6 +45,19 @@ public class BrickData
         return this.states.FindIndex(s => s == state);
     }
 
+    public HashSet<int> GetBrickIndexList(BrickState state)
+    {
+        var indices = new HashSet<int>();
+        for (int i = 0; i < this.states.Count; i++)
+        {
+            if (this.states[i] == state)
+            {
+                indices.Add(i);
+            }
+        }
+        return indices;
+    }
+
     public BrickState GetBrickState(int index)
     {
         if (index < 0 || index >= this.states.Count)

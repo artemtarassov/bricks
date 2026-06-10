@@ -28,11 +28,11 @@ public class EmitBrickCmd
 {
     private CityElement cityElement;
     private CityElementDataContainer elementDataContainer => cityElement.dataContainer;
-    private Transform nextBrick;
+    private Transform nextBrick => elementBrickData.brickTransform;
     private ColorIndex colorIndex => emitter.brickData.color;
     private EmitterSpace emitter;
     private BrickData emitterBrickData;
-    private BrickData elementBrickData;
+    private ColoredBrickInfo elementBrickData;
 
     public EmitBrickCmd(EmitterSpace emitter)
     {
@@ -40,8 +40,8 @@ public class EmitBrickCmd
         this.cityElement = ModelUtils.GetCurrentElement();
         this.emitter = emitter;
         this.emitterBrickData = emitter.brickData;
-        this.elementBrickData = elementDataContainer.brickDataList.Find(b => b.color == this.colorIndex && b.coloredAmount > 0);
-        Assert.IsNotNull(this.elementBrickData, $"No brick data found in city element for color {this.colorIndex}");
+        this.elementBrickData = cityElement.GetFurthestColoredBrick(this.colorIndex);
+
         Assert.IsNotNull(this.cityElement, "No current city element found");
         Assert.AreNotEqual(this.colorIndex, ColorIndex.Undefined, "Color index must be defined");
     }
@@ -55,19 +55,13 @@ public class EmitBrickCmd
 
     public void Run()
     {
-        this.nextBrick = cityElement.GetColoredBrick(this.colorIndex);
-        if (nextBrick == null)
-        {
-            Debug.LogError("No next brick found in city element for color " + this.colorIndex);
-            return;
-        }
         PlayerModel.Instance.playerData.isDirty = true;
         //from pos is 10 in front of camera
         var fromPos = GetFromPos();
         CityModel.Instance.FlyBrick(fromPos, nextBrick, this.colorIndex);
 
         emitterBrickData.SetBrickState(emitterBrickData.GetBrickIndex(BrickState.Colored), BrickState.Full);
-        elementBrickData.SetBrickState(elementBrickData.GetBrickIndex(BrickState.Colored), BrickState.Emitting);
+        elementBrickData.brickData.SetBrickState(elementBrickData.index, BrickState.Emitting);
 
         SlotModel.Instance.UpdateEmitters(emitter);
         DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete, false);
@@ -81,11 +75,8 @@ public class EmitBrickCmd
     private void OnFlyComplete()
     {
         //Debug.Log("EmitBricksCmd OnFlyComplete Fly complete for color " + this.colorIndex + " time " + Time.time);
-
-        var emittingBrickindex = elementBrickData.GetBrickIndex(BrickState.Emitting);
-        if (emittingBrickindex != -1)
         {
-            elementBrickData.SetBrickState(emittingBrickindex, BrickState.Full);
+            elementBrickData.brickData.SetBrickState(elementBrickData.index, BrickState.Full);
             cityElement.ShowCurrentState();
         }
 

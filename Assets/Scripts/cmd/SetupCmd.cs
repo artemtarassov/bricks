@@ -35,6 +35,8 @@ public class SetupCmd
         var cityElementGroups = root.GetComponentsInChildren<CityElementGroup>(true).ToList();
         new SetupCityCmd().Run(cityElementGroups);
 
+        new EnsureSolveableCmd().Run();
+
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
 
 #if !UNITY_EDITOR

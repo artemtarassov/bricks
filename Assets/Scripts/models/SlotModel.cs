@@ -84,6 +84,9 @@ public class SlotModel
 
     public void Fill(List<SlotColumnData> columns)
     {
+        var hasExplosive = columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
+        Assert.IsTrue(hasExplosive, "SlotModel Fill: columns should contain explosive elements");
+
         for (var i = 0; i < this.Emitters.Count; i++)
         {
             this.Emitters[i].brickData = null;
@@ -165,6 +168,7 @@ public class SlotModel
 
         Assert.IsTrue(brickData.color != ColorIndex.Undefined, "Brick color must be defined");
         Assert.IsTrue(this.Columns.Any(c => c.list.Any(e => e.brickData == brickData)), "Brick data not found in any column");
+        Assert.IsFalse(brickData.inEmitter, "Brick data is already in emitter");
 
         var emitterIndex = AddToUnlockedEmitter(brickData);
         Assert.IsTrue(emitterIndex >= 0, "No empty emitter found");

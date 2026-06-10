@@ -7,7 +7,6 @@ public class CompleteCurrentGroupCmd
 {
     public void Run()
     {
-        Debug.Log("CompleteCurrentGroupCmd Run");
         var cityModel = CityModel.Instance;
         var playerModel = PlayerModel.Instance;
         var pd = playerModel.playerData;
@@ -39,23 +38,6 @@ public class CompleteCurrentGroupCmd
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
 
         new ShowViewCmd(ViewName.CompleteView).Run();
-
-
-        /*var nextGroupName = cityModel.GetNextGroupName();
-        if (nextGroupName == null)
-        {
-            //out of groups, game completed.
-            Debug.LogError("UnlockNextCmd no groups");
-        }
-        else
-        {
-            cityModel.SetCurrentGroupName(nextGroupName);
-            currentElementData = null;
-            currentGroupName = nextGroupName;
-            playerModel.playerData.currentGroupName = nextGroupName;
-            playerModel.playerData.currentElement = null;
-            this.Run();
-        }*/
     }
 
 }

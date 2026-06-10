@@ -87,6 +87,8 @@ public class ViewModel
 
     public BottomNav CurrentBottomNav { get; private set; } = BottomNav.None;
 
+    public int GoldenTicketViewTriggerTimestamp = 0;
+
 
     public ViewModel()
     {
@@ -95,7 +97,7 @@ public class ViewModel
 
     public void ChangeBottomNav(BottomNav nav)
     {
-        if(CurrentBottomNav == nav)
+        if (CurrentBottomNav == nav)
         {
             return;
         }

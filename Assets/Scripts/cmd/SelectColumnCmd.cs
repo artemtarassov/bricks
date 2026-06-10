@@ -8,11 +8,12 @@ public class SelectColumnCmd
     private SlotElementData data;
     private SlotElement element;
 
-    public SelectColumnCmd(int columnIndex)
+    public SelectColumnCmd(int columnIndex, SlotElement e = null)
     {
         var elementData = SlotModel.Instance.GetNextSlotElementDataInColumn(columnIndex);
         Assert.IsNotNull(elementData, $"SelectColumnCmd: No element found in column {columnIndex}");
         this.data = elementData;
+        this.element = e;
     }
 
     public void Run()
@@ -34,7 +35,7 @@ public class SelectColumnCmd
         }
         var element = ModelUtils.GetCurrentElement();
 
-        if (this.data.type == SlotElementType.Bricks)
+        if (this.data.type == SlotElementType.Bricks || this.data.type == SlotElementType.HiddenBricks)
         {
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
             if (!hasEmitterSpace)
@@ -57,11 +58,12 @@ public class SelectColumnCmd
         {
             if (AdModel.Instance.IsAdReady(RewardName.INTERSTITIAL))
                 new ShowAdCmd().Run(RewardName.INTERSTITIAL);
+            else Debug.Log("SelectColumnCmd: ad reward selected but ad is not ready");
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
 
-        if (this.data.type == SlotElementType.Explosion)
+        if (this.data.type == SlotElementType.FinalExplosion)
         {
             if (element.dataContainer.ElementCompleted() && element.HasVisuals() == false)
             {

@@ -25,12 +25,12 @@ public class BrickLightController : MonoBehaviour
         Assert.IsTrue(camPos != null, $"BrickLightController OnCityElementUnlocked: camPos should not be null for city element {cityElement.name}");
         Assert.IsTrue(sourcePos != null, $"BrickLightController OnCityElementUnlocked: sourcePos should not be null for city element {cityElement.name}");
         Assert.IsTrue(Vector3.Distance(camPos, sourcePos) > 1.0f, $"BrickLightController OnCityElementUnlocked: camPos {camPos} and sourcePos {sourcePos} should not be the same for city element {cityElement.name}");
-        Assert.AreNotEqual(sourcePos,Vector3.zero, $"BrickLightController OnCityElementUnlocked: sourcePos should not be Vector3.zero for city element {cityElement.name}");
+        Assert.AreNotEqual(sourcePos, Vector3.zero, $"BrickLightController OnCityElementUnlocked: sourcePos should not be Vector3.zero for city element {cityElement.name}");
         Assert.AreNotEqual(camPos, Vector3.zero, $"BrickLightController OnCityElementUnlocked: camPos should not be Vector3.zero for city element {cityElement.name}");
         //position the light 10 units away from the source in the direction of the camera
         var direction = (camPos - sourcePos).normalized;
         var targetPos = sourcePos + direction * 5f;
-        this.lightComponent.transform.position = targetPos;
+        this.lightComponent.transform.position = targetPos - new Vector3(2, 0, 0);
     }
     void OnDestroy()
     {

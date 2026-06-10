@@ -12,8 +12,26 @@ public class CompleteAdRewardCmd
         //
         var rd = AdModel.Instance.GetRewardData(unit);
         AdModel.Instance.SetRewardEarned(unit);
-        
+
         Debug.Log("CompleteAdRewardCmd. unit: " + unit + ", recorded: " + recorded);
+
+        if (rd.rewardName == RewardName.INTERSTITIAL)
+        {
+            var curTimestamp = TimeUtils.GetUnixTimestamp();
+            var lastTriggerTimestamp = ViewModel.Instance.GoldenTicketViewTriggerTimestamp;
+
+            var secDiff = curTimestamp - lastTriggerTimestamp;
+            if (secDiff > 60 * 60)
+            {
+                var hasIapPrices = IAPModel.Instance.HasPriceForProduct(IAPModel.GoldenTicket) && IAPModel.Instance.HasPriceForProduct(IAPModel.GoldenTicketTemp);
+                if (hasIapPrices)
+                {
+                    ViewModel.Instance.GoldenTicketViewTriggerTimestamp = curTimestamp;
+                    new ShowViewCmd(ViewName.GoldenTicketView).Run();
+                }
+            }
+            return;
+        }
 
         if (!recorded)
         {

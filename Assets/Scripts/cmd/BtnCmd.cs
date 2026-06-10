@@ -56,19 +56,8 @@ public class BtnCmd
             }
             var pd = playerModel.playerData;
             var currentGroup = pd.currentGroupName;
-            var currentElement = pd.currentElement;
-            currentElement = BalancingModel.Instance.GetDataCopy(currentGroup, currentElement.dataKey);
-            pd.currentElement = currentElement;
-            pd.isDirty = true;
-       
-            var cityElement = ModelUtils.GetCurrentElement();
-            Assert.AreEqual(cityElement.dataKey, currentElement.dataKey, "BtnCmd: ContinueNextAttempt: current city element data key should match player data current element data key");
-            
-            cityElement.Setup(currentElement);
-            currentElement.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-
-            cityElement.ShowCurrentState();
-            slotModel.Fill(currentElement.columns);
+            pd.currentElement = BalancingModel.Instance.GetDataCopy(currentGroup, pd.currentElement.dataKey);
+            new UnlockNextCmd().Run();
             ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }

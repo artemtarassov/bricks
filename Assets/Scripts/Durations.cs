@@ -17,5 +17,5 @@ public static class Durations
 
     public const float RocketFlyDuration = 0.75f;
 
-    public const float ExplosionDuration = 2.0f;
+    public const float ExplosionDuration = 1.6f;
 }

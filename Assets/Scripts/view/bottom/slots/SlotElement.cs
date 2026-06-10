@@ -45,11 +45,22 @@ public class SlotElement : MonoBehaviour
             SetupWithHiddenBricks();
             return;
         }
-        if (data.type == SlotElementType.Explosion)
+        if (data.type == SlotElementType.FinalExplosion)
         {
             SetupWithExplosion();
             return;
         }
+        if (data.type == SlotElementType.Ad)
+        {
+            SetupWithAd();
+            return;
+        }
+    }
+
+    private void SetupWithAd()
+    {
+        this.SetupAsEmpty();
+        this.ad.SetActive(true);
     }
 
     private void SetupWithExplosion()

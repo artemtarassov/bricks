@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
+
 [Serializable]
 public enum SettingsKey
 {
@@ -33,7 +34,7 @@ public enum SlotElementType
     AddMoreBricks = 3,
     Coins = 4,
     Ad = 5,
-    Explosion = 6,
+    FinalExplosion = 6,
 }
 
 [Serializable]

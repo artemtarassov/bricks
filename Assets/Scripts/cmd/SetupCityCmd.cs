@@ -30,44 +30,14 @@ public class SetupCityCmd
         {
             var firstGroup = groups[0].GroupName;
             cityModel.SetGroups(groups, firstGroup);
-            pd.currentGroupName = firstGroup;
+            pd.SetCurrentGroup(firstGroup);
         }
         else
         {
             cityModel.SetGroups(groups, pd.currentGroupName);
         }
 
-        /*var cityElementData = pd.currentElement;
-        if (cityElementData != null)
-        {
-            var group = cityModel.GetGroupByName(pd.currentGroupName);
-            var elements = group.GetElements().ToList();
-            var currentElementIndex = elements.FindIndex((e) => e.dataKey == cityElementData.dataKey);
-            cityModel.ActivateElements(currentElementIndex);
-
-            var allCompleted = pd.currentElement.AllSlotsEmpty() && pd.currentElement.ElementCompleted();
-            if (allCompleted)
-            {
-                //new UnlockNextCmd().Run();
-            }
-            else
-            {
-
-                if (cityElementData.ElementCountColoredBricks() == 0)
-                    cityElementData.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-                var cityElement = cityModel.GetElementByDataKey(cityElementData.dataKey);
-                cityElement.Setup(cityElementData);
-                //SlotModel.Instance.Fill(cityElementData.columns);
-                //CamModel.Instance.MoveCameraToCityElement(cityElement);
-            }
-            return;
-        }*/
-
-        //CamModel.Instance.MoveCameraToElementGroup();
-
         new SwitchGroupCmd().Run(0);//load current group, this will also move the camera to the group.
-
-        //new UnlockNextCmd().Run();
 
 #if UNITY_EDITOR    
         new ValidateDataCmd().Run();

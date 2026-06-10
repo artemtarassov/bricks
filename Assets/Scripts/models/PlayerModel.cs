@@ -46,11 +46,10 @@ public class PlayerModel
         }
         if (progress.state == GroupState.Playing && newState == GroupState.Completed)
         {
-            progress.completedCounter += 1;
+            progress.completedGroupCounter += 1;
         }
         progress.state = newState;
-        playerData.currentGroupName = groupName;
-        playerData.isDirty = true;
+        playerData.SetCurrentGroup(groupName);
         OnPlayerDataChanged?.Invoke();
     }
 
@@ -83,7 +82,6 @@ public class PlayerModel
         {
             enabledSettings = allSettingsKeys,
             coins = 10000,
-            unlockedBuildings = 0,
             attempts = 1,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,

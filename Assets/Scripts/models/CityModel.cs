@@ -6,6 +6,10 @@ using UnityEngine.Assertions;
 
 public class FlyBrickData
 {
+    public FlyBrickData()
+    {
+        
+    }
     public Vector3 from;
     public Transform targetBrick;
     public ColorIndex colorIndex;

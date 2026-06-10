@@ -10,6 +10,13 @@ class BrickInfo
     public ColorIndex color;
 }
 
+public struct ColoredBrickInfo
+{
+    public BrickData brickData;
+    public Transform brickTransform;
+    public int index;
+}
+
 public class CityElement : MonoBehaviour
 {
     [SerializeField] public Vector3 camPos;
@@ -55,15 +62,20 @@ public class CityElement : MonoBehaviour
         return brickLayersContainer;
     }
 
+    public BricksMatrix matrix { get; private set; }
+
     public void Setup(CityElementDataContainer dataContainer)
     {
         //Debug.Log($"CityElement Setup: setting up city element {this.name} with data container {dataContainer.dataKey}");
         Assert.IsNotNull(dataContainer, "Data container should not be null when setting up city element " + this.gameObject.name);
         this.dataContainer = dataContainer;
+
         this.EnableBricks(true);
         this.EnableVisuals(false);
         this.SetBrickColors();
         this.ShowCurrentState();
+
+        this.matrix = new BricksMatrix(this);
     }
 
     public List<Transform> FindAllBricks()
@@ -146,30 +158,33 @@ public class CityElement : MonoBehaviour
     }
 
 
-    public Transform GetColoredBrick(ColorIndex colorIndex)
+    public ColoredBrickInfo GetFurthestColoredBrick(ColorIndex colorIndex)
     {
-        var elementBrickData = dataContainer.brickDataList.Find(b => b.color == colorIndex && b.coloredAmount > 0);
-        if (elementBrickData == null)
+        var camPos = Camera.main.transform.position;
+        var allColoredBricks = GetColoredBricks(colorIndex);
+        var closestBricks = allColoredBricks.OrderBy(b => Vector3.Distance(b.brickTransform.position, camPos));
+        if (closestBricks.Count() == 0)
         {
-            return null;
+            return default(ColoredBrickInfo);
         }
-        return GetBrick(elementBrickData, elementBrickData.GetBrickIndex(BrickState.Colored));
+        var furthestBrick = closestBricks.Last();
+        return furthestBrick;
     }
 
-    public List<Transform> GetColoredBricks()
+
+
+    public List<ColoredBrickInfo> GetColoredBricks(ColorIndex colorIndex = ColorIndex.Undefined)
     {
-        var coloredBricks = new List<Transform>();
+        var coloredBricks = new List<ColoredBrickInfo>();
         foreach (var brickData in dataContainer.brickDataList)
         {
-            if (brickData.coloredAmount > 0)
+            if (brickData.coloredAmount > 0 && (colorIndex == ColorIndex.Undefined || brickData.color == colorIndex))
             {
-                for (var i = 0; i < brickData.coloredAmount; i++)
+                var indexList = brickData.GetBrickIndexList(BrickState.Colored);
+                foreach (var index in indexList)
                 {
-                    var brick = GetBrick(brickData, brickData.GetBrickIndex(BrickState.Colored) + i);
-                    if (brick != null)
-                    {
-                        coloredBricks.Add(brick);
-                    }
+                    var brickTransform = GetBrick(brickData, index);
+                    coloredBricks.Add(new ColoredBrickInfo { brickData = brickData, brickTransform = brickTransform, index = index });
                 }
             }
         }

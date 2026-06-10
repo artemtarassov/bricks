@@ -15,7 +15,7 @@ public class CityElementGroup : MonoBehaviour
         {
             elements = new HashSet<CityElement>(this.GetComponentsInChildren<CityElement>(true));
         }
-        Assert.IsTrue(elements.Count > 0, $"CityElementGroup {GroupName} has no CityElements");
+        Assert.IsTrue(elements.Count > 1, $"CityElementGroup {GroupName} has no CityElements");
 #if UNITY_EDITOR
         //ensure that all elements have unique data keys
         var dataKeys = new HashSet<string>();

@@ -5,7 +5,7 @@ public class CityController : MonoBehaviour
 {
     [SerializeField] private GameObject flyingBrickPrefab;
 
-    private FlyingBricks flyingBricks;
+    private FlyingBricks2 flyingBricks;
 
 
     void Awake()
@@ -16,7 +16,7 @@ public class CityController : MonoBehaviour
     
     void Start()
     {
-        this.flyingBricks = new FlyingBricks(this.flyingBrickPrefab, this.transform);
+        this.flyingBricks = new FlyingBricks2(this.flyingBrickPrefab, this.transform);
         CityModel.Instance.OnFlyBrick += OnFlyBrick;
         this.gameObject.AddComponent<BrickEmissionController>();
     }
@@ -29,6 +29,7 @@ public class CityController : MonoBehaviour
 
     private void OnFlyBrick(FlyBrickData data)
     {
-        this.flyingBricks.Fly(data);
+        var otherBricks = ModelUtils.GetCurrentElement().GetBrickLayersContainer().sortedBricks;
+        this.flyingBricks.Fly(otherBricks, data);
     }
 }

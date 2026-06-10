@@ -8,7 +8,7 @@ public class ModelUtils
 {
     public static CityElement GetCurrentElement()
     {
-        var currentElementData = PlayerModel.Instance.playerData.GetCurrentGroupProgress().currentElement;
+        var currentElementData = PlayerModel.Instance.playerData.currentElement;
         if (currentElementData == null)
         {
             return null;
@@ -21,12 +21,23 @@ public class ModelUtils
     public static bool CurrentGroupCompleted()
     {
         var currentGroup = CityModel.Instance.GetGroupByName(PlayerModel.Instance.playerData.currentGroupName);
-        var groupCompleted = currentGroup.GetElements().All(e => e.dataContainer.ElementCompleted());
-        if (groupCompleted)
+        var cityElements = currentGroup.GetElements();
+        foreach (var cityElement in cityElements)
         {
-            return true;
+            if (!cityElement.gameObject.activeSelf)
+            {
+                return false;
+            }
+            var elementDidSetup = cityElement.dataContainer != null;
+            if (elementDidSetup)
+            {
+                if (!cityElement.dataContainer.ElementCompleted())
+                {
+                    return false;
+                }
+            }
         }
-        return false;
+        return true;
     }
 
 
