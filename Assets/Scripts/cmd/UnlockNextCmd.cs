@@ -62,6 +62,7 @@ public class UnlockNextCmd
         new AddExtrasCmd().Run(currentElementData);
         UnlockElement(currentElementData);
         playerModel.OnPlayerDataChanged?.Invoke();
+        new SoundCmd(SoundModel.Instance.MUSIC1).Run();
     }
 
 
@@ -88,6 +89,7 @@ public class UnlockNextCmd
     private void MoveCam(CityElement cityElement)
     {
         CamModel.Instance.MoveCameraToCityElement(cityElement);
+        new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK).Run();
     }
 
 }

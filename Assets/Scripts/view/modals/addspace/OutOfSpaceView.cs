@@ -69,7 +69,7 @@ public class OutOfSpaceView : DefaultView
     public override void OnBackgroundTap()
     {
         new HideViewCmd(ViewName.OutOfSpaceView).Run();
-       // new GoBackBtnCmd().Run();
+        // new GoBackBtnCmd().Run();
         /*
         var a = PlayerModel.Instance.playerData.attempts;
         var isGameOver = a == 0;

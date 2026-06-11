@@ -77,7 +77,7 @@ public class SlotController : MonoBehaviour
         }
         this.content.SetActive(true);
         this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
-        this.content.transform.DOLocalMove(this.startPos, 0.5f).SetEase(Ease.OutSine);
+        this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
     }
 
   

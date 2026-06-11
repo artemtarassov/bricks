@@ -17,6 +17,40 @@ public class SoundCmd
 
     public void Run()
     {
+        var isMusic = SoundModel.Instance.MUSIC1 == sndName;
+
+        if (isMusic)
+        {
+            var musicEnabled = PlayerModel.Instance.IsSettingEnabled(SettingsKey.Music);
+            if (!musicEnabled)
+            {
+                return;
+            }
+            var remoteConfig = RemoteConfigModel.Instance.RemoteConfig;
+            var musicTrack = remoteConfig.MusicTrack;
+            if (musicTrack == 0)
+            {
+                Debug.Log("SoundCmd: Music track 0, not playing music");
+                return;
+            }
+        }
+
+        var isSfx = !isMusic;
+        if (isSfx)
+        {
+            var sfxEnabled = PlayerModel.Instance.IsSettingEnabled(SettingsKey.Sounds);
+            if (!sfxEnabled)
+            {
+                Debug.Log("SoundCmd: SFX disabled, not playing sound: " + sndName);
+                return;
+            }
+        }
+
+        if(isMusic)
+        {
+           
+        }
+
         if (delay > 0)
         {
             DOVirtual.DelayedCall(delay, () =>

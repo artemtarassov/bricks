@@ -56,6 +56,7 @@ public class ModalsController : MonoBehaviour
                     view.transform.DOKill();
                     view.gameObject.SetActive(false);
                     view.OnHidden();
+                    new SoundCmd(SoundModel.Instance.TOCK).Run();
                 }
             }
         }
@@ -91,11 +92,13 @@ public class ModalsController : MonoBehaviour
                 //view.transform.DOScale(1, t).SetEase(Ease.OutBack);
                 view.transform.localPosition = new Vector3(0, 50, 0);
                 view.transform.DOLocalMoveY(0, t).SetEase(Ease.OutBack);
+                new SoundCmd(SoundModel.Instance.TICK).Run();
             }
             else
                 if (!view.gameObject.activeSelf && wasActive)
                 {
                     view.OnHidden();
+                    new SoundCmd(SoundModel.Instance.TOCK).Run();
                 }
         }
 

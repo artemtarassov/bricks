@@ -30,7 +30,7 @@ public class BrickLightController : MonoBehaviour
         //position the light 10 units away from the source in the direction of the camera
         var direction = (camPos - sourcePos).normalized;
         var targetPos = sourcePos + direction * 5f;
-        this.lightComponent.transform.position = targetPos - new Vector3(2, 0, 0);
+        this.lightComponent.transform.position = targetPos - new Vector3(4, 0, 0);
     }
     void OnDestroy()
     {

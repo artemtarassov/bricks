@@ -24,6 +24,7 @@ public class SetupCmd
         AdModel.Instance = new AdModel();
         AdModel.Instance.Load();
 
+        SoundModel.Instance = new SoundModel();
         CityModel.Instance = new CityModel();
         SlotModel.Instance = new SlotModel();
         ViewModel.Instance = new ViewModel();

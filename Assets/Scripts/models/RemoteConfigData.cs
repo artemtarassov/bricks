@@ -16,6 +16,7 @@ public enum RemoteConfigProperty
     DailyRewardCoinsGoldenTicketTemp = 6,
     CompleteRewardCoins = 7,
     ColumnCoins = 8,
+    MusicTrack = 9,
 }
 
 [Serializable]
@@ -69,6 +70,8 @@ public class RemoteConfigData
     public int CompleteRewardCoins => GetValue(RemoteConfigProperty.CompleteRewardCoins, 500);
 
     public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 100);
+
+    public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 1);//disabled by default.
 
     public static RemoteConfigData Load()
     {

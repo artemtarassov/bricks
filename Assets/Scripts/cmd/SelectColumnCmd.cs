@@ -18,7 +18,15 @@ public class SelectColumnCmd
 
     public void Run()
     {
-        Debug.Log($"SelectColumnCmd: type={this.data.type}, brickData={this.data.brickData}");
+        //Debug.Log($"SelectColumnCmd: type={this.data.type}, brickData={this.data.brickData}");
+
+
+        if (ModelUtils.IsOutOfSpace())
+        {
+            this.ShowOutOfSpace();
+            return;
+        }
+
         if (this.data.type == SlotElementType.Coins)
         {
             var nCoins = RemoteConfigModel.Instance.RemoteConfig.ColumnCoins;
@@ -33,24 +41,28 @@ public class SelectColumnCmd
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
-        var element = ModelUtils.GetCurrentElement();
+
 
         if (this.data.type == SlotElementType.Bricks || this.data.type == SlotElementType.HiddenBricks)
         {
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
             if (!hasEmitterSpace)
             {
+                new SoundCmd(SoundModel.Instance.ERROR).Run();
                 return;
             }
-
             SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
             return;
         }
+
+        var element = ModelUtils.GetCurrentElement();
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
+
             element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
             element.ShowCurrentState();
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
             return;
         }
 
@@ -72,17 +84,11 @@ public class SelectColumnCmd
             }
             else
             {
-                Debug.Log("SelectColumnCmd: explosion column selected but current group is not completed, not flying rocket");
+                new SoundCmd(SoundModel.Instance.ERROR).Run();
             }
             return;
         }
 
-
-        if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
-        {
-            this.ShowOutOfSpace();
-            return;
-        }
 
     }
 

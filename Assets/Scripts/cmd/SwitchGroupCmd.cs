@@ -51,6 +51,27 @@ public class SwitchGroupCmd
 
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
         ViewModel.Instance.Fade(FadeType.Flash);
+
+        ChangeSkyMaterial(nextGroupName);
+    }
+
+    private void ChangeSkyMaterial(string nextGroupName)
+    {
+        var cm = ColoredMaterials.Instance;
+        if (nextGroupName == "Preset_House_05")
+        {
+            RenderSettings.skybox = cm.GetMaterialByName("Sky 01");
+        }
+        else if (nextGroupName == "Tower_House")
+        {
+            RenderSettings.skybox = cm.GetMaterialByName("Sky 04");
+        }
+        else if (nextGroupName == "Ruins1_House")
+        {
+            RenderSettings.skybox = cm.GetMaterialByName("Sky 02");
+        }
+        else
+            RenderSettings.skybox = cm.GetMaterialByName("Sky 01");
     }
 
 }

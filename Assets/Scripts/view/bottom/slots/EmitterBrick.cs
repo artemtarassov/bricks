@@ -113,6 +113,9 @@ public class EmitterBrick : MonoBehaviour
 
         if (eb == null)
         {
+            var wasOpen = this.count.gameObject.activeSelf == true;
+            if (wasOpen)
+                new SoundCmd(SoundModel.Instance.EMITTER_CLOSE).Run();
             this.count.gameObject.SetActive(false);
             this.colorImg.transform.DOKill();
             if (animate)
@@ -126,6 +129,15 @@ public class EmitterBrick : MonoBehaviour
             }
             this.UpdateContentPos();
             return;
+        }
+
+        var wasClosed = this.count.gameObject.activeSelf == false;
+        if (wasClosed)
+        {
+            new SoundCmd(SoundModel.Instance.EMITTER_OPEN).Run();
+        } else
+        {
+            //new SoundCmd(SoundModel.Instance.CLICK).Run();
         }
 
 

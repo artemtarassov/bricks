@@ -9,6 +9,19 @@ public class SwitchSettingsCmd
     {
         var isEnabled = PlayerModel.Instance.IsSettingEnabled(key);
         PlayerModel.Instance.EnableSetting(key, !isEnabled);
+
+        if (key == SettingsKey.Music)
+        {
+            var settingEnabled = PlayerModel.Instance.IsSettingEnabled(key);
+            if (settingEnabled)
+            {
+                new SoundCmd(SoundModel.Instance.MUSIC1).Run();
+            }
+            else
+            {
+                SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
+            }
+        }
     }
 
 }

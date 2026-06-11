@@ -10,5 +10,6 @@ public class ToastCmd
     public void Run()
     {
         viewModel.ShowToast(msg);
+        new SoundCmd(SoundModel.Instance.ERROR).Run(); 
     }
 }

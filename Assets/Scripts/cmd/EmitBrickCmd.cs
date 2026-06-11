@@ -29,7 +29,7 @@ public class EmitBrickCmd
     private CityElement cityElement;
     private CityElementDataContainer elementDataContainer => cityElement.dataContainer;
     private Transform nextBrick => elementBrickData.brickTransform;
-    private ColorIndex colorIndex => emitter.brickData.color;
+    private ColorIndex colorIndex;
     private EmitterSpace emitter;
     private BrickData emitterBrickData;
     private ColoredBrickInfo elementBrickData;
@@ -39,6 +39,7 @@ public class EmitBrickCmd
         Assert.IsTrue(emitter.HasColoredBricks);
         this.cityElement = ModelUtils.GetCurrentElement();
         this.emitter = emitter;
+        this.colorIndex = emitter.brickData.color;
         this.emitterBrickData = emitter.brickData;
         this.elementBrickData = cityElement.GetFurthestColoredBrick(this.colorIndex);
 
@@ -66,14 +67,20 @@ public class EmitBrickCmd
         SlotModel.Instance.UpdateEmitters(emitter);
         DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete, false);
 
+
+
         if (emitterBrickData.coloredAmount == 0)
         {
             SlotModel.Instance.Replace(emitterBrickData, SlotElementType.Undefined);
         }
     }
 
+ 
+
     private void OnFlyComplete()
     {
+        new SoundCmd(SoundModel.Instance.BRICK_CLICK).Run();
+
         //Debug.Log("EmitBricksCmd OnFlyComplete Fly complete for color " + this.colorIndex + " time " + Time.time);
         {
             elementBrickData.brickData.SetBrickState(elementBrickData.index, BrickState.Full);
@@ -84,6 +91,14 @@ public class EmitBrickCmd
         {
             elementDataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
             cityElement.ShowCurrentState();
+            new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
+        }
+
+        if (elementDataContainer.ElementCompleted())
+        {
+            var delay = 0.25f;
+            new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK, delay).Run();
+            DOVirtual.DelayedCall(delay, CamModel.Instance.MoveCamBack);
         }
 
     }

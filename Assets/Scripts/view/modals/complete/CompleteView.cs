@@ -25,8 +25,8 @@ public class CompleteView : DefaultView
 
     void Start()
     {
-        btnCollect.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnCollectClicked);
-        btnCollect2x.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnCollect2xClicked);
+        btnCollect.GetComponent<HoldButton>().OnClick.AddListener(OnBtnCollectClicked);
+        btnCollect2x.GetComponent<HoldButton>().OnClick.AddListener(OnBtnCollect2xClicked);
     }
 
     private void OnBtnCollectClicked()
@@ -83,7 +83,10 @@ public class CompleteView : DefaultView
 
         var canvasGroup = this.GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0;
-        canvasGroup.DOFade(1, 5);
+        canvasGroup.DOFade(1, Durations.ViewFadeIn);
+
+        SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
+        new SoundCmd(SoundModel.Instance.MAGIC_LIGHT).Run();
     }
 
     private void OnRewardEarned(AdRewardData rewardData)
@@ -105,7 +108,9 @@ public class CompleteView : DefaultView
         this.coinsIcon.gameObject.SetActive(false);
         this.coins.gameObject.SetActive(false);
         new AddCoinsCmd(n, this.coinsIcon.position).Run();
-        DOVirtual.DelayedCall(1.0f, new HideViewCmd(ViewName.CompleteView).Run);
+
+        var canvasGroup = this.GetComponent<CanvasGroup>();
+        canvasGroup.DOFade(0, Durations.ViewFadeOut).OnComplete(new HideViewCmd(ViewName.CompleteView).Run);
     }
 
 

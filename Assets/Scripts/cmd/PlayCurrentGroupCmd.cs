@@ -55,11 +55,11 @@ public class PlayCurrentGroupCmd
         cam.transform.rotation = Quaternion.Euler(camRot);
 
         //move camera away from the direction its facing.
-        var forward = cam.transform.forward;
+        /*var forward = cam.transform.forward;
         cam.transform.position += forward * -10f;
         cam.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y - 5f, cam.transform.position.z);
 
-        cam.transform.LookAt(cityElement.GetAveragePosition());
+        cam.transform.LookAt(cityElement.GetAveragePosition());*/
     }
 
 }

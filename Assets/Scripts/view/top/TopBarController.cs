@@ -32,6 +32,7 @@ public class TopBarController : MonoBehaviour
 
     private void OnBackButtonClicked()
     {
+        new SoundCmd(SoundModel.Instance.CLICK2).Run(); 
         new GoBackBtnCmd().Run();
     }
 
@@ -46,7 +47,7 @@ public class TopBarController : MonoBehaviour
         var state = PlayerModel.Instance.playerData.GetCurrentGroupProgress().state;
         this.backButton.gameObject.SetActive(state == GroupState.Playing);
 
-        
+
         var n = PlayerModel.Instance.playerData.coins;
         if (prevCoinsAmount == n)
         {

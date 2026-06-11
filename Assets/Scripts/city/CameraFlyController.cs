@@ -18,6 +18,8 @@ public class CameraFlyController : MonoBehaviour
         CamModel.Instance.OnMoveCameraToElementGroup += OnMoveCameraToElementGroup;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly += OnAnticipateRocketFly;
+        CamModel.Instance.OnMoveCamBack += OnMoveCamBack;
+
 
         var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
         if (progress.state == GroupState.Unlocked || progress.state == GroupState.Completed)
@@ -31,6 +33,18 @@ public class CameraFlyController : MonoBehaviour
         CamModel.Instance.OnMoveCameraToElementGroup -= OnMoveCameraToElementGroup;
         CamModel.Instance.OnMoveCameraToCityElement -= OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly -= OnAnticipateRocketFly;
+        CamModel.Instance.OnMoveCamBack -= OnMoveCamBack;
+    }
+
+    private void OnMoveCamBack()
+    {
+        var mainCam = Camera.main;
+        mainCam.transform.DOKill();
+
+        //move cam a bit away and up to show the rocket fly better
+        var toPos = mainCam.transform.position + (mainCam.transform.forward * -1);
+        var t = 0.464f;
+        mainCam.transform.DOMove(toPos, t).SetEase(Ease.OutBack);
     }
 
     private void OnAnticipateRocketFly()
@@ -39,10 +53,10 @@ public class CameraFlyController : MonoBehaviour
         mainCam.transform.DOKill();
 
         //move cam a bit away and up to show the rocket fly better
-        var toPos = mainCam.transform.position + (mainCam.transform.forward * -6);
+        var toPos = mainCam.transform.position + (mainCam.transform.forward * -5);
         var t = Durations.RocketFlyDuration;
         mainCam.transform.DOMove(toPos, t).SetEase(Ease.OutSine);
-        DOVirtual.DelayedCall(Durations.RocketFlyDuration, ShakeExplision);
+        DOVirtual.DelayedCall(Durations.RocketFlyDuration - 0.15f, ShakeExplision);
     }
 
     private void ShakeExplision()
@@ -59,8 +73,8 @@ public class CameraFlyController : MonoBehaviour
         mainCam.transform.DOKill();
 
         var t = Durations.CamFly;
-        mainCam.transform.DOMove(cityElement.camPos, t).SetEase(Ease.InOutSine);
-        mainCam.transform.DORotate(cityElement.camRot, t).SetEase(Ease.InOutSine);
+        mainCam.transform.DOMove(cityElement.camPos, t).SetEase(Ease.OutBack);
+        mainCam.transform.DORotate(cityElement.camRot, t*0.8f).SetEase(Ease.OutSine);
     }
 
     private void OnMoveCameraToElementGroup()

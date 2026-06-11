@@ -22,15 +22,15 @@ public class MainNavController : MonoBehaviour
     void Start()
     {
         this.startPos = this.content.transform.localPosition;
-        btnRestart.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnRestartClicked);
-        btnContinue.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnContinueClicked);
-        btnStart.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnStartClicked);
-        btnNext.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnNextClicked);
-        btnLeft.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnLeftClicked);
-        btnRight.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnBtnRightClicked);
+        btnRestart.GetComponent<HoldButton>().OnClick.AddListener(OnBtnRestartClicked);
+        btnContinue.GetComponent<HoldButton>().OnClick.AddListener(OnBtnContinueClicked);
+        btnStart.GetComponent<HoldButton>().OnClick.AddListener(OnBtnStartClicked);
+        btnNext.GetComponent<HoldButton>().OnClick.AddListener(OnBtnNextClicked);
+        btnLeft.GetComponent<HoldButton>().OnClick.AddListener(OnBtnLeftClicked);
+        btnRight.GetComponent<HoldButton>().OnClick.AddListener(OnBtnRightClicked);
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
         ViewModel.Instance.OnShowView += OnViewUpdate;
-        ViewModel.Instance.OnHideView += OnViewUpdate;  
+        ViewModel.Instance.OnHideView += OnViewUpdate;
         PlayerModel.Instance.OnPlayerDataChanged += UpdateVisibility;
         UpdateVisibility();
     }
@@ -126,7 +126,7 @@ public class MainNavController : MonoBehaviour
         }
         this.content.SetActive(true);
         this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
-        this.content.transform.DOLocalMove(this.startPos, 0.5f).SetEase(Ease.OutSine);
+        this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
     }
 
     private void UpdateLeftRightButtonVisibility()
@@ -144,34 +144,40 @@ public class MainNavController : MonoBehaviour
     private void OnBtnRestartClicked()
     {
         //
+        new SoundCmd(SoundModel.Instance.CLICK2).Run();
         new RestartCurrentGroupCmd().Run();
     }
 
     private void OnBtnContinueClicked()
     {
         //
+        new SoundCmd(SoundModel.Instance.CLICK2).Run();
         new PlayCurrentGroupCmd().Run();
     }
 
     private void OnBtnStartClicked()
     {
         //
+        new SoundCmd(SoundModel.Instance.CLICK2).Run();
         new PlayCurrentGroupCmd().Run();
     }
 
     private void OnBtnNextClicked()
     {
         //
+        new SoundCmd(SoundModel.Instance.CLICK1).Run();
         new SwitchGroupCmd().Run(1);
     }
 
     private void OnBtnLeftClicked()
     {
+        new SoundCmd(SoundModel.Instance.CLICK1).Run();
         new SwitchGroupCmd().Run(-1);
     }
 
     private void OnBtnRightClicked()
     {
+        new SoundCmd(SoundModel.Instance.CLICK1).Run();
         new SwitchGroupCmd().Run(1);
     }
 

@@ -9,12 +9,19 @@ public class CamModel
     public Action<CityElement> OnMoveCameraToCityElement;
 
     public Action OnAnticipateRocketFly;
+    public Action OnMoveCamBack;
 
 
     public void AnticipateRocketFly()
     {
         Debug.Log("CamModel AnticipateRocketFly: anticipating rocket fly");
         OnAnticipateRocketFly?.Invoke();
+    }
+
+    public void MoveCamBack()
+    {
+        Debug.Log("CamModel MoveCamBack: moving camera back to default position");
+        OnMoveCamBack?.Invoke();
     }
 
     public void MoveCameraToCityElement(CityElement cityElement)

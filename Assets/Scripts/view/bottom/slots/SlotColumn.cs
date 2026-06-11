@@ -26,7 +26,7 @@ public class SlotColumn : MonoBehaviour
         this.slotBrickPrefab.gameObject.SetActive(false);
         this.checkmark.gameObject.SetActive(false);
         this.topSlot.gameObject.SetActive(false);
-        this.GetComponent<HoldButton>().OnFirstTouch.AddListener(OnClick);
+        this.GetComponent<HoldButton>().OnClick.AddListener(OnClick);
     }
 
     private void OnClick()

@@ -18,6 +18,16 @@ public class ModelUtils
         return cityElement;
     }
 
+    public static bool IsOutOfSpace()
+    {
+        var element = GetCurrentElement();
+        if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public static bool CurrentGroupCompleted()
     {
         var currentGroup = CityModel.Instance.GetGroupByName(PlayerModel.Instance.playerData.currentGroupName);

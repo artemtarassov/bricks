@@ -81,7 +81,7 @@ public class PlayerModel
         this.playerData = new PlayerData()
         {
             enabledSettings = allSettingsKeys,
-            coins = 10000,
+            coins = 1000,
             attempts = 1,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,

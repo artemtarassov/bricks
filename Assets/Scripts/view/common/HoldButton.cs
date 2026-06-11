@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -11,8 +12,11 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     public UnityEvent OnHold;
     public UnityEvent OnFirstTouch;//tbd.
 
+    public UnityEvent OnClick;
+
     [SerializeField] private float holdIntervalSeconds = 0.2f;
     [SerializeField] private bool triggerHoldEvent = false;
+    [SerializeField] private bool scaleOnClick = true;
 
     private Button button;
     private Coroutine holdCoroutine;
@@ -27,6 +31,7 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     private void Awake()
     {
         button = GetComponent<Button>();
+        button.onClick.AddListener(() => OnClick?.Invoke());
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -37,6 +42,11 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
 
         isHolding = true;
+
+        if (scaleOnClick)
+        {
+            transform.DOScale(Vector3.one * 0.9f, 0.02f).SetEase(Ease.OutSine);
+        }
 
         if (!TryInvokeEvent(OnFirstTouch, nameof(OnFirstTouch)) || !CanContinueHolding())
         {
@@ -55,6 +65,10 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (scaleOnClick)
+        {
+            transform.DOScale(Vector3.one, 0.02f).SetEase(Ease.OutSine);
+        }
         StopHolding();
     }
 

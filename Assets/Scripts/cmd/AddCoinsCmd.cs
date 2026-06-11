@@ -20,8 +20,10 @@ public class AddCoinsCmd
             var from = PlayerModel.Instance.playerData.coins;
             var to = from + amount;
             ViewModel.Instance.FlyCoin(fromFlyPos, from, to);
+            new SoundCmd(SoundModel.Instance.COINS_FLY, 0.1f).Run();
             return;
         }
+        new SoundCmd(SoundModel.Instance.COINS).Run();
         PlayerModel.Instance.AddCoins(amount);
     }
 

@@ -80,38 +80,21 @@ public class SecUpdateCmd
 
     private void UpdateOutOfSpace()
     {
-        var cntEmitterSpace = SlotModel.Instance.CountEmptyEmitters();
-        if (cntEmitterSpace > 0)
+        var isOut = ModelUtils.IsOutOfSpace();
+        if (!isOut)
         {
             ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
-        var currentElement = ModelUtils.GetCurrentElement();
-        Assert.IsNotNull(currentElement, "Current city element is null in UpdateOutOfSpace");
-        var hasEmittingBricks = currentElement.dataContainer.ElementCountEmittingBricks() > 0;
-        Debug.Log($"SecUpdateCmd: UpdateOutOfSpace: cntEmitterSpace={cntEmitterSpace}, hasEmittingBricks={hasEmittingBricks}");
-        if (hasEmittingBricks)
-        {
-            ViewModel.Instance.OutOfSpaceSeconds = 0;
-            return;
-        }
-        /*var colorsInEmitters = SlotModel.Instance.Emitters.FindAll(e => e.HasColoredBricks).Select(e => e.brickData.color).ToHashSet();
-        var colorsInCityElement = currentElement.GetBrickColors();
-
-        foreach (var c in colorsInEmitters)
-        {
-            if (colorsInCityElement.Contains(c))
-            {
-                Debug.Log($"SecUpdateCmd color {c} is still present in emitters, skipping");
-                return;
-            }
-        }*/
 
         ViewModel.Instance.OutOfSpaceSeconds++;
         if (ViewModel.Instance.OutOfSpaceSeconds == 3)
         {
             new ShowViewCmd(ViewName.OutOfSpaceView).Run();
+            new SoundCmd("impact_deep_thud_bounce_01").Run();
+            SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
             ViewModel.Instance.OutOfSpaceSeconds = int.MinValue;
+            PlayerModel.Instance.playerData.difficultyIndex = 0;
         }
     }
 
