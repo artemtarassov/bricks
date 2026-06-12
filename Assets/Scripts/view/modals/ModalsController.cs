@@ -43,7 +43,6 @@ public class ModalsController : MonoBehaviour
 
     private void OnHideView(ViewName viewName)
     {
-        var t = Durations.ModalViewTransition;
         var allViews = this.GetComponentsInChildren<DefaultView>(true);
         foreach (var view in allViews)
         {

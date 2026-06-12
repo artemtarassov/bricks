@@ -28,7 +28,7 @@ public class RateAppCmd
             }
             else
             {
-                var appId = "....";
+                var appId = "6779683450";
                 var appStoreUrl = "https://apps.apple.com/app/id" + appId;
                 Application.OpenURL(appStoreUrl);
             }

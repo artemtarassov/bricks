@@ -12,6 +12,14 @@ public class DebugController : MonoBehaviour
 
     [SerializeField] Button rocketBtn;
 
+    void Awake()
+    {
+#if !UNITY_EDITOR
+            GameObject.Destroy(this.gameObject);
+             return;
+#endif
+    }
+
     void Start()
     {
         this.nextBtn.onClick.AddListener(OnNextBtnClicked);

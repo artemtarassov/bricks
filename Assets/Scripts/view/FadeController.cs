@@ -21,7 +21,9 @@ public class FadeController : MonoBehaviour
         {
             if (Durations.FadeIn == 0)
             {
+#pragma warning disable CS0162 // Unreachable code detected
                 cover.gameObject.SetActive(false);
+#pragma warning restore CS0162 // Unreachable code detected
                 return;
             }
             cover.DOFade(0, Durations.FadeIn).OnComplete(() =>
@@ -38,7 +40,9 @@ public class FadeController : MonoBehaviour
                 cover.color = new Color(cover.color.r, cover.color.g, cover.color.b, 1);
                 return;
             }
+#pragma warning disable CS0162 // Unreachable code detected
             cover.gameObject.SetActive(true);
+#pragma warning restore CS0162 // Unreachable code detected
             cover.color = new Color(cover.color.r, cover.color.g, cover.color.b, 0);
             cover.DOFade(1, Durations.FadeOut);
             return;
