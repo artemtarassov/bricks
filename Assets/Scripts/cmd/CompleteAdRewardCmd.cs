@@ -9,6 +9,7 @@ public class CompleteAdRewardCmd
     public void Run(string unit, bool recorded)
     {
         new HideViewCmd(ViewName.LoadingView).Run();
+        AudioListener.pause = false;
         //
         var rd = AdModel.Instance.GetRewardData(unit);
         AdModel.Instance.SetRewardEarned(unit);

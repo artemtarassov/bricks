@@ -38,6 +38,18 @@ public class SoundCmd
         var isSfx = !isMusic;
         if (isSfx)
         {
+            var vibrationsEnabled = PlayerModel.Instance.IsSettingEnabled(SettingsKey.Vibrations);
+            if (vibrationsEnabled)
+            {
+                if (sndName == SoundModel.Instance.BRICK_CLICK)
+                {
+                    iOSHapticFeedback.Instance.Trigger(iOSHapticFeedback.iOSFeedbackType.ImpactLight);
+                }
+                else
+                {
+                    iOSHapticFeedback.Instance.Trigger(iOSHapticFeedback.iOSFeedbackType.ImpactMedium);
+                }
+            }
             var sfxEnabled = PlayerModel.Instance.IsSettingEnabled(SettingsKey.Sounds);
             if (!sfxEnabled)
             {
@@ -46,9 +58,9 @@ public class SoundCmd
             }
         }
 
-        if(isMusic)
+        if (isMusic)
         {
-           
+
         }
 
         if (delay > 0)

@@ -21,6 +21,7 @@ public class CityElement : MonoBehaviour
 {
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
+    [SerializeField] public Vector3 lightRot;
 
     [SerializeField] public Transform __GeneratedBricks = null;
     [SerializeField] public Transform __EnclosingGameObject = null;

@@ -12,6 +12,7 @@ public class ShowAdCmd
             new ToastCmd("no ads").Run();
             return;
         }
+        AudioListener.pause = true;
         AdModel.Instance.ShowAd(new AdRewardData(rn));
         new ShowViewCmd(ViewName.LoadingView).Run();
     }

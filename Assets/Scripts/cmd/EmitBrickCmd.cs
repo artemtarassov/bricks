@@ -89,8 +89,7 @@ public class EmitBrickCmd
 
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
-            elementDataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-            cityElement.ShowCurrentState();
+            CityModel.Instance.EnableDifferentColors(cityElement, BalancingModel.AdditionalBricksOnEmptyElement);
             new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
         }
 

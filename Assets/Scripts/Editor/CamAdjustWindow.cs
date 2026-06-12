@@ -238,17 +238,6 @@ public class CamAdjustWindow : EditorWindow
             return;
         }
 
-        var group2 = selectedObject.GetComponent<CameraFlyController2>();
-        if (group2 != null)
-        {
-            mainCamera.transform.position = group2.camPos;
-            mainCamera.transform.rotation = Quaternion.Euler(group2.camRot);
-            if (s_IsPreviewEnabled)
-            {
-                s_TargetCamera = mainCamera;
-            }
-        }
-
 
 
     }

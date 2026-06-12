@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 2926381705726189471}
   - component: {fileID: 3057886090710615323}
   - component: {fileID: 6895148869501135017}
+  - component: {fileID: 6629891575647114637}
   m_Layer: 5
   m_Name: BtnRefill
   m_TagString: Untagged
@@ -113,7 +114,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -1.2500305, y: 0.000061035156}
+  m_AnchoredPosition: {x: -1.25, y: 0}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &3057886090710615323
@@ -172,6 +173,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbb4463911346455c900c312332a4aa0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BtnRefill
+--- !u!114 &6629891575647114637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1301932834368949226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2683d1ed7043b4f9083d460adf46b302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
+  OnHold:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFirstTouch:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  holdIntervalSeconds: 0.2
+  triggerHoldEvent: 0
+  scaleOnClick: 1
 --- !u!1 &2728737010092098574
 GameObject:
   m_ObjectHideFlags: 0

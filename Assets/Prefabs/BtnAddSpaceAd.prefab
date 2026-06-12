@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5553956639050770044}
   - component: {fileID: 2707357507397003115}
   - component: {fileID: 6724369309992789842}
+  - component: {fileID: 3868824027002246087}
   m_Layer: 5
   m_Name: BtnAddSpaceAd
   m_TagString: Untagged
@@ -97,6 +98,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BtnAddSpaceAd
   text: {fileID: 105519962403118123}
+--- !u!114 &3868824027002246087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 835090439462049179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2683d1ed7043b4f9083d460adf46b302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
+  OnHold:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFirstTouch:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  holdIntervalSeconds: 0.2
+  triggerHoldEvent: 0
+  scaleOnClick: 1
 --- !u!1 &3041780807228600405
 GameObject:
   m_ObjectHideFlags: 0

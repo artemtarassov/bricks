@@ -81,8 +81,8 @@ public class PlayerModel
         this.playerData = new PlayerData()
         {
             enabledSettings = allSettingsKeys,
-            coins = 1000,
-            attempts = 1,
+            coins = 0,
+            attempts = 5,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,
             progress = new List<GroupProgressData>()

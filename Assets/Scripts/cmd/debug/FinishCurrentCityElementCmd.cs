@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 public class FinishCurrentCityElementCmd
 
 {
@@ -20,6 +22,13 @@ public class FinishCurrentCityElementCmd
         cityElement.ShowCurrentState();
 
         new UnlockNextCmd().Run();
+
+        cityElement = ModelUtils.GetCurrentElement();
+        foreach (var bd in cityElement.dataContainer.brickDataList)
+        {
+            bd.SetAll(BrickState.Colored);
+        }
+        cityElement.ShowCurrentState();
 
     }
 }

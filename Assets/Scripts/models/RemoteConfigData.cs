@@ -69,7 +69,7 @@ public class RemoteConfigData
 
     public int CompleteRewardCoins => GetValue(RemoteConfigProperty.CompleteRewardCoins, 500);
 
-    public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 100);
+    public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 50);
 
     public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 1);//disabled by default.
 

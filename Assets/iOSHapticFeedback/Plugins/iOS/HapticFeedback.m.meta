@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 60b2a35a0cfd04a85a26522b005847f1
+timeCreated: 1476095981
+licenseType: Store
+PluginImporter:
+  serializedVersion: 1
+  iconMap: {}
+  executionOrder: {}
+  isPreloaded: 0
+  platformData:
+    Any:
+      enabled: 0
+      settings: {}
+    Editor:
+      enabled: 0
+      settings:
+        DefaultValueInitialized: true
+    iOS:
+      enabled: 1
+      settings: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 73225
+  packageName: iOS Haptic Feedback
+  packageVersion: 1.4
+  assetPath: Assets/iOSHapticFeedback/Plugins/iOS/HapticFeedback.m
+  uploadId: 279438

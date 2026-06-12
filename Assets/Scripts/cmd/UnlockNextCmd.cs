@@ -72,15 +72,21 @@ public class UnlockNextCmd
         Assert.IsNotNull(currentElementData, "UnlockCityElementCmd UnlockElement: cityElementData should not be null");
         Assert.IsTrue(currentElementData.columns.Count > 0, "UnlockCityElementCmd UnlockElement: city element should have at least 1 column to be unlocked. " + currentElementData.dataKey);
 
-        if (currentElementData.ElementCountColoredBricks() == 0)
-            currentElementData.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement + 1);
         var cityElement = cityModel.GetElementByDataKey(currentElementData.dataKey);
-
+        Assert.IsNotNull(cityElement, $"UnlockNextCmd UnlockElement: failed to find city element with dataKey {currentElementData.dataKey}");
         var elementIndex = cityModel.GetElementIndex(cityElement);
         cityModel.ActivateElements(elementIndex);
 
         cityElement.Setup(currentElementData);
         slotModel.Fill(currentElementData.columns);
+
+
+
+        if (currentElementData.ElementCountColoredBricks() == 0)
+        {
+            CityModel.Instance.EnableDifferentColors(cityElement, BalancingModel.AdditionalBricksOnEmptyElement);
+        }
+
         this.MoveCam(cityElement);
     }
 
@@ -90,6 +96,12 @@ public class UnlockNextCmd
     {
         CamModel.Instance.MoveCameraToCityElement(cityElement);
         new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK).Run();
+
+        #if UNITY_EDITOR
+        //select gameobject
+        var go = cityElement.gameObject;
+        UnityEditor.Selection.activeGameObject = go;
+        #endif
     }
 
 }

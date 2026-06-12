@@ -58,9 +58,7 @@ public class SelectColumnCmd
         var element = ModelUtils.GetCurrentElement();
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
-
-            element.dataContainer.EnableDifferentColors(BalancingModel.AdditionalBricksOnEmptyElement);
-            element.ShowCurrentState();
+            CityModel.Instance.EnableDifferentColors(element, BalancingModel.AdditionalBricksOnEmptyElement);
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
             return;

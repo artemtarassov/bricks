@@ -45,7 +45,7 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
         if (scaleOnClick)
         {
-            transform.DOScale(Vector3.one * 0.9f, 0.02f).SetEase(Ease.OutSine);
+            transform.DOScale(Vector3.one * 1.15f, 0.05f).SetEase(Ease.OutSine);
         }
 
         if (!TryInvokeEvent(OnFirstTouch, nameof(OnFirstTouch)) || !CanContinueHolding())
@@ -67,7 +67,7 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     {
         if (scaleOnClick)
         {
-            transform.DOScale(Vector3.one, 0.02f).SetEase(Ease.OutSine);
+            transform.DOScale(Vector3.one, 0.05f).SetEase(Ease.OutSine);
         }
         StopHolding();
     }

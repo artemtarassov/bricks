@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 7629098513883119115}
   - component: {fileID: 1223112740847136064}
   - component: {fileID: 6880996978938961225}
+  - component: {fileID: 2780022704786624155}
   m_Layer: 5
   m_Name: BtnIAP
   m_TagString: Untagged
@@ -307,3 +308,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2000c1796703744e5bfd03c84abf7b0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BtnAddSpaceIAP
+  productName: 0
+--- !u!114 &2780022704786624155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5892877131155350685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2683d1ed7043b4f9083d460adf46b302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoldButton
+  OnHold:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFirstTouch:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  holdIntervalSeconds: 0.2
+  triggerHoldEvent: 0
+  scaleOnClick: 1

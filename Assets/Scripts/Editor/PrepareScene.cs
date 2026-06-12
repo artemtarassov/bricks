@@ -19,6 +19,8 @@ public class PrepareScene
         var elements = group.GetElements();
         foreach (var element in elements)
         {
+   
+      
             if (element.__EnclosingGameObject == null)
                 element.__EnclosingGameObject = element.GetChildByName("__EnclosingGameObject");
 

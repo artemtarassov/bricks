@@ -19,9 +19,9 @@ public class SetupCityCmd
             {
                 groupProgressData = new GroupProgressData() { groupName = group.GroupName, state = i == 0 ? GroupState.Unlocked : GroupState.Locked };
                 pd.progress.Add(groupProgressData);
-                #if UNITY_EDITOR
+               // #if UNITY_EDITOR
                     groupProgressData.state = GroupState.Unlocked; //unlock all groups in editor for testing
-                #endif
+               // #endif
             }
         }
 

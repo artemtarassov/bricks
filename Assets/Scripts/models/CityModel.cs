@@ -8,7 +8,7 @@ public class FlyBrickData
 {
     public FlyBrickData()
     {
-        
+
     }
     public Vector3 from;
     public Transform targetBrick;
@@ -20,10 +20,11 @@ public class CityModel
     public static CityModel Instance;
 
     public Action<FlyBrickData> OnFlyBrick;
-    public Action<CityElement> OnCityElementUnlocked;
 
     private List<CityElement> cityElements;
     private List<CityElementGroup> groups;
+
+    public Action<CityElement> OnEnableDifferentColors;
 
     private string currentGroupName;
 
@@ -107,9 +108,6 @@ public class CityModel
             cityElements[i].gameObject.SetActive(true);
             cityElements[i].EnableVisuals(true);
             cityElements[i].EnableBricks(false);
-
-            if (i == toIndex)
-                this.OnCityElementUnlocked?.Invoke(cityElements[toIndex]);
         }
         for (var i = toIndex + 1; i < cityElements.Count; i++)
         {
@@ -142,6 +140,18 @@ public class CityModel
             return null;
         }
         return ce;
+    }
+
+
+    public void EnableDifferentColors(CityElement cityElement, int n)
+    {
+        Assert.IsTrue(n > 0, "CityModel EnableDifferentColors: n should be greater than 0");
+        Assert.IsNotNull(cityElement, "CityModel EnableDifferentColors: cityElement should not be null");
+         var elementDataContainer = cityElement.dataContainer;
+        Assert.IsNotNull(elementDataContainer, $"CityModel EnableDifferentColors: dataContainer should not be null for city element {cityElement.name}");
+        elementDataContainer.EnableDifferentColors(n);
+        cityElement.ShowCurrentState();
+        OnEnableDifferentColors?.Invoke(cityElement);
     }
 
     /*public CityElement UnlockElements(string dataKey)

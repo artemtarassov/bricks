@@ -62,7 +62,6 @@ public class AddExtrasCmd
         }
         if (difficultyToApply == 3)
         {
-            AddCoinsIfAbsent(currentElementData);
             AddBicksMultiplier(currentElementData);
             SetHiddenBricks(currentElementData, 2);
             return;
