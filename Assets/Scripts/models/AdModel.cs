@@ -17,8 +17,9 @@ public enum RewardName
     UNDEFINED = 0,
     SPACE1 = 1,
     ADD_ATTEMPT = 2,
-    INTERSTITIAL = 3,
-    DOUBLE_COINS = 4
+    MID_SESSION_INTERSTITIAL = 3,
+    MID_SESSION_REWARDED = 4,
+    DOUBLE_COINS = 5
 }
 
 [Serializable]

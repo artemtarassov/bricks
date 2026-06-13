@@ -62,7 +62,7 @@ public class RemoteConfigData
 
     //reward for completing one cityElement.
     public int Reward1Coins => GetValue(RemoteConfigProperty.Reward1Coins, 50);
-    public int AdditionalEmitterSec => GetValue(RemoteConfigProperty.AdditionalEmitterSec, 1 * 60);
+    public int AdditionalEmitterSec => GetValue(RemoteConfigProperty.AdditionalEmitterSec, 5 * 60);
 
     public int DailyRewardCoinsGoldenTicket => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicket, 2000);
     public int DailyRewardCoinsGoldenTicketTemp => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicketTemp, 1000);
@@ -71,7 +71,7 @@ public class RemoteConfigData
 
     public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 50);
 
-    public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 1);//disabled by default.
+    public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 0);//disabled by default.
 
     public static RemoteConfigData Load()
     {

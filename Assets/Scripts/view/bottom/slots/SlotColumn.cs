@@ -16,6 +16,9 @@ public class SlotColumn : MonoBehaviour
     private GameObject checkmark;
 
     [SerializeField]
+    private GameObject blinkingArrow;
+
+    [SerializeField]
     private GameObject topSlot;
 
     private SlotColumnData columnData;
@@ -25,6 +28,7 @@ public class SlotColumn : MonoBehaviour
         this.slotElements = new List<SlotElement>();
         this.slotBrickPrefab.gameObject.SetActive(false);
         this.checkmark.gameObject.SetActive(false);
+        this.blinkingArrow.gameObject.SetActive(false);
         this.topSlot.gameObject.SetActive(false);
         this.GetComponent<HoldButton>().OnClick.AddListener(OnClick);
     }
@@ -34,6 +38,7 @@ public class SlotColumn : MonoBehaviour
         var activeSlotElement = this.slotElements.Find(e => e.gameObject.activeSelf);
         Assert.IsNotNull(activeSlotElement, "SlotColumn: OnClick: activeSlotElement should not be null. total slots " + this.slotElements.Count);
         new SelectColumnCmd(this.columnData.columnIndex, activeSlotElement).Run();
+        this.blinkingArrow.SetActive(false);
     }
 
     private SlotElement CreateSlotElementByIndex(int index)
@@ -88,6 +93,20 @@ public class SlotColumn : MonoBehaviour
 
         this.ShowGameObject(this.checkmark, !hasElements);
         this.ShowGameObject(this.topSlot, hasElements);
+    }
+
+    public void OnElementCompleted()
+    {
+        var hasElements = this.slotElements.Any((e) => e.gameObject.activeSelf);
+        if (hasElements)
+        {
+            var lastElementIsExplosion = this.slotElements[0].slotElementData.type == SlotElementType.FinalExplosion;
+            this.blinkingArrow.SetActive(lastElementIsExplosion);
+        }
+        else
+        {
+            this.blinkingArrow.SetActive(false);
+        }
     }
 
     private void ShowGameObject(GameObject t, bool show)

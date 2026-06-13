@@ -25,6 +25,19 @@ public class AddExtrasCmd
         AddExplosion();
     }
 
+    private bool ShouldAddAd()
+    {
+        var installTimestamp = PlayerModel.Instance.playerData.installTimestamp;
+        var secPassed = TimeUtils.GetUnixTimestamp() - installTimestamp;
+        if (secPassed < 60 * 5)
+        {
+            //don't add ad for the first 5 minutes after install
+            return false;
+        }
+        var didLoadAd = AdModel.Instance.IsAdReady(RewardName.MID_SESSION_INTERSTITIAL) || AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED);
+        return didLoadAd;
+    }
+
 
     private void ApplyDifficulty()
     {
@@ -54,7 +67,8 @@ public class AddExtrasCmd
         }
         if (difficultyToApply == 2)
         {
-            AddAd(currentElementData);
+            if (ShouldAddAd())
+                AddAd(currentElementData);
             AddCoinsIfAbsent(currentElementData);
             AddBicksMultiplier(currentElementData);
             SetHiddenBricks(currentElementData, 1);
@@ -68,7 +82,8 @@ public class AddExtrasCmd
         }
         if (difficultyToApply == 4)
         {
-            AddAd(currentElementData);
+            if (ShouldAddAd())
+                AddAd(currentElementData);
             AddCoinsIfAbsent(currentElementData);
             SetHiddenBricks(currentElementData, 2);
             return;

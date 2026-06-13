@@ -10,11 +10,11 @@ public sealed class Loca
         switch (groupName)
         {
             case "Ruins1_House":
-                return "Statue";
+                return "Palermo";
             case "Tower_House":
-                return "Tower";
+                return "Veneto";
             case "Preset_House_05":
-                return "Finca";
+                return "Tuscany";
             default:
                 Debug.LogError($"Loca: GetThemeName: no theme name found for group name {groupName}");
                 return groupName;

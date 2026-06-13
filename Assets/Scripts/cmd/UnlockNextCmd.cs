@@ -31,12 +31,15 @@ public class UnlockNextCmd
         Debug.Log("UnlockNextCmd Run with currentGroupName " + currentGroupName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
 
         this.currentGroupData = balancingModel.GetDataCopy(this.currentGroupName);
-
+        ViewModel.Instance.ResetOutOfSpaceCounter();
+        
         if (currentElementData == null)
         {
             var firstElementName = cityModel.GetElementByIndex(firstCityElementIndex).dataKey;
             currentElementData = currentGroupData.cityElementDataList.Find(e => e.dataKey == firstElementName);
             this.playerModel.playerData.currentElement = currentElementData;
+            progress.completedElementsCounter = 0;
+            
         }
         else
             if (currentElementData.ElementCompleted())
@@ -45,7 +48,17 @@ public class UnlockNextCmd
                 var elementsInGroup = currentGroupElement.GetElements().ToList();
                 var elementIndexInGroup = elementsInGroup.FindIndex((e) => e.dataKey == currentElementData.dataKey);
                 var nextElementIndexInGroup = elementIndexInGroup + 1;
+                progress.completedElementsCounter = nextElementIndexInGroup;
 
+                {
+                    var completedElementsCounter = progress.completedElementsCounter;
+                    var groupIndex = CityModel.Instance.GetAllGroupNames().FindIndex(g => g == currentGroupName);
+                    var dict = new Dictionary<string, object>();
+                    dict["completedElementsCounter"] = completedElementsCounter;
+                    dict["elementName"] = currentElementData.dataKey;
+                    dict["themeIndex"] = groupIndex;
+                    new LogEventCmd().Run("complete_element", dict);
+                }
                 if (nextElementIndexInGroup >= elementsInGroup.Count)
                 {
                     //no more elements in group.
@@ -56,7 +69,8 @@ public class UnlockNextCmd
                 var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
                 this.playerModel.playerData.currentElement = nextElementData;
                 currentElementData = nextElementData;
-                progress.completedElementsCounter++;
+
+
             }
 
         new AddExtrasCmd().Run(currentElementData);
@@ -97,11 +111,11 @@ public class UnlockNextCmd
         CamModel.Instance.MoveCameraToCityElement(cityElement);
         new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK).Run();
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         //select gameobject
         var go = cityElement.gameObject;
         UnityEditor.Selection.activeGameObject = go;
-        #endif
+#endif
     }
 
 }

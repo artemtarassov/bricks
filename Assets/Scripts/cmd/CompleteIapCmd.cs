@@ -32,10 +32,9 @@ public class CompleteIapCmd
             {
                 PlayerModel.Instance.UnlockAdditionalEmitter();
                 SlotModel.Instance.UnlockAdditionalEmitter();
-                ViewModel.Instance.OutOfSpaceSeconds = 0;
+                ViewModel.Instance.ResetOutOfSpaceCounter();
             }
         }
-
 
         if (productId == IAPModel.GoldenTicket || productId == IAPModel.GoldenTicketTemp)
         {
@@ -43,18 +42,19 @@ public class CompleteIapCmd
             {
                 PlayerModel.Instance.UnlockAdditionalEmitter();
                 SlotModel.Instance.UnlockAdditionalEmitter();
-                ViewModel.Instance.OutOfSpaceSeconds = 0;
+                ViewModel.Instance.ResetOutOfSpaceCounter();
             }
 
             if (response == IapResponse.Success)
             {
+                var rc = RemoteConfigModel.Instance.RemoteConfig;
                 if (productId == IAPModel.GoldenTicketTemp)
                 {
-                    PlayerModel.Instance.AddDailyRewardCoins(1000);
+                    PlayerModel.Instance.AddDailyRewardCoins(rc.DailyRewardCoinsGoldenTicketTemp);
                 }
                 if (productId == IAPModel.GoldenTicket)
                 {
-                    PlayerModel.Instance.AddDailyRewardCoins(2000);
+                    PlayerModel.Instance.AddDailyRewardCoins(rc.DailyRewardCoinsGoldenTicket);
                 }
             }
         }

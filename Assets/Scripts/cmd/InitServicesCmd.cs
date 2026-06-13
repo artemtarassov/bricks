@@ -15,8 +15,11 @@ public class InitServicesCmd
     {
         //init unity services
         root.gameObject.AddComponent<InitializeUnityServices>();
+        #if !UNITY_EDITOR
+        new ListenToExceptionsCmd().Run();
         new InitFBCmd().Run();
         new InitIAPCmd().Run();
+        #endif
     }
 
 }
@@ -29,6 +32,7 @@ class InitializeUnityServices : MonoBehaviour
     async void Start()
     {
         var options = new InitializationOptions().SetEnvironmentName(environment);
+        Debug.Log("InitializeUnityServices.Start: initializing unity services with environment " + environment);
 
         while (UnityServices.State != ServicesInitializationState.Initialized)
         {

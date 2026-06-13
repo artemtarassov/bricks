@@ -34,10 +34,14 @@ public class EmitBrickCmd
     private BrickData emitterBrickData;
     private ColoredBrickInfo elementBrickData;
 
+    private int groupIndex;
+    private GroupProgressData progress;
+
     public EmitBrickCmd(EmitterSpace emitter)
     {
         Assert.IsTrue(emitter.HasColoredBricks);
-        this.cityElement = ModelUtils.GetCurrentElement();
+        this.progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
+        this.cityElement = CityModel.Instance.GetElementByDataKey(progress.currentElement.dataKey);
         this.emitter = emitter;
         this.colorIndex = emitter.brickData.color;
         this.emitterBrickData = emitter.brickData;
@@ -45,6 +49,7 @@ public class EmitBrickCmd
 
         Assert.IsNotNull(this.cityElement, "No current city element found");
         Assert.AreNotEqual(this.colorIndex, ColorIndex.Undefined, "Color index must be defined");
+        this.groupIndex = ModelUtils.GetCurrentGroupIndex();
     }
 
     private Vector3 GetFromPos()
@@ -67,15 +72,13 @@ public class EmitBrickCmd
         SlotModel.Instance.UpdateEmitters(emitter);
         DOVirtual.DelayedCall(Durations.FlyBrickDuration, OnFlyComplete, false);
 
-
-
         if (emitterBrickData.coloredAmount == 0)
         {
             SlotModel.Instance.Replace(emitterBrickData, SlotElementType.Undefined);
         }
     }
 
- 
+
 
     private void OnFlyComplete()
     {
@@ -98,6 +101,7 @@ public class EmitBrickCmd
             var delay = 0.25f;
             new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK, delay).Run();
             DOVirtual.DelayedCall(delay, CamModel.Instance.MoveCamBack);
+            CityModel.Instance.OnElementCompleted?.Invoke(cityElement);
         }
 
     }

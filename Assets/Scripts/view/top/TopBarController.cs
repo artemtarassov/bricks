@@ -8,6 +8,7 @@ public class TopBarController : MonoBehaviour
 {
     [SerializeField] private TMP_Text coinsText;
     [SerializeField] private Transform coinsIcon;
+    [SerializeField] private GameObject coinsObject;
 
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button backButton;
@@ -18,6 +19,7 @@ public class TopBarController : MonoBehaviour
 
     void Start()
     {
+        this.coinsObject.SetActive(false);
         OnPlayerDataChanged();
         PlayerModel.Instance.OnPlayerDataChanged += OnPlayerDataChanged;
         this.settingsButton.onClick.AddListener(OnSettingsButtonClicked);
@@ -32,7 +34,7 @@ public class TopBarController : MonoBehaviour
 
     private void OnBackButtonClicked()
     {
-        new SoundCmd(SoundModel.Instance.CLICK2).Run(); 
+        new SoundCmd(SoundModel.Instance.CLICK2).Run();
         new GoBackBtnCmd().Run();
     }
 
@@ -44,15 +46,19 @@ public class TopBarController : MonoBehaviour
 
     private void OnPlayerDataChanged()
     {
-        var state = PlayerModel.Instance.playerData.GetCurrentGroupProgress().state;
-        this.backButton.gameObject.SetActive(state == GroupState.Playing);
-
-
         var n = PlayerModel.Instance.playerData.coins;
+        var state = PlayerModel.Instance.playerData.GetCurrentGroupProgress().state;
+        
+        this.backButton.gameObject.SetActive(state == GroupState.Playing);
+        this.coinsObject.SetActive(n > 0 || state == GroupState.Playing);
+
+
         if (prevCoinsAmount == n)
         {
             return;
         }
+
+
         if (prevCoinsAmount > n)
         {
             this.coinsText.DOKill();

@@ -72,7 +72,7 @@ public class ViewModel
 
     private float UILockedTime;
 
-    public int OutOfSpaceSeconds = 0;
+    public int OutOfSpaceCounter { get; private set; } = 0;
 
     public Action<Vector3, int, int> OnFlyCoin;
 
@@ -90,9 +90,10 @@ public class ViewModel
     public int GoldenTicketViewTriggerTimestamp = 0;
 
 
-    public ViewModel()
+    public ViewModel(Transform root)
     {
-        UILockedTime = 0;
+        this.root = root;
+        this.CurrentBottomNav = BottomNav.MainNav;
     }
 
     public void ChangeBottomNav(BottomNav nav)
@@ -184,6 +185,20 @@ public class ViewModel
     public bool HasAnyView()
     {
         return viewDataStack.Count > 0;
+    }
+
+
+    public void IncOutOfSpaceCounter()
+    {
+        this.OutOfSpaceCounter++;
+    }
+    public void ResetOutOfSpaceCounter()
+    {
+        this.OutOfSpaceCounter = 0;
+    }
+    public void DisableOutOfSpaceCounter()
+    {
+        this.OutOfSpaceCounter = int.MinValue;
     }
 
 }

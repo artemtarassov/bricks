@@ -21,6 +21,7 @@ public class SwitchSettingsCmd
             {
                 SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
             }
+            new LogEventCmd().Run("music_settings", "musicEnabled", settingEnabled ? 1 : 0);
         }
     }
 

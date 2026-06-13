@@ -66,9 +66,12 @@ public class SelectColumnCmd
 
         if (this.data.type == SlotElementType.Ad)
         {
-            if (AdModel.Instance.IsAdReady(RewardName.INTERSTITIAL))
-                new ShowAdCmd().Run(RewardName.INTERSTITIAL);
-            else Debug.Log("SelectColumnCmd: ad reward selected but ad is not ready");
+            if (AdModel.Instance.IsAdReady(RewardName.MID_SESSION_INTERSTITIAL))
+                new ShowAdCmd().Run(RewardName.MID_SESSION_INTERSTITIAL);
+            else 
+            if (AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED))
+                new ShowAdCmd().Run(RewardName.MID_SESSION_REWARDED);
+
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
         }
@@ -92,6 +95,6 @@ public class SelectColumnCmd
 
     private void ShowOutOfSpace()
     {
-        new ShowViewCmd(ViewName.OutOfSpaceView).Run();
+        new ShowOutOfSpaceCmd().Run();
     }
 }

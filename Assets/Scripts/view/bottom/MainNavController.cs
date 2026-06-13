@@ -115,7 +115,17 @@ public class MainNavController : MonoBehaviour
     private void UpdateGroupTitle()
     {
         var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
-        this.groupTitle.text = Loca.GetThemeName(currentGroupName);
+        var progressData = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
+        var completedElements = progressData.completedElementsCounter;
+        var maxElements = CityModel.Instance.GetGroupByName(currentGroupName).GetElements().Count;
+        //this.groupTitle.text = Loca.GetThemeName(currentGroupName);
+
+        if (completedElements >= maxElements)
+        {
+            this.groupTitle.text = "Completed";
+            return;
+        }
+        this.groupTitle.text = $"{completedElements}/{maxElements} completed";
     }
 
     private void AnimateIn()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,6 +46,7 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
         SlotModel.Instance.OnRemovedFromColumn += OnRemovedFromColumn;
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
+        CityModel.Instance.OnElementCompleted += OnCityElementCompleted;
 
         this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
 
@@ -80,7 +82,7 @@ public class SlotController : MonoBehaviour
         this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
     }
 
-  
+
 
     private void OnRemovedFromColumn(SlotElementData data)
     {
@@ -132,6 +134,7 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
         SlotModel.Instance.OnRemovedFromColumn -= OnRemovedFromColumn;
         ViewModel.Instance.OnBottomNavChange -= OnBottomNavChange;
+        CityModel.Instance.OnElementCompleted -= OnCityElementCompleted;
     }
 
     private void OnEmitterChanged(EmitterSpace es = null)
@@ -205,6 +208,15 @@ public class SlotController : MonoBehaviour
                 GetEmitterByIndex(emitterIndex).Setup(bd, true);
                 break;
             }
+        }
+    }
+
+    private void OnCityElementCompleted(CityElement cityElement)
+    {
+        var slotModel = SlotModel.Instance;
+        foreach (var c in slotModel.Columns)
+        {
+            GetSlotColumnByIndex(c.columnIndex).OnElementCompleted();
         }
     }
 }

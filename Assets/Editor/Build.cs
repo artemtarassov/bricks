@@ -1,7 +1,10 @@
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using System;
 using System.IO;
+using System.Reflection;
+using System.Xml;
 
 
 
@@ -11,6 +14,11 @@ using UnityEditor.iOS.Xcode;
 
 public class Build
 {
+#if UNITY_IOS
+    private const string IOSResolverTypeName = "Google.IOSResolver, Google.IOSResolver";
+    private const string IOSResolverPodfileGenerationSetting = "Google.IOSResolver.PodfileGenerationEnabled";
+#endif
+
     private static string[] Scenes = new string[]
     {
         "Assets/Scenes/Main2.unity"
@@ -23,6 +31,88 @@ public class Build
     }
 
 #if UNITY_IOS
+    private static void DisableIosResolverPodfileGeneration()
+    {
+        try
+        {
+            var resolverType = Type.GetType(IOSResolverTypeName);
+            if (resolverType == null)
+            {
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    resolverType = assembly.GetType("Google.IOSResolver");
+                    if (resolverType != null) break;
+                }
+            }
+
+            var property = resolverType?.GetProperty(
+                "PodfileGenerationEnabled",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (property != null && property.CanWrite && property.PropertyType == typeof(bool))
+            {
+                property.SetValue(null, false, null);
+                Debug.Log("Disabled EDM4U Podfile generation via Google.IOSResolver.");
+            }
+            else
+            {
+                Debug.LogWarning("Could not access Google.IOSResolver.PodfileGenerationEnabled via reflection.");
+            }
+        }
+        catch (Exception exception)
+        {
+            Debug.LogWarning("Failed to disable EDM4U Podfile generation via reflection: " + exception.Message);
+        }
+
+        PersistProjectSetting(IOSResolverPodfileGenerationSetting, "False");
+    }
+
+    private static void PersistProjectSetting(string settingName, string value)
+    {
+        var projectRoot = Directory.GetParent(Application.dataPath)?.FullName;
+        if (string.IsNullOrEmpty(projectRoot))
+        {
+            Debug.LogWarning("Could not determine the Unity project root to persist EDM4U settings.");
+            return;
+        }
+
+        var settingsPath = Path.Combine(projectRoot, "ProjectSettings", "GvhProjectSettings.xml");
+        var document = new XmlDocument();
+
+        if (File.Exists(settingsPath))
+        {
+            document.Load(settingsPath);
+        }
+        else
+        {
+            var declaration = document.CreateXmlDeclaration("1.0", "utf-8", null);
+            document.AppendChild(declaration);
+            document.AppendChild(document.CreateElement("projectSettings"));
+        }
+
+        var root = document.DocumentElement;
+        if (root == null)
+        {
+            root = document.CreateElement("projectSettings");
+            document.AppendChild(root);
+        }
+
+        var existingSetting = root.SelectSingleNode(
+            string.Format("projectSetting[@name=\"{0}\"]", settingName)) as XmlElement;
+
+        if (existingSetting == null)
+        {
+            existingSetting = document.CreateElement("projectSetting");
+            existingSetting.SetAttribute("name", settingName);
+            root.AppendChild(existingSetting);
+        }
+
+        existingSetting.SetAttribute("value", value);
+        document.Save(settingsPath);
+
+        Debug.Log("Persisted EDM4U setting " + settingName + "=" + value + " to " + settingsPath);
+    }
+
     private static void UpdateOtherFile()
     {
         var buildPath = "build/ios";
@@ -237,6 +327,9 @@ public class Build
 
     public static void IOS()
     {
+#if UNITY_IOS
+        DisableIosResolverPodfileGeneration();
+#endif
 
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = Scenes;

@@ -58,7 +58,6 @@ public class BtnCmd
             var currentGroup = pd.currentGroupName;
             pd.currentElement = BalancingModel.Instance.GetDataCopy(currentGroup, pd.currentElement.dataKey);
             new UnlockNextCmd().Run();
-            ViewModel.Instance.OutOfSpaceSeconds = 0;
             return;
         }
 

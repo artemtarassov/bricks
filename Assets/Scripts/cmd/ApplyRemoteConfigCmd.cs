@@ -13,6 +13,8 @@ public class ApplyRemoteConfigCmd
         }
         RemoteConfigModel.Instance.SetRemoteConfigApplied();
         new SoundCmd(SoundModel.Instance.MUSIC1).Run();
+
+        Debug.Log("ApplyRemoteConfigCmd: applied remote config");
     }
 
 

@@ -9,7 +9,7 @@ public class ShowAdCmd
     {
         if (!AdModel.Instance.IsAdReady(rn))
         {
-            new ToastCmd("no ads").Run();
+            new ToastCmd("No ads available").Run();
             return;
         }
         AudioListener.pause = true;

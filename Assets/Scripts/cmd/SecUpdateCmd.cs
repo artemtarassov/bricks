@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
@@ -13,6 +14,7 @@ public class SecUpdateCmd
     }
     public void Run()
     {
+        PlayerModel.Instance.playerData.secondsPlaying += 1;
         PlayerModel.Instance.Save();
         IAPModel.Instance.Save();
         if (ViewModel.Instance.HasAnyView())
@@ -24,7 +26,6 @@ public class SecUpdateCmd
         {
             UpdateOutOfSpace();
             UpdateAdditionalEmitter();
-            //UpdateNextCityElement();
         }
         UpdateDailyReward();
     }
@@ -57,44 +58,18 @@ public class SecUpdateCmd
         }
     }
 
-
-    /*private void UpdateNextCityElement()
-    {
-        var currentElement = ModelUtils.GetCurrentElement();
-        Assert.IsNotNull(currentElement, "Current city element is null in UpdateNextCityElement");
-        var da = currentElement.dataContainer;
-        Assert.IsNotNull(da, "Current city element data container is null");
-
-        //Debug.Log($"SecUpdateCmd: UpdateNextCityElement: element={currentElement.name}, emittingBricks={da.ElementCountEmittingBricks()}, coloredBricks={da.ElementCountColoredBricks()}, allSlotsEmpty={da.AllSlotsEmpty()}");
-        if (da.ElementCompleted() && da.AllSlotsEmpty() && currentElement.HasVisuals())
-        {
-            var currentGroup = CityModel.Instance.GetGroupByName(PlayerModel.Instance.playerData.currentGroupName);
-            var groupCompleted = currentGroup.GetElements().All(e => e.dataContainer.ElementCompleted());
-            if (groupCompleted)
-            {
-                new CompleteCurrentGroupCmd().Run();
-            }
-        }
-    }*/
-
-
     private void UpdateOutOfSpace()
     {
         var isOut = ModelUtils.IsOutOfSpace();
         if (!isOut)
         {
-            ViewModel.Instance.OutOfSpaceSeconds = 0;
+            ViewModel.Instance.ResetOutOfSpaceCounter();
             return;
         }
-
-        ViewModel.Instance.OutOfSpaceSeconds++;
-        if (ViewModel.Instance.OutOfSpaceSeconds == 3)
+        ViewModel.Instance.IncOutOfSpaceCounter(); 
+        if (ViewModel.Instance.OutOfSpaceCounter == 3)
         {
-            new ShowViewCmd(ViewName.OutOfSpaceView).Run();
-            new SoundCmd("impact_deep_thud_bounce_01").Run();
-            SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
-            ViewModel.Instance.OutOfSpaceSeconds = int.MinValue;
-            PlayerModel.Instance.playerData.difficultyIndex = 0;
+            new ShowOutOfSpaceCmd().Run();
         }
     }
 

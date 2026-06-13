@@ -8,8 +8,9 @@ public class SetupCmd
         //set fps to 60
         Application.targetFrameRate = 60;
 
-
+#if UNITY_EDITOR
         FilePrefs.DeleteAll(); //for testing only, remove in production
+#endif
 
         PlayerModel.Instance = new PlayerModel();
         PlayerModel.Instance.Load();
@@ -20,15 +21,13 @@ public class SetupCmd
         IAPModel.Instance = new IAPModel();
         IAPModel.Instance.Load();
 
-
         AdModel.Instance = new AdModel();
         AdModel.Instance.Load();
 
         SoundModel.Instance = new SoundModel();
         CityModel.Instance = new CityModel();
         SlotModel.Instance = new SlotModel();
-        ViewModel.Instance = new ViewModel();
-        ViewModel.Instance.root = root;
+        ViewModel.Instance = new ViewModel(root);
 
         BalancingModel.Instance = new BalancingModel();
         BalancingModel.Instance.Load();
@@ -38,10 +37,8 @@ public class SetupCmd
 
         new EnsureSolveableCmd().Run();
 
-        ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
 
-#if !UNITY_EDITOR
         new InitServicesCmd().Run(root);
-#endif
+
     }
 }

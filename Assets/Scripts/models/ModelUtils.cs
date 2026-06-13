@@ -50,6 +50,12 @@ public class ModelUtils
         return true;
     }
 
+    public static int GetCurrentGroupIndex()
+    {
+        var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
+        return CityModel.Instance.GetAllGroupNames().FindIndex(g => g == currentGroupName);
+    }
+
 
 
 }

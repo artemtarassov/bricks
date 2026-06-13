@@ -36,13 +36,13 @@ public class IAPModel
     public readonly List<string> productIds = new List<string>();
     private Dictionary<string, PriceData> prices = new Dictionary<string, PriceData>();
 
-    public const string GoldenTicketTemp = "com.badmonkee.stones.goldentickettemp";
-    public const string GoldenTicket = "com.badmonkee.stones.goldenticket";
-    public const string AdditionalSpace = "com.badmonkee.stones.morespace";
+    public const string GoldenTicketTemp = "de.badmonkee.solari.goldentickettemp";
+    public const string GoldenTicket = "de.badmonkee.solari.goldenticket";
+    public const string AdditionalSpace = "de.badmonkee.solari.morespace";
 
-    public const string CashPack1 = "com.badmonkee.stones.smallcashpack";//Small cash pack: Receive a small cash pack immediately
-    public const string CashPack2 = "com.badmonkee.stones.mediumcashpack";//Medium cash pack: Receive a medium cash pack immediately
-    public const string CashPack3 = "com.badmonkee.stones.largecashpack";//Large cash pack: Receive a large cash pack immediately
+    public const string CashPack1 = "de.badmonkee.solari.smallcashpack";//Small cash pack: Receive a small cash pack immediately
+    public const string CashPack2 = "de.badmonkee.solari.mediumcashpack";//Medium cash pack: Receive a medium cash pack immediately
+    public const string CashPack3 = "de.badmonkee.solari.largecashpack";//Large cash pack: Receive a large cash pack immediately
 
     public static bool IsCashPack(string productId)
     {

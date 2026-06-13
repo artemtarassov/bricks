@@ -26,6 +26,7 @@ public class GroupProgressData
 [Serializable]
 public class PlayerData
 {
+    public int secondsPlaying = 0;
     public int lastDailyRewardTimestamp = 0;
     public int installTimestamp = 0;
     public int coins = 0;

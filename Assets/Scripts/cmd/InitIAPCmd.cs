@@ -25,9 +25,11 @@ class MyIAPManager
     {
         new ProductDefinition(IAPModel.AdditionalSpace, ProductType.NonConsumable),
         new ProductDefinition(IAPModel.GoldenTicket, ProductType.NonConsumable),
-        new ProductDefinition(IAPModel.CashPack1, ProductType.Consumable),
-        new ProductDefinition(IAPModel.CashPack2, ProductType.Consumable),
-        new ProductDefinition(IAPModel.CashPack3, ProductType.Consumable),
+        new ProductDefinition(IAPModel.GoldenTicketTemp, ProductType.Consumable),
+
+       // new ProductDefinition(IAPModel.CashPack1, ProductType.Consumable),
+       // new ProductDefinition(IAPModel.CashPack2, ProductType.Consumable),
+       // new ProductDefinition(IAPModel.CashPack3, ProductType.Consumable),
     };
 
     private StoreController storeController;
@@ -136,7 +138,7 @@ class MyIAPManager
 
         if (response == IapResponse.Failed)
         {
-            Debug.LogError("MyIAPManager OnRestorePurchases failed: " + message);
+            Debug.LogWarning("MyIAPManager OnRestorePurchases failed: " + message);
         }
     }
 

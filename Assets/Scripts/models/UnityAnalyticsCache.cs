@@ -8,9 +8,30 @@ public class UnityAnalyticsCache
 {
     private List<Unity.Services.Analytics.Event> cachedEvents = new List<Unity.Services.Analytics.Event>();
 
+    public UnityAnalyticsCache()
+    {
+
+    }
+
     public void Send(AdImpressionEvent e)
     {
         cachedEvents.Add(e);
+    } 
+
+    public void Send(string logEventName, string key, int value)
+    {
+        var e = new CustomEvent(logEventName.ToString());
+        e.Add(key, value);
+        cachedEvents.Add(e);
+        SendCachedEvents();
+    }
+
+    public void Send(string logEventName, string key, string value)
+    {
+        var e = new CustomEvent(logEventName.ToString());
+        e.Add(key, value);
+        cachedEvents.Add(e);
+        SendCachedEvents();
     }
 
     public void Send(string logEventName, Dictionary<string, object> dict)

@@ -14,15 +14,18 @@ public class CompleteAdRewardCmd
         var rd = AdModel.Instance.GetRewardData(unit);
         AdModel.Instance.SetRewardEarned(unit);
 
+
+        new LogEventCmd().Run("ad_reward_earned", "rewardName", rd.rewardName.ToString());
+
         Debug.Log("CompleteAdRewardCmd. unit: " + unit + ", recorded: " + recorded);
 
-        if (rd.rewardName == RewardName.INTERSTITIAL)
+        if (rd.rewardName == RewardName.MID_SESSION_INTERSTITIAL || rd.rewardName == RewardName.MID_SESSION_REWARDED)
         {
             var curTimestamp = TimeUtils.GetUnixTimestamp();
             var lastTriggerTimestamp = ViewModel.Instance.GoldenTicketViewTriggerTimestamp;
 
             var secDiff = curTimestamp - lastTriggerTimestamp;
-            if (secDiff > 60 * 60)
+            if (secDiff > 60 * 15)
             {
                 var hasIapPrices = IAPModel.Instance.HasPriceForProduct(IAPModel.GoldenTicket) && IAPModel.Instance.HasPriceForProduct(IAPModel.GoldenTicketTemp);
                 if (hasIapPrices)
@@ -47,7 +50,7 @@ public class CompleteAdRewardCmd
             var additionalEmitterSec = RemoteConfigModel.Instance.RemoteConfig.AdditionalEmitterSec;
             PlayerModel.Instance.UnlockAdditionalEmitter(curTimestamp + additionalEmitterSec);
             SlotModel.Instance.UnlockAdditionalEmitter();
-            ViewModel.Instance.OutOfSpaceSeconds = 0;
+            ViewModel.Instance.ResetOutOfSpaceCounter();
         }
 
         if (rd.rewardName == RewardName.ADD_ATTEMPT)

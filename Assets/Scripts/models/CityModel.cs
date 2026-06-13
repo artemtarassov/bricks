@@ -25,6 +25,7 @@ public class CityModel
     private List<CityElementGroup> groups;
 
     public Action<CityElement> OnEnableDifferentColors;
+    public Action<CityElement> OnElementCompleted;
 
     private string currentGroupName;
 

@@ -13,7 +13,7 @@ public class GoBackBtnCmd
         var currentElement = ModelUtils.GetCurrentElement();
         var index = CityModel.Instance.GetElementIndex(currentElement);
         CityModel.Instance.ActivateElements(index - 1);
-        ViewModel.Instance.OutOfSpaceSeconds = 0;
+        ViewModel.Instance.ResetOutOfSpaceCounter();
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
 
         ViewModel.Instance.Fade(FadeType.Flash);
