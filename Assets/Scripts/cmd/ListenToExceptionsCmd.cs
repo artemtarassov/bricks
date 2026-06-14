@@ -39,13 +39,13 @@ public class ListenToExceptionsCmd
                 dict["errorsLogged"] = errorsLogged;
                 try
                 {
-                    var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
-                    var themeIndex = CityModel.Instance.GetAllGroupNames().FindIndex(g => g == progress.groupName);
+                    var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+                    var themeIndex = CityModel.Instance.GetAllBuildingNames().FindIndex(g => g == progress.BuildingName);
                     var currentElement = ModelUtils.GetCurrentElement();
                     dict = new Dictionary<string, object>();
                     dict["themeIndex"] = themeIndex;
                     dict["elementName"] = currentElement == null ? "null" : currentElement.dataKey;
-                    dict["progressState"] = progress.state.ToString();
+                    dict["progressState"] = progress.State.ToString();
                 }
                 catch (System.Exception e)
                 {

@@ -55,16 +55,16 @@ public class LogoController : MonoBehaviour
             contents.SetActive(true);
 
 
-            var currentGroup = PlayerModel.Instance.playerData.currentGroupName;
-            if (currentGroup == "Ruins1_House")
+            var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+            if (currentBuildingName == BuildingName.Ruins1_House)
             {
                 palermo.SetActive(true);
             }
-            else if (currentGroup == "Tower_House")
+            else if (currentBuildingName == BuildingName.Tower_House)
             {
                 veneto.SetActive(true);
             }
-            else if (currentGroup == "Preset_House_05")
+            else if (currentBuildingName == BuildingName.Preset_House_05)
             {
                 tuscany.SetActive(true);
             }

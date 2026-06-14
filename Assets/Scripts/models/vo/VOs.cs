@@ -1,8 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
+[Serializable]
+public enum BuildingName
+{
+    Undefined = 0,
+    Preset_House_05 = 100,
+    Ruins1_House = 200,
+    Tower_House = 300,
+}
 
+public class BuildingNameUtil
+{
+    private static List<BuildingName> allBuildingNames;
+    public static List<BuildingName> GetAllBuildingNames()
+    {
+        if (allBuildingNames != null)
+        {
+            return allBuildingNames;
+        }
+        allBuildingNames = Enum.GetValues(typeof(BuildingName)).Cast<BuildingName>().Where(v => v != BuildingName.Undefined).ToList();
+        return allBuildingNames;
+    }
+    public static BuildingName GetBuildingNameByString(string name)
+    {
+        var result = GetAllBuildingNames().Find(b => b.ToString() == name);
+        return result;
+    }
+}
 
 [Serializable]
 public enum SettingsKey
@@ -175,26 +202,31 @@ public class EmitterSpace
 
 
 [Serializable]
-public class GroupDataListContainer
+public class BuildingDataContainer
 {
-    public List<GroupDataList> groups = new List<GroupDataList>();
+    public List<BuildingData> buildings = new List<BuildingData>();
 }
 
 
 [Serializable]
-public class GroupDataList
+public class BuildingData
 {
-    public string groupName;
+    [SerializeField]
+    private BuildingName buildingName = BuildingName.Undefined;
+
+    public BuildingName BuildingName => buildingName;
+
     public List<CityElementDataContainer> cityElementDataList;
-    public GroupDataList(string n)
+    
+    public BuildingData(BuildingName n)
     {
-        this.groupName = n;
+        this.buildingName = n;
         this.cityElementDataList = new List<CityElementDataContainer>();
     }
 
-    public GroupDataList Clone()
+    public BuildingData Clone()
     {
-        var clone = new GroupDataList(this.groupName);
+        var clone = new BuildingData(this.buildingName);
         foreach (var item in this.cityElementDataList)
         {
             clone.cityElementDataList.Add(item.Clone());

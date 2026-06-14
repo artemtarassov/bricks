@@ -9,7 +9,7 @@ public class SetupCmd
         Application.targetFrameRate = 60;
 
 #if UNITY_EDITOR
-        FilePrefs.DeleteAll(); //for testing only, remove in production
+       // FilePrefs.DeleteAll(); //for testing only, remove in production
 #endif
 
         PlayerModel.Instance = new PlayerModel();
@@ -32,10 +32,8 @@ public class SetupCmd
         BalancingModel.Instance = new BalancingModel();
         BalancingModel.Instance.Load();
 
-        var cityElementGroups = root.GetComponentsInChildren<CityElementGroup>(true).ToList();
+        var cityElementGroups = root.GetComponentsInChildren<BuildingElement>(true).ToList();
         new SetupCityCmd().Run(cityElementGroups);
-
-        new EnsureSolveableCmd().Run();
 
 
         new InitServicesCmd().Run(root);

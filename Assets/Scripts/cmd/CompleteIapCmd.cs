@@ -26,6 +26,7 @@ public class CompleteIapCmd
 
     public void Run(IapResponse response, bool report = true)
     {
+
         if (productId == IAPModel.AdditionalSpace)
         {
             if (response == IapResponse.Success || response == IapResponse.Restore)
@@ -57,6 +58,11 @@ public class CompleteIapCmd
                     PlayerModel.Instance.AddDailyRewardCoins(rc.DailyRewardCoinsGoldenTicket);
                 }
             }
+        }
+
+        if (response == IapResponse.Success || response == IapResponse.Restore)
+        {
+            IAPModel.Instance.SetPurchaseCompleted(productId);
         }
 
     }

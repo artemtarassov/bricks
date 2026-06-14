@@ -6,14 +6,14 @@ public class PrepareScene
 
     public void Run()
     {
-        var groups = GameObject.FindObjectsOfType<CityElementGroup>(true);
+        var groups = GameObject.FindObjectsOfType<BuildingElement>(true);
         foreach (var group in groups)
         {
             Run(group);
         }
     }
 
-    public void Run(CityElementGroup group)
+    public void Run(BuildingElement group)
     {
         Debug.Log("Preparing group " + group.name);
         var elements = group.GetElements();

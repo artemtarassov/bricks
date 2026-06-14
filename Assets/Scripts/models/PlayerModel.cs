@@ -24,32 +24,24 @@ public class PlayerModel
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
         FilePrefs.Save();
+        Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
     }
 
-    public List<string> GetPlayableGroupNames()
+
+    public void SetCurrentBuilding(BuildingState newState)
     {
-        return playerData.progress.FindAll(g => g.state != GroupState.Locked).ConvertAll(g => g.groupName);
+        this.SetCurrentBuilding(playerData.CurrentBuildingName, newState);
     }
 
-    public void SetCurrentGroup(GroupState newState)
+    public void SetCurrentBuilding(BuildingName buildingName, BuildingState newState)
     {
-        this.SetCurrentGroup(playerData.currentGroupName, newState);
+        Debug.Log($"PlayerModel: setting current building to {buildingName} with state {newState}");
+        playerData.SetCurrentBuilding(buildingName, newState);
+        OnPlayerDataChanged?.Invoke();
     }
-
-    public void SetCurrentGroup(string groupName, GroupState newState)
+    public void RemoveCurrentBuilding()
     {
-        var progress = playerData.progress.Find(p => p.groupName == groupName);
-        if (progress == null)
-        {
-            Debug.LogError($"PlayerModel: SetCurrentGroup: no progress found for group {groupName}");
-            return;
-        }
-        if (progress.state == GroupState.Playing && newState == GroupState.Completed)
-        {
-            progress.completedGroupCounter += 1;
-        }
-        progress.state = newState;
-        playerData.SetCurrentGroup(groupName);
+        playerData.RemoveCurrentBuilding();
         OnPlayerDataChanged?.Invoke();
     }
 
@@ -70,6 +62,21 @@ public class PlayerModel
         }
     }
 
+    public List<BuildingName> GetUnlockedBuildings()
+    {
+        var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
+        var unlockedBuildings = new List<BuildingName>();
+        foreach (var buildingName in allBuildingNames)
+        {
+            var progress = playerData.GetBuildingProgressByName(buildingName);
+            if (progress != null && progress.State != BuildingState.Locked)
+            {
+                unlockedBuildings.Add(buildingName);
+            }
+        }
+        return unlockedBuildings;
+    }
+
     public bool IsSettingEnabled(SettingsKey key)
     {
         return playerData.enabledSettings.Contains(key);
@@ -85,7 +92,6 @@ public class PlayerModel
             attempts = 5,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,
-            progress = new List<GroupProgressData>()
         };
     }
 
@@ -179,10 +185,20 @@ public class PlayerModel
             this.CreateNewPlayerData();
         }
 
-        if (playerData.currentElement != null)
+        foreach (var p in playerData.Progress)
         {
-            this.playerData.currentElement.brickDataList.ForEach((e) => e.ResetEmittingStates());
-            this.playerData.currentElement.columns.ForEach((s) => s.ResetEmittingStates());
+            if (p.State == BuildingState.Playing)
+            {
+                p.SetState(BuildingState.Unlocked); //reset in-progress building to unlocked, so player can replay it
+            }
+        }
+
+        var progress = playerData.GetCurrentBuildingProgress();
+        if (progress != null && progress.GetCurrentElement() != null)
+        {
+            var element = progress.GetCurrentElement();
+            element.brickDataList.ForEach((e) => e.ResetEmittingStates());
+            element.columns.ForEach((s) => s.ResetEmittingStates());
         }
     }
 

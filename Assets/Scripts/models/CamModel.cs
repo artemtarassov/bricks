@@ -5,7 +5,7 @@ public class CamModel
 {
     public static CamModel Instance;
 
-    public Action OnMoveCameraToElementGroup;
+    public Action OnMoveCameraToBuilding;
     public Action<CityElement> OnMoveCameraToCityElement;
 
     public Action OnAnticipateRocketFly;
@@ -30,10 +30,10 @@ public class CamModel
         OnMoveCameraToCityElement?.Invoke(cityElement);
     }
 
-    public void MoveCameraToElementGroup()
+    public void MoveCameraToBuilding()
     {
-        Debug.Log("CamModel MoveCameraToElementGroup: moving camera to element group");
-        OnMoveCameraToElementGroup?.Invoke();
+        Debug.Log("CamModel MoveCameraToBuilding: moving camera to building");
+        OnMoveCameraToBuilding?.Invoke();
     }
 
 }

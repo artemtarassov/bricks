@@ -22,66 +22,55 @@ public class CityModel
     public Action<FlyBrickData> OnFlyBrick;
 
     private List<CityElement> cityElements;
-    private List<CityElementGroup> groups;
+    private List<BuildingElement> buildings;
 
     public Action<CityElement> OnEnableDifferentColors;
     public Action<CityElement> OnElementCompleted;
 
-    private string currentGroupName;
+    public Action<BuildingName> OnCurrentBuildingChanged;
 
-    public CityElementGroup GetGroupByName(string groupName)
+    public BuildingElement GetBuildingByName(BuildingName buildingName)
     {
-        Assert.IsNotNull(this.groups, "CityModel GetGroupByName: groups list is null");
-        Assert.IsTrue(this.groups.Count > 0, "CityModel GetGroupByName: groups list is empty");
-        Assert.IsFalse(string.IsNullOrEmpty(groupName), "CityModel GetGroupByName: groupName should not be null or empty");
-        return this.groups.Find((g) => g.GroupName == groupName);
+        Assert.IsNotNull(this.buildings, "CityModel GetGroupByName: groups list is null");
+        Assert.IsTrue(this.buildings.Count > 0, "CityModel GetGroupByName: groups list is empty");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "CityModel GetGroupByName: buildingName should not be undefined");
+        return this.buildings.Find((g) => g.BuildingName == buildingName);
     }
 
-    public void SetGroups(List<CityElementGroup> groups, string currentGroupName)
+    public void SetBuildings(List<BuildingElement> groups, BuildingName currentBuildingName)
     {
-        Assert.IsNotNull(groups, "CityModel SetGroups: groups list is null");
-        Assert.IsTrue(groups.Count > 0, "CityModel SetGroups: groups list is empty");
-        Assert.IsFalse(string.IsNullOrEmpty(currentGroupName), "CityModel SetGroups: currentGroupName should not be null or empty");
-        Debug.Log($"CityModel SetGroups: setting groups with current group name {currentGroupName}");
-        this.groups = groups;
-        this.SetCurrentGroupName(currentGroupName);
+        Assert.IsNotNull(groups, "CityModel SetBuildings: groups list is null");
+        Assert.IsTrue(groups.Count > 0, "CityModel SetBuildings: groups list is empty");
+        Assert.IsFalse(currentBuildingName == BuildingName.Undefined, "CityModel SetBuildings: currentBuildingName should not be undefined");
+        Debug.Log($"CityModel SetBuildings: setting groups with current building name {currentBuildingName}");
+        this.buildings = groups;
+        this.SetCurrentBuildingName(currentBuildingName);
+        OnCurrentBuildingChanged?.Invoke(currentBuildingName);
     }
 
-    public void SetCurrentGroupName(string currentGroupName)
+    public void SetCurrentBuildingName(BuildingName currentBuildingName)
     {
-        Debug.Log($"CityModel SetCurrentGroupName: setting current group name to {currentGroupName}");
-        var group = this.groups.Find(g => g.GroupName == currentGroupName);
-        Assert.IsNotNull(group, $"CityModel SetCurrentGroupName: failed to find group with name {currentGroupName}");
+        Debug.Log($"CityModel SetCurrentBuildingName: setting current building name to {currentBuildingName}");
+        var group = this.buildings.Find(g => g.BuildingName == currentBuildingName);
+        Assert.IsNotNull(group, $"CityModel SetCurrentBuildingName: failed to find group with name {currentBuildingName}");
         this.cityElements = group.GetElements().ToList();
-        this.currentGroupName = currentGroupName;
     }
 
 
-    public List<string> GetAllGroupNames()
+    public List<BuildingName> GetAllBuildingNames()
     {
-        Assert.IsNotNull(this.groups, "CityModel GetAllGroupNames: groups list is null");
-        Assert.IsTrue(this.groups.Count > 0, "CityModel GetAllGroupNames: groups list is empty");
-        return this.groups.Select(g => g.GroupName).ToList();
+        return BuildingNameUtil.GetAllBuildingNames();
     }
 
-    public string GetNextGroupName()
+    public int GetBuildingNameIndex(BuildingName buildingName)
     {
-        Assert.IsNotNull(this.groups, "CityModel GetNextGroupName: groups list is null");
-        Assert.IsTrue(this.groups.Count > 0, "CityModel GetNextGroupName: groups list is empty");
-        var currentIndex = this.groups.FindIndex(g => g.GroupName == this.currentGroupName);
-        Assert.IsTrue(currentIndex >= 0, $"CityModel GetNextGroupName: failed to find index of current group name {this.currentGroupName} in groups list");
-        var nextIndex = (currentIndex + 1);
-        if (nextIndex >= this.groups.Count)
-        {
-            return null;
-        }
-        return this.groups[nextIndex].GroupName;
+        Assert.IsNotNull(this.buildings, "CityModel GetBuildingNameIndex: groups list is null");
+        Assert.IsTrue(this.buildings.Count > 0, "CityModel GetBuildingNameIndex: groups list is empty");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "CityModel GetBuildingNameIndex: buildingName should not be undefined");
+        var index = this.buildings.FindIndex(g => g.BuildingName == buildingName);
+        return index;
     }
 
-    public bool HasGroups()
-    {
-        return this.groups != null && this.groups.Count > 0;
-    }
 
     public void FlyBrick(Vector3 from, Transform targetBrick, ColorIndex colorIndex = ColorIndex.Undefined)
     {
@@ -132,6 +121,7 @@ public class CityModel
 
     public CityElement GetElementByDataKey(string dataKey)
     {
+        Assert.IsFalse(string.IsNullOrEmpty(dataKey), "CityModel GetElementByDataKey: dataKey should not be null or empty");
         Assert.IsNotNull(cityElements, "CityModel GetElementByDataKey: cityElements list is null");
         Assert.IsTrue(cityElements.Count > 0, "CityModel GetElementByDataKey: cityElements list is empty");
         var ce = cityElements.Find(e => e.dataKey == dataKey);
@@ -148,7 +138,7 @@ public class CityModel
     {
         Assert.IsTrue(n > 0, "CityModel EnableDifferentColors: n should be greater than 0");
         Assert.IsNotNull(cityElement, "CityModel EnableDifferentColors: cityElement should not be null");
-         var elementDataContainer = cityElement.dataContainer;
+        var elementDataContainer = cityElement.dataContainer;
         Assert.IsNotNull(elementDataContainer, $"CityModel EnableDifferentColors: dataContainer should not be null for city element {cityElement.name}");
         elementDataContainer.EnableDifferentColors(n);
         cityElement.ShowCurrentState();

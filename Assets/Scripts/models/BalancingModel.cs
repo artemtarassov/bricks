@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 #if UNITY_EDITOR
@@ -24,7 +23,7 @@ public class BalancingModel
     public static int StartGroupIndex = 1;
     public static int FirstCityElementIndex = 0;
 
-    private GroupDataListContainer groups;
+    private BuildingDataContainer buildingDataContainer;
 
     public BalancingModel()
     {
@@ -36,80 +35,61 @@ public class BalancingModel
         var resource = Resources.Load<TextAsset>($"{BalancingWriter.fileName}");
         if (resource == null)
         {
-            this.groups = new GroupDataListContainer();
+            this.buildingDataContainer = new BuildingDataContainer();
             return;
         }
         var json = resource.text;
         if (json.Length < 10)
         {
-            this.groups = new GroupDataListContainer();
+            this.buildingDataContainer = new BuildingDataContainer();
             return;
         }
-        Debug.Log($"BalancingModel Load: loaded json from resources, json: {json}");
-        var data = JsonUtility.FromJson<GroupDataListContainer>(json);
+        //Debug.Log($"BalancingModel Load: loaded json from resources, json: {json}");
+        var data = JsonUtility.FromJson<BuildingDataContainer>(json);
         Assert.IsNotNull(data, "BalancingModel Load: failed to parse groups.json");
-        Assert.IsNotNull(data.groups, "BalancingModel Load: data.list is null after parsing groups.json");
-        Debug.Log($"BalancingModel Load: loaded {data.groups.Count} entries from groups.json");
-        this.groups = data;
+        Assert.IsNotNull(data.buildings, "BalancingModel Load: data.list is null after parsing groups.json");
+        Debug.Log($"BalancingModel Load: loaded {data.buildings.Count} entries from groups.json");
+        this.buildingDataContainer = data;
 
-        foreach (var g in this.groups.groups)
+        foreach (var g in this.buildingDataContainer.buildings)
         {
-            Debug.Log("BalancingModel Group " + g.groupName + " has cityElement " + g.cityElementDataList.Count);
+            Debug.Log("BalancingModel Group " + g.BuildingName + " has cityElement " + g.cityElementDataList.Count);
         }
     }
 
-    public List<string> GetAllGroups()
+    public BuildingData GetDataCopy(BuildingName buildingName)
     {
-        Assert.IsNotNull(this.groups, "BalancingModel GetAllGroups: groups is null, did you forget to call Load()?");
-        var list = new List<string>();
-        foreach (var g in this.groups.groups)
-        {
-            list.Add(g.groupName);
-        }
-        return list;
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetData: groups is null, did you forget to call Load()?");
+        Assert.IsTrue(this.buildingDataContainer.buildings.Count > 0, "BalancingModel GetData: no groups available in groups list");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel GetData: buildingName is undefined");
+        var d = this.buildingDataContainer.buildings.Find(g => g.BuildingName == buildingName);
+        Assert.IsNotNull(d, $"BalancingModel GetData: no data found for building {buildingName}");
+        return d.Clone();
     }
 
-    public GroupDataList GetDataCopy(string groupName)
+    public BuildingName GetNextGroup(BuildingName buildingName)
     {
-        Assert.IsNotNull(this.groups, "BalancingModel GetData: groups is null, did you forget to call Load()?");
-        Assert.IsTrue(this.groups.groups.Count > 0, "BalancingModel GetData: no groups available in groups list");
-        Assert.IsNotNull(groupName, "BalancingModel GetData: groupName is null");
-        var group = this.groups.groups.Find(g => g.groupName == groupName);
-        if (group == null)
-        {
-            Debug.LogError($"BalancingModel GetData: no data found for group {groupName}");
-            return null;
-        }
-        return group.Clone();
-    }
-
-    public string GetNextGroup(string groupName)
-    {
-        Assert.IsNotNull(this.groups, "BalancingModel GetNextGroup: groups is null, did you forget to call Load()?");
-        Assert.IsNotNull(groupName, "BalancingModel GetNextGroup: groupName is null");
-        var index = this.groups.groups.FindIndex(g => g.groupName == groupName);
-        if (index < 0)
-        {
-            Debug.LogError($"BalancingModel GetNextGroup: no data found for group {groupName}");
-            return null;
-        }
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetNextGroup: groups is null, did you forget to call Load()?");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel GetNextGroup: buildingName is undefined");
+        var index = this.buildingDataContainer.buildings.FindIndex(g => g.BuildingName == buildingName);
+        Assert.IsTrue(index >= 0, $"BalancingModel GetNextGroup: no data found for building {buildingName}");
         var nextIndex = index + 1;
-        if (nextIndex >= this.groups.groups.Count)
+        if (nextIndex >= this.buildingDataContainer.buildings.Count)
         {
-            throw new Exception($"BalancingModel GetNextGroup: no next group found for group {groupName}, index: {index}, nextIndex: {nextIndex}, total groups: {this.groups.groups.Count}");
+            throw new Exception($"BalancingModel GetNextGroup: no next building found for building {buildingName}, index: {index}, nextIndex: {nextIndex}, total buildings: {this.buildingDataContainer.buildings.Count}");
         }
-        return this.groups.groups[nextIndex].groupName;
+        return this.buildingDataContainer.buildings[nextIndex].BuildingName;
     }
 
-    public CityElementDataContainer GetDataCopy(string groupName, string dataKey)
+    public CityElementDataContainer GetDataCopy(BuildingName buildingName, string dataKey)
     {
-        Assert.IsNotNull(this.groups, "BalancingModel GetData: groups is null, did you forget to call Load()?");
-        Assert.IsNotNull(groupName, "BalancingModel GetData: groupName is null");
-        Assert.IsNotNull(dataKey, "BalancingModel GetData: dataKey is null");
-        var group = this.groups.groups.Find(g => g.groupName == groupName);
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetData: groups is null, did you forget to call Load()?");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel GetData: buildingName is undefined");
+        Assert.IsFalse(string.IsNullOrEmpty(dataKey), "BalancingModel GetData: dataKey is null or empty");
+        var group = this.buildingDataContainer.buildings.Find(g => g.BuildingName == buildingName);
         if (group == null)
         {
-            Debug.LogError($"BalancingModel GetData: no data found for group {groupName}");
+            Debug.LogError($"BalancingModel GetData: no data found for building {buildingName}");
             return null;
         }
         var container = group.cityElementDataList.Find(c => c.dataKey == dataKey);
@@ -123,8 +103,8 @@ public class BalancingModel
 
     public int CountEntries()
     {
-        Assert.IsNotNull(this.groups, "BalancingModel CountEntries: groups is null, did you forget to call Load()?");
-        return this.groups.groups.Count;
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel CountEntries: groups is null, did you forget to call Load()?");
+        return this.buildingDataContainer.buildings.Count;
     }
 }
 
@@ -135,17 +115,18 @@ public class BalancingWriter
 
     public BalancingWriter()
     {
-        this.groups = new GroupDataListContainer();
+        this.buildingDataContainer = new BuildingDataContainer();
     }
 
-    public CityElementDataContainer GetData(string groupName, string dataKey)
+    public CityElementDataContainer GetData(BuildingName buildingName, string dataKey)
     {
-        Assert.IsNotNull(this.groups, "BalancingModel GetData: groups is null, did you forget to call Load()?");
-        Assert.IsNotNull(groupName, "BalancingModel GetData: groupName is null");
-        Assert.IsNotNull(dataKey, "BalancingModel GetData: dataKey is null");
-        var group = this.groups.groups.Find(g => g.groupName == groupName);
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetData: groups is null, did you forget to call Load()?");
+        Assert.IsTrue(this.buildingDataContainer.buildings.Count > 0, "BalancingModel GetData: no groups available in groups list");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel GetData: buildingName is undefined");
+        Assert.IsFalse(string.IsNullOrEmpty(dataKey), "BalancingModel GetData: dataKey is null or empty");
+        var group = this.buildingDataContainer.buildings.Find(g => g.BuildingName == buildingName);
         if (group == null)        {
-            Debug.LogError($"BalancingModel GetData: no data found for group {groupName}");
+            Debug.LogError($"BalancingModel GetData: no data found for building {buildingName}");
             return null;
         }
         var container = group.cityElementDataList.Find(c => c.dataKey == dataKey);
@@ -155,7 +136,7 @@ public class BalancingWriter
         }
         return container; 
     }
-    private GroupDataListContainer groups;
+    private BuildingDataContainer buildingDataContainer;
     private string GetFilePath()
     {
         return Application.dataPath + $"/Resources/{fileName}.json";
@@ -187,15 +168,9 @@ public class BalancingWriter
     }
 #endif
 
-    public List<string> GetAllGroups()
+    public List<BuildingName> GetAllBuildingNames()
     {
-        Assert.IsNotNull(this.groups, "BalancingWriter GetAllGroups: groups is null");
-        var list = new List<string>();
-        foreach (var g in this.groups.groups)
-        {
-            list.Add(g.groupName);
-        }
-        return list;
+        return BuildingNameUtil.GetAllBuildingNames();
     }
 
     public void Delete()
@@ -219,7 +194,7 @@ public class BalancingWriter
     }
     public void Save()
     {
-        var json = JsonUtility.ToJson(this.groups, true);
+        var json = JsonUtility.ToJson(this.buildingDataContainer, true);
 
         var filePath = GetFilePath();
         //delete file if exists
@@ -235,8 +210,8 @@ public class BalancingWriter
         }
         Debug.Log($"BalancingModel Save to " + filePath);
         System.IO.File.WriteAllText(filePath, json, Encoding.ASCII);
-        var elements = this.groups.groups.Sum(g => g.cityElementDataList.Count);
-        Debug.Log($"BalancingModel saved {json.Length} bytes to {filePath}, groups: {this.groups.groups.Count}, elements: {elements}");
+        var elements = this.buildingDataContainer.buildings.Sum(g => g.cityElementDataList.Count);
+        Debug.Log($"BalancingModel saved {json.Length} bytes to {filePath}, groups: {this.buildingDataContainer.buildings.Count}, elements: {elements}");
 
 #if UNITY_EDITOR
         RefreshEditorResource();
@@ -248,35 +223,35 @@ public class BalancingWriter
     }
 
 
-    public void AddDataForElement(string groupName, string dataKey, List<BrickData> brickDataList, List<SlotColumnData> slotElementDataList)
+    public void AddDataForElement(BuildingName buildingName, string dataKey, List<BrickData> brickDataList, List<SlotColumnData> slotElementDataList)
     {
-        Assert.IsNotNull(this.groups, "BalancingModel InsertData: groups is null, did you forget to call Load()?");
-        Assert.IsNotNull(groupName, "BalancingModel InsertData: groupName is null");
-        Assert.IsNotNull(dataKey, "BalancingModel InsertData: dataKey is null");
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel InsertData: buildingDataContainer is null, did you forget to call Load()?");
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel InsertData: buildingName is undefined");
+        Assert.IsFalse(string.IsNullOrEmpty(dataKey), "BalancingModel InsertData: dataKey is null or empty");
         Assert.IsNotNull(brickDataList, "BalancingModel InsertData: brickDataList is null");
         Assert.IsNotNull(slotElementDataList, "BalancingModel InsertData: slotElementDataList is null");
         Assert.IsTrue(brickDataList.Count > 0, "BalancingModel InsertData: brickDataList is empty");
         Assert.IsTrue(slotElementDataList.Count > 0, "BalancingModel InsertData: slotElementDataList is empty");
 
         //remove prev if exists
-        var group = this.groups.groups.Find(g => g.groupName == groupName);
-        if (group == null)
+        var building = this.buildingDataContainer.buildings.Find(g => g.BuildingName == buildingName);
+        if (building == null)
         {
-            group = new GroupDataList(groupName);
-            this.groups.groups.Add(group);
+            building = new BuildingData(buildingName);
+            this.buildingDataContainer.buildings.Add(building);
         }
-        var prev = group.cityElementDataList.Find(c => c.dataKey == dataKey);
+        var prev = building.cityElementDataList.Find(c => c.dataKey == dataKey);
         if (prev != null)
         {
-            throw new Exception($"BalancingModel InsertData: data for group {groupName} and dataKey {dataKey} already exists, cannot insert duplicate data");
+            throw new Exception($"BalancingModel InsertData: data for building {buildingName} and dataKey {dataKey} already exists, cannot insert duplicate data");
         }
-        group.cityElementDataList.Add(new CityElementDataContainer() { dataKey = dataKey, brickDataList = brickDataList, columns = slotElementDataList });
+        building.cityElementDataList.Add(new CityElementDataContainer(dataKey) { brickDataList = brickDataList, columns = slotElementDataList });
     }
 
     public int CountEntries()
     {
-        Assert.IsNotNull(this.groups, "BalancingModel CountEntries: groups is null, did you forget to call Load()?");
-        return this.groups.groups.Count;
+        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel CountEntries: buildingDataContainer is null, did you forget to call Load()?");
+        return this.buildingDataContainer.buildings.Count;
     }
 
 }

@@ -12,6 +12,14 @@ public class CityElementDataContainer
     public List<BrickData> brickDataList;
     public List<SlotColumnData> columns;
 
+    public CityElementDataContainer(string dataKey)
+    {
+        Assert.IsFalse(string.IsNullOrEmpty(dataKey), "CityElementDataContainer: dataKey should not be null or empty");
+        this.dataKey = dataKey;
+        this.brickDataList = new List<BrickData>();
+        this.columns = new List<SlotColumnData>();
+    }
+
     public int ElementCountColoredBricks(ColorIndex colorIndex)
     {
         return this.brickDataList.Sum(bd => bd.color == colorIndex ? bd.coloredAmount : 0);
@@ -76,9 +84,7 @@ public class CityElementDataContainer
 
     public CityElementDataContainer Clone()
     {
-        var clone = new CityElementDataContainer();
-        clone.dataKey = this.dataKey;
-        clone.brickDataList = new List<BrickData>();
+        var clone = new CityElementDataContainer(this.dataKey);
         foreach (var item in this.brickDataList)
         {
             clone.brickDataList.Add(item.Clone());
@@ -89,5 +95,10 @@ public class CityElementDataContainer
             clone.columns.Add(item.Clone());
         }
         return clone;
+    }
+
+    public string ToJson()
+    {
+        return JsonUtility.ToJson(this);
     }
 }

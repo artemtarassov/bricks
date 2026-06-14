@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -62,9 +63,7 @@ public class IAPModel
     public IAPModel()
     {
         productIds.Add(GoldenTicket);
-        productIds.Add(CashPack1);
-        productIds.Add(CashPack2);
-        productIds.Add(CashPack3);
+        productIds.Add(GoldenTicketTemp);
         productIds.Add(AdditionalSpace);
         var pricesJson = FilePrefs.GetString("IAPModel.prices", "{}");
         prices = JsonUtility.FromJson<Dictionary<string, PriceData>>(pricesJson);
@@ -83,11 +82,6 @@ public class IAPModel
             default:
                 return null;
         }
-    }
-
-    public bool HasGoldenTicket()
-    {
-        return DidPurchaseComplete(GoldenTicket) || DidPurchaseComplete(GoldenTicketTemp);
     }
 
     public void Load()
@@ -157,6 +151,19 @@ public class IAPModel
             timestamp = TimeUtils.GetUnixTimestamp()
         });
         this.completedPurchaseContainer.dirty = true;
+    }
+
+    public bool HasTempGoldenTicket()
+    {
+        var purchases = completedPurchaseContainer.purchases.FindAll(p => p.productId == GoldenTicketTemp);
+        if (purchases.Count == 0)
+        {
+            return false; //should not happen, but just in case
+        }
+        var currentTime = TimeUtils.GetUnixTimestamp();
+        var days = 7;
+        var timeout = days * 24 * 60 * 60; //7 days in seconds
+        return purchases.Any(p => p.timestamp + timeout > currentTime);
     }
 
     public void SetPurchaseFailed(string productUd)

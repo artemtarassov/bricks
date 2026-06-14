@@ -12,66 +12,64 @@ public class UnlockNextCmd
     private BalancingModel balancingModel => BalancingModel.Instance;
 
     private CityElementDataContainer currentElementData;
-    private string currentGroupName;
-    private GroupDataList currentGroupData;
+    private BuildingName currentBuildingName;
+    private BuildingData currentGroupData;
 
     private readonly int firstCityElementIndex = BalancingModel.FirstCityElementIndex;
 
-    private GroupProgressData progress => playerModel.playerData.GetCurrentGroupProgress();
+    private BuildingProgressData progress => playerModel.playerData.GetCurrentBuildingProgress();
+
+    private CityModel cm => CityModel.Instance;
 
 
     public UnlockNextCmd()
     {
-        currentElementData = playerModel.playerData.currentElement;
-        currentGroupName = playerModel.playerData.currentGroupName;
+        currentElementData = progress.GetCurrentElement();
+        currentBuildingName = progress.BuildingName;
     }
 
     public void Run()
     {
-        Debug.Log("UnlockNextCmd Run with currentGroupName " + currentGroupName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
+        Debug.Log("UnlockNextCmd Run with currentBuildingName " + currentBuildingName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
 
-        this.currentGroupData = balancingModel.GetDataCopy(this.currentGroupName);
+        this.currentGroupData = balancingModel.GetDataCopy(this.currentBuildingName);
         ViewModel.Instance.ResetOutOfSpaceCounter();
-        
+
         if (currentElementData == null)
         {
             var firstElementName = cityModel.GetElementByIndex(firstCityElementIndex).dataKey;
             currentElementData = currentGroupData.cityElementDataList.Find(e => e.dataKey == firstElementName);
-            this.playerModel.playerData.currentElement = currentElementData;
-            progress.completedElementsCounter = 0;
-            
+            progress.ResetElementsCounter();
+            progress.SetCurrentElement(currentElementData);
         }
         else
-            if (currentElementData.ElementCompleted())
+        if (currentElementData.ElementCompleted())
+        {
+            var currentBuilding = cm.GetBuildingByName(this.currentBuildingName);
+            var elementsInBuilding = currentBuilding.GetElements().ToList();
+            var elementIndexInBuilding = elementsInBuilding.FindIndex((e) => e.dataKey == currentElementData.dataKey);
+            var nextElementIndexInBuilding = elementIndexInBuilding + 1;
+
             {
-                var currentGroupElement = CityModel.Instance.GetGroupByName(this.currentGroupName);
-                var elementsInGroup = currentGroupElement.GetElements().ToList();
-                var elementIndexInGroup = elementsInGroup.FindIndex((e) => e.dataKey == currentElementData.dataKey);
-                var nextElementIndexInGroup = elementIndexInGroup + 1;
-                progress.completedElementsCounter = nextElementIndexInGroup;
-
-                {
-                    var completedElementsCounter = progress.completedElementsCounter;
-                    var groupIndex = CityModel.Instance.GetAllGroupNames().FindIndex(g => g == currentGroupName);
-                    var dict = new Dictionary<string, object>();
-                    dict["completedElementsCounter"] = completedElementsCounter;
-                    dict["elementName"] = currentElementData.dataKey;
-                    dict["themeIndex"] = groupIndex;
-                    new LogEventCmd().Run("complete_element", dict);
-                }
-                if (nextElementIndexInGroup >= elementsInGroup.Count)
-                {
-                    //no more elements in group.
-                    //new CompleteCurrentGroupCmd().Run();
-                    return;
-                }
-                var nextElement = elementsInGroup[nextElementIndexInGroup];
-                var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
-                this.playerModel.playerData.currentElement = nextElementData;
-                currentElementData = nextElementData;
-
-
+                var completedElementsCounter = progress.CompletedElementsCounter;
+                var buildingIndex = cm.GetBuildingNameIndex(currentBuildingName);
+                var dict = new Dictionary<string, object>();
+                dict["completedElementsCounter"] = completedElementsCounter;
+                dict["elementName"] = currentElementData.dataKey;
+                dict["themeIndex"] = buildingIndex;
+                new LogEventCmd().Run("complete_element", dict);
             }
+            if (nextElementIndexInBuilding >= elementsInBuilding.Count)
+            {
+                //no more elements in building.
+                //new CompleteCurrentBuildingCmd().Run();
+                return;
+            }
+            var nextElement = elementsInBuilding[nextElementIndexInBuilding];
+            var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
+            progress.SetCurrentElement(nextElementData);
+            currentElementData = nextElementData;
+        }
 
         new AddExtrasCmd().Run(currentElementData);
         UnlockElement(currentElementData);

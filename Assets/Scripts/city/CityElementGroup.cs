@@ -2,9 +2,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class CityElementGroup : MonoBehaviour
+public class BuildingElement : MonoBehaviour
 {
-    public string GroupName => this.gameObject.name;
+    private BuildingName buildingName = BuildingName.Undefined;
+    public BuildingName BuildingName
+    {
+        get
+        {
+            if (buildingName == BuildingName.Undefined)
+            {
+                buildingName = BuildingNameUtil.GetBuildingNameByString(this.gameObject.name);
+            }
+            return buildingName;
+        }
+    }
     private HashSet<CityElement> elements;
 
     private Transform centerObj;
@@ -15,7 +26,7 @@ public class CityElementGroup : MonoBehaviour
         {
             elements = new HashSet<CityElement>(this.GetComponentsInChildren<CityElement>(true));
         }
-        Assert.IsTrue(elements.Count > 1, $"CityElementGroup {GroupName} has no CityElements");
+        Assert.IsTrue(elements.Count > 1, $"BuildingElement {BuildingName} has no CityElements");
 #if UNITY_EDITOR
         //ensure that all elements have unique data keys
         var dataKeys = new HashSet<string>();
@@ -23,7 +34,7 @@ public class CityElementGroup : MonoBehaviour
         {
             if (dataKeys.Contains(e.dataKey))
             {
-                Debug.LogError($"CityElementGroup {GroupName} has duplicate data key {e.dataKey} in element {e.gameObject.name}");
+                Debug.LogError($"BuildingElement {BuildingName} has duplicate data key {e.dataKey} in element {e.gameObject.name}");
             }
             else
             {

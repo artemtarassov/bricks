@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Assertions;
 
 [Serializable]
 
-public enum GroupState
+public enum BuildingState
 {
     Locked = 1,
     Unlocked = 2,
@@ -12,14 +14,74 @@ public enum GroupState
 }
 
 [Serializable]
-
-public class GroupProgressData
+public class BuildingProgressData
 {
-    public string groupName;
-    public int completedGroupCounter = 0;
-    public int completedElementsCounter = 0;
-    public GroupState state;
-    public CityElementDataContainer currentElement = null;
+    [SerializeField]
+    private BuildingName buildingName = BuildingName.Undefined;
+
+    public BuildingName BuildingName => buildingName;
+
+    [SerializeField]
+    private int completedBuildingCounter = 0;
+
+    [SerializeField]
+    private int completedElementsCounter = 0;
+
+    public int CompletedElementsCounter => completedElementsCounter;
+
+    public int CompletedBuildingCounter => completedBuildingCounter;
+
+    [SerializeField]
+    private BuildingState state = BuildingState.Locked;
+
+    public BuildingState State => state;
+
+    [SerializeField]
+    private CityElementDataContainer currentElement = null;
+
+    public CityElementDataContainer GetCurrentElement()
+    {
+        return currentElement != null && !string.IsNullOrEmpty(currentElement.dataKey) ? currentElement : null;
+    }
+
+    public void SetState(BuildingState newState)
+    {
+        state = newState;
+    }
+
+    public void RemoveCurrentElement()
+    {
+        currentElement = null;
+    }
+
+    public void SetCurrentElement(CityElementDataContainer element)
+    {
+        Assert.IsNotNull(element, "BuildingProgressData: SetCurrentElement: element should not be null");
+        Assert.IsFalse(string.IsNullOrEmpty(element.dataKey), "BuildingProgressData: SetCurrentElement: element dataKey should not be null or empty");
+        this.currentElement = element;
+    }
+
+    public void ResetElementsCounter()
+    {
+        this.completedElementsCounter = 0;
+    }
+
+    public void IncCompletedBuildingCounter()
+    {
+        this.completedBuildingCounter++;
+    }
+
+    public void ResetCompletedBuildingCounter()
+    {
+        this.completedBuildingCounter = 0;
+    }
+
+    public BuildingProgressData(BuildingName buildingName, BuildingState state)
+    {
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "BuildingProgressData: buildingName should not be undefined");
+        this.buildingName = buildingName;
+        this.state = state;
+    }
 
 }
 
@@ -34,34 +96,66 @@ public class PlayerData
     public int additionalEmitterUnlockTimeoutTimestamp = 0; //-1 means unlocked permanently, 0 means locked, >0 means unlocked temporarily until the timestamp
     public int difficultyIndex = 0;
 
-    public List<GroupProgressData> progress = null;
+    public List<BuildingProgressData> Progress => progress;
 
-    public List<string> allGroupNames => progress.ConvertAll(p => p.groupName);
-    public string currentGroupName { get; private set; }
-    public void SetCurrentGroup(string groupName)
+    [SerializeField]
+    private List<BuildingProgressData> progress = new List<BuildingProgressData>();
+
+    public List<BuildingName> allBuildingNames => progress.ConvertAll(p => p.BuildingName);
+
+    [SerializeField]
+    private BuildingName currentBuildingName = BuildingName.Undefined;
+
+    public BuildingName CurrentBuildingName => currentBuildingName;
+
+    public void SetCurrentBuilding(BuildingName buildingName, BuildingState newState)
     {
-        currentGroupName = groupName;
+        Assert.IsFalse(buildingName == BuildingName.Undefined, "PlayerData: SetCurrentBuilding: buildingName should not be undefined");
+        this.currentBuildingName = buildingName;
+        this.GetCurrentBuildingProgress().SetState(newState);
         isDirty = true;
     }
 
-    public GroupProgressData GetCurrentGroupProgress()
+    public void RemoveCurrentBuilding()
     {
-        return progress.Find(g => g.groupName == currentGroupName);
+        this.currentBuildingName = BuildingName.Undefined;
+        isDirty = true;
     }
 
-    public CityElementDataContainer currentElement
+
+    public BuildingProgressData GetBuildingProgressByName(BuildingName buildingName)
+    {
+        return progress.Find(p => p.BuildingName == buildingName);
+    }
+
+
+    public BuildingProgressData GetCurrentBuildingProgress()
+    {
+        if (currentBuildingName == BuildingName.Undefined)
+        {
+            return null;
+        }
+        return progress.Find(g => g.BuildingName == currentBuildingName);
+    }
+
+    /*public CityElementDataContainer elementInCurrentBuilding
     {
         get
         {
-            return GetCurrentGroupProgress().currentElement;
+            if (string.IsNullOrEmpty(currentBuildingName))
+            {
+                return null;
+            }
+            return GetCurrentBuildingProgress().GetCurrentElement();
         }
         set
         {
             isDirty = true;
-            GetCurrentGroupProgress().currentElement = value;
+            GetCurrentBuildingProgress().SetCurrentElement(value);
         }
-    }
+    }*/
 
+    [SerializeField]
     public List<SettingsKey> enabledSettings;
 
     [System.NonSerialized]

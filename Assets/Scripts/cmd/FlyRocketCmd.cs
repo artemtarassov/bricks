@@ -24,9 +24,9 @@ public class FlyRocketCmd
 
     private void OnNext()
     {
-        if (ModelUtils.CurrentGroupCompleted())
+        if (ModelUtils.CurrentBuildingCompleted())
         {
-            new CompleteCurrentGroupCmd().Run();
+            new CompleteCurrentBuildingCmd().Run();
         }
         else
         {

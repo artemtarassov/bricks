@@ -5,39 +5,36 @@ using UnityEngine.Assertions;
 public class SetupCityCmd
 {
     private CityModel cityModel => CityModel.Instance;
+    private PlayerModel playerModel => PlayerModel.Instance;
 
-    public void Run(List<CityElementGroup> groups)
+    public void Run(List<BuildingElement> buildings)
     {
-        Assert.IsTrue(groups.Count > 0, "SetupCityCmd: groups list should not be empty");
+        Assert.IsTrue(buildings.Count > 0, "SetupCityCmd: buildings list should not be empty");
         var pd = PlayerModel.Instance.playerData;
 
-        for (var i = 0; i < groups.Count; i++)
+        for (var i = 0; i < buildings.Count; i++)
         {
-            var group = groups[i];
-            var groupProgressData = pd.progress.Find(g => g.groupName == group.GroupName);
-            if (groupProgressData == null)
+            var building = buildings[i];
+            var progress = pd.GetBuildingProgressByName(building.BuildingName);
+            if (progress == null)
             {
-                groupProgressData = new GroupProgressData() { groupName = group.GroupName, state = i == 0 ? GroupState.Unlocked : GroupState.Locked };
-                pd.progress.Add(groupProgressData);
-               // #if UNITY_EDITOR
-                    groupProgressData.state = GroupState.Unlocked; //unlock all groups in editor for testing
-               // #endif
+                progress = new BuildingProgressData(building.BuildingName, i == 0 ? BuildingState.Unlocked : BuildingState.Locked);
+                pd.Progress.Add(progress);
             }
         }
 
-
-        if (string.IsNullOrEmpty(pd.currentGroupName))
+        if (pd.CurrentBuildingName == BuildingName.Undefined)
         {
-            var firstGroup = groups[0].GroupName;
-            cityModel.SetGroups(groups, firstGroup);
-            pd.SetCurrentGroup(firstGroup);
+            var firstBuilding = buildings[0].BuildingName;
+            cityModel.SetBuildings(buildings, firstBuilding);
+            playerModel.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
         }
         else
         {
-            cityModel.SetGroups(groups, pd.currentGroupName);
+            cityModel.SetBuildings(buildings, pd.CurrentBuildingName);
         }
-
-        new SwitchGroupCmd().Run(0);//load current group, this will also move the camera to the group.
+        new EnsureSolveableCmd().Run();
+        new SwitchBuildingCmd().Run(0);
 
 #if UNITY_EDITOR    
         new ValidateDataCmd().Run();

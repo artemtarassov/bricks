@@ -8,7 +8,6 @@ public class SoundsController : MonoBehaviour
 {
     void Awake()
     {
-        Assert.IsNull(SoundModel.Instance, "SoundModel instance already exists!");
         for (var i = 0; i < this.transform.childCount; i++)
         {
             var c = this.transform.GetChild(i);

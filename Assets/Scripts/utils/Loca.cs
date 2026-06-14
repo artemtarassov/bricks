@@ -5,19 +5,19 @@ using UnityEngine.Assertions;
 
 public sealed class Loca
 {
-    public static string GetThemeName(string groupName)
+    public static string GetThemeName(BuildingName buildingName)
     {
-        switch (groupName)
+        switch (buildingName)
         {
-            case "Ruins1_House":
+            case BuildingName.Ruins1_House:
                 return "Palermo";
-            case "Tower_House":
+            case BuildingName.Tower_House:
                 return "Veneto";
-            case "Preset_House_05":
+            case BuildingName.Preset_House_05:
                 return "Tuscany";
             default:
-                Debug.LogError($"Loca: GetThemeName: no theme name found for group name {groupName}");
-                return groupName;
+                Debug.LogError($"Loca: GetThemeName: no theme name found for building name {buildingName}");
+                return buildingName.ToString();
         }
     }
 

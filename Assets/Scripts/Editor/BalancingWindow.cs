@@ -20,17 +20,14 @@ public class BalancingWindow : EditorWindow
             new PrepareScene().Run();
             var model = new BalancingWriter();
 
-            var ngroups = model.GetAllGroups();
-            Assert.IsTrue(ngroups.Count == 0, "BalancingWindow: expected no groups in model after delete, but found " + ngroups.Count);
-
-            var groups = GameObject.FindObjectsByType<CityElementGroup>().ToList();
-            foreach (var group in groups)
+            var buildings1 = GameObject.FindObjectsByType<BuildingElement>().ToList();
+            foreach (var b in buildings1)
             {
-                var elements = group.GetElements();
-                Debug.Log($"BalancingWindow: found group {group.GroupName} with {elements.Count()} elements in selected objects, adding balancing data for each element.");
+                var elements = b.GetElements();
+                Debug.Log($"BalancingWindow: found group {b.BuildingName} with {elements.Count()} elements in selected objects, adding balancing data for each element.");
                 foreach (var cityElement in elements)
                 {
-                    OnAddBalancingDataClicked(model, group, cityElement);
+                    OnAddBalancingDataClicked(model, b, cityElement);
                 }
             }
             model.Save();
@@ -39,11 +36,11 @@ public class BalancingWindow : EditorWindow
     }
 
 
-    public void ApplyDifficulty(BalancingWriter model, string groupName, string dataKey, int difficulty = 1)//0-3
+    public void ApplyDifficulty(BalancingWriter model, BuildingName buildingName, string dataKey, int difficulty = 1)//0-3
     {
         Assert.IsTrue(difficulty >= 0 && difficulty <= 3, "ApplyDifficulty: difficulty should be between 0 and 3");
         var counter = 0;
-        var data = model.GetData(groupName, dataKey);
+        var data = model.GetData(buildingName, dataKey);
         var columnIndexList = new List<int>();
         for (var i = 0; i < SlotModel.MaxColumns; i++)
         {
@@ -95,10 +92,10 @@ public class BalancingWindow : EditorWindow
         //Debug.Log($"BalancingWindow ApplyDifficulty: total swaps applied: {counter}, difficulty: {difficulty}   ");
     }
 
-    private void OnAddBalancingDataClicked(BalancingWriter model, CityElementGroup group, CityElement cityElement)
+    private void OnAddBalancingDataClicked(BalancingWriter model, BuildingElement b, CityElement cityElement)
     {
 
-        var data = cityElement.dataKey;
+        var dataKey = cityElement.dataKey;
         var cec = new CityElementColors(cityElement.FindAllBricks().Count);
         var predefinedBricks = cec.predefinedBricks.ToList();
         Assert.IsTrue(predefinedBricks.Count > 0, "predefinedBricks is empty");
@@ -111,18 +108,18 @@ public class BalancingWindow : EditorWindow
         {
             for (var c = 0; c < maxColumns && predefinedBricks.Count > 0; c++)
             {
-                var b = predefinedBricks.First().Clone();
-                b.SetAll(BrickState.Colored);
+                var br = predefinedBricks.First().Clone();
+                br.SetAll(BrickState.Colored);
                 predefinedBricks.RemoveAt(0);
                 if (slotElementDataList.Count <= c)
                 {
                     slotElementDataList.Add(new SlotColumnData() { columnIndex = c });
                 }
-                slotElementDataList[c].list.Add(new SlotElementData(b));
+                slotElementDataList[c].list.Add(new SlotElementData(br));
             }
         }
-        var groupName = group.GroupName;
-        model.AddDataForElement(groupName, data, cec.predefinedBricks, slotElementDataList);
+        var groupName = b.BuildingName;
+        model.AddDataForElement(groupName, dataKey, cec.predefinedBricks, slotElementDataList);
 
 
         var cityElementIndex = cityElement.transform.GetSiblingIndex();//0-n
@@ -140,9 +137,9 @@ public class BalancingWindow : EditorWindow
             difficulty = 0;
         }*/
         var difficulty = cityElementIndex % 2 == 0 ? 0 : 1;
-        this.ApplyDifficulty(model, groupName, data, difficulty);
+        this.ApplyDifficulty(model, groupName, dataKey, difficulty);
 
-        Debug.Log($"BalancingWindow: added balancing data for element {data} in group {groupName} with difficulty {difficulty}");
+        Debug.Log($"BalancingWindow: added balancing data for element {dataKey} in group {groupName} with difficulty {difficulty}");
 
     }
 

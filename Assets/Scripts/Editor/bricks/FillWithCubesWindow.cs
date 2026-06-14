@@ -19,7 +19,7 @@ public class FillWithCubesWindow : EditorWindow
         List<GameObject> validSelectedObjects = GetValidSelectedObjects();
         int ignoredSelectionCount = Selection.gameObjects.Length - validSelectedObjects.Count;
         GameObject activeSelectedObject = Selection.activeGameObject;
-        bool canToggleGeneratedBricks = activeSelectedObject != null && activeSelectedObject.GetComponent<CityElementGroup>() != null;
+        bool canToggleGeneratedBricks = activeSelectedObject != null && activeSelectedObject.GetComponent<BuildingElement>() != null;
         bool canFixBrickSpacing = Selection.gameObjects.Length > 0;
 
         EditorGUILayout.LabelField("Brick Settings", EditorStyles.boldLabel);

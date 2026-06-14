@@ -36,12 +36,12 @@ public class DebugController : MonoBehaviour
 
     public void OnMoveCameraToElementGroupClicked()
     {
-        CamModel.Instance.MoveCameraToElementGroup();
+        CamModel.Instance.MoveCameraToBuilding();
     }
 
     public void OnCompleteCurrentGroupClicked()
     {
-        new CompleteCurrentGroupCmd().Run();
+        new CompleteCurrentBuildingCmd().Run();
     }
     public void OnNextBtnClicked()
     {

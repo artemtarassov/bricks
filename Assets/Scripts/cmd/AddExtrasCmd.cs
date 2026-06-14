@@ -34,6 +34,12 @@ public class AddExtrasCmd
             //don't add ad for the first 5 minutes after install
             return false;
         }
+        var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket) || IAPModel.Instance.HasTempGoldenTicket();
+        if (hasGoldenTicket)
+        {
+            //don't add ad if player has golden ticket
+            return false;
+        }
         var didLoadAd = AdModel.Instance.IsAdReady(RewardName.MID_SESSION_INTERSTITIAL) || AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED);
         return didLoadAd;
     }

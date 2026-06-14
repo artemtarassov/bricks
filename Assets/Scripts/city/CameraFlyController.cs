@@ -15,22 +15,22 @@ public class CameraFlyController : MonoBehaviour
 
     void Start()
     {
-        CamModel.Instance.OnMoveCameraToElementGroup += OnMoveCameraToElementGroup;
+        CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly += OnAnticipateRocketFly;
         CamModel.Instance.OnMoveCamBack += OnMoveCamBack;
 
 
-        var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
-        if (progress.state == GroupState.Unlocked || progress.state == GroupState.Completed)
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (progress.State == BuildingState.Unlocked || progress.State == BuildingState.Completed)
         {
-            OnMoveCameraToElementGroup();
+            OnMoveCameraToBuilding();
         }
     }
 
     void OnDestroy()
     {
-        CamModel.Instance.OnMoveCameraToElementGroup -= OnMoveCameraToElementGroup;
+        CamModel.Instance.OnMoveCameraToBuilding -= OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement -= OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly -= OnAnticipateRocketFly;
         CamModel.Instance.OnMoveCamBack -= OnMoveCamBack;
@@ -74,16 +74,16 @@ public class CameraFlyController : MonoBehaviour
 
         var t = Durations.CamFly;
         mainCam.transform.DOMove(cityElement.camPos, t).SetEase(Ease.OutBack);
-        mainCam.transform.DORotate(cityElement.camRot, t*0.8f).SetEase(Ease.OutSine);
+        mainCam.transform.DORotate(cityElement.camRot, t * 0.8f).SetEase(Ease.OutSine);
     }
 
-    private void OnMoveCameraToElementGroup()
+    private void OnMoveCameraToBuilding()
     {
-        var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
-        var currentGroup = CityModel.Instance.GetGroupByName(currentGroupName);
-        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentGroupName);
-        Assert.IsNotNull(spline, "CameraFlyController OnMoveCameraToElementGroup: no spline found for group " + currentGroupName);
-        this.lookAt = currentGroup.GetCamCenterPos();
+        var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+        var currentBuilding = CityModel.Instance.GetBuildingByName(currentBuildingName);
+        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentBuildingName.ToString());
+        Assert.IsNotNull(spline, "CameraFlyController OnMoveCameraToBuilding: no spline found for building " + currentBuildingName);
+        this.lookAt = currentBuilding.GetCamCenterPos();
         MoveCameraLongSpline(spline, Durations.CamOrbit);
     }
 

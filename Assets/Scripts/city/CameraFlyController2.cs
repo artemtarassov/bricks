@@ -24,19 +24,19 @@ public class CameraFlyController2 : MonoBehaviour
 
     void Start()
     {
-        CamModel.Instance.OnMoveCameraToElementGroup += OnMoveCameraToElementGroup;
+        CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
 
-        var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
-        if (progress.state == GroupState.Unlocked || progress.state == GroupState.Completed)
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (progress.State == BuildingState.Unlocked || progress.State == BuildingState.Completed)
         {
-            OnMoveCameraToElementGroup();
+            OnMoveCameraToBuilding();
         }
     }
 
     void OnDestroy()
     {
-        CamModel.Instance.OnMoveCameraToElementGroup -= OnMoveCameraToElementGroup;
+        CamModel.Instance.OnMoveCameraToBuilding -= OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement -= OnMoveCameraToCityElement;
     }
 
@@ -141,18 +141,18 @@ public class CameraFlyController2 : MonoBehaviour
         ).SetEase(Ease.OutSine));
     }
 
-    private void OnMoveCameraToElementGroup()
+    private void OnMoveCameraToBuilding()
     {
-        var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
-        var currentGroup = CityModel.Instance.GetGroupByName(currentGroupName);
-        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentGroupName);
-        Assert.IsNotNull(spline, "CameraFlyController2 OnMoveCameraToElementGroup: no spline found for group " + currentGroupName);
+        var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+        var currentBuilding = CityModel.Instance.GetBuildingByName(currentBuildingName);
+        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentBuildingName.ToString());
+        Assert.IsNotNull(spline, "CameraFlyController2 OnMoveCameraToBuilding: no spline found for building " + currentBuildingName);
         var cam = Camera.main;
         cam.transform.DOKill();
         var duration = 200;
         activeSpline = spline;
         isOrbitingOnSpline = true;
-        this.lookAt = currentGroup.GetCamCenterPos();
+        this.lookAt = currentBuilding.GetCamCenterPos();
         MoveCameraLongSpline(spline, duration);
     }
 

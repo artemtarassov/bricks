@@ -8,7 +8,8 @@ public class ModelUtils
 {
     public static CityElement GetCurrentElement()
     {
-        var currentElementData = PlayerModel.Instance.playerData.currentElement;
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        var currentElementData = progress.GetCurrentElement();
         if (currentElementData == null)
         {
             return null;
@@ -28,9 +29,10 @@ public class ModelUtils
         return false;
     }
 
-    public static bool CurrentGroupCompleted()
+    public static bool CurrentBuildingCompleted()
     {
-        var currentGroup = CityModel.Instance.GetGroupByName(PlayerModel.Instance.playerData.currentGroupName);
+        var currentGroupName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+        var currentGroup = CityModel.Instance.GetBuildingByName(currentGroupName);
         var cityElements = currentGroup.GetElements();
         foreach (var cityElement in cityElements)
         {
@@ -52,8 +54,8 @@ public class ModelUtils
 
     public static int GetCurrentGroupIndex()
     {
-        var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
-        return CityModel.Instance.GetAllGroupNames().FindIndex(g => g == currentGroupName);
+        var bn = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+        return CityModel.Instance.GetBuildingNameIndex(bn);
     }
 
 

@@ -46,26 +46,27 @@ public class TopBarController : MonoBehaviour
 
     private void OnPlayerDataChanged()
     {
-        var n = PlayerModel.Instance.playerData.coins;
-        var state = PlayerModel.Instance.playerData.GetCurrentGroupProgress().state;
-        
-        this.backButton.gameObject.SetActive(state == GroupState.Playing);
-        this.coinsObject.SetActive(n > 0 || state == GroupState.Playing);
+        var pd = PlayerModel.Instance.playerData;
+        var coins = pd.coins;
+        var state = pd.GetCurrentBuildingProgress().State;
+
+        this.backButton.gameObject.SetActive(state == BuildingState.Playing);
+        this.coinsObject.SetActive(coins > 0 || state == BuildingState.Playing);
 
 
-        if (prevCoinsAmount == n)
+        if (prevCoinsAmount == coins)
         {
             return;
         }
 
 
-        if (prevCoinsAmount > n)
+        if (prevCoinsAmount > coins)
         {
             this.coinsText.DOKill();
             this.coinsIcon.DOKill();
             this.coinsIcon.localScale = Vector3.one;
-            this.coinsText.text = n.ToString("N0");
-            this.prevCoinsAmount = n;
+            this.coinsText.text = coins.ToString("N0");
+            this.prevCoinsAmount = coins;
             return;
         }
         this.coinsIcon.DOKill();
@@ -74,9 +75,9 @@ public class TopBarController : MonoBehaviour
         this.coinsText.DOKill();
 
         this.fromAmount = prevCoinsAmount;
-        this.prevCoinsAmount = n;
+        this.prevCoinsAmount = coins;
 
-        DOTween.To(() => fromAmount, x => coinsText.text = x.ToString("N0"), n, 0.1f).SetEase(Ease.Linear).SetTarget(this.coinsText);
+        DOTween.To(() => fromAmount, x => coinsText.text = x.ToString("N0"), coins, 0.1f).SetEase(Ease.Linear).SetTarget(this.coinsText);
 
     }
 }

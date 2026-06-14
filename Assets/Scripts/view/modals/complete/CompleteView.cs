@@ -71,7 +71,7 @@ public class CompleteView : DefaultView
     public override void OnShown()
     {
         AdModel.Instance.OnRewardEarned += OnRewardEarned;
-        var currentGroupName = PlayerModel.Instance.playerData.currentGroupName;
+        var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
         this.rewardCollected = false;
         this.overlayCollected.SetActive(false);
         this.overlayCollected2x.SetActive(false);
@@ -79,7 +79,7 @@ public class CompleteView : DefaultView
         this.coinsIcon.gameObject.SetActive(true);
         this.coins.gameObject.SetActive(true);
         this.coins.text = RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins.ToString();
-        this.title.text = Loca.GetThemeName(currentGroupName);
+        this.title.text = Loca.GetThemeName(currentBuildingName);
 
         var canvasGroup = this.GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0;

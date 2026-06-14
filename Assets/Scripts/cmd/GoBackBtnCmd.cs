@@ -8,8 +8,10 @@ public class GoBackBtnCmd
     public void Run()
     {
         new HideViewCmd().Run();
+
+        var progress= PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         
-        PlayerModel.Instance.SetCurrentGroup(GroupState.Unlocked);
+        PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
         var currentElement = ModelUtils.GetCurrentElement();
         var index = CityModel.Instance.GetElementIndex(currentElement);
         CityModel.Instance.ActivateElements(index - 1);
@@ -18,7 +20,7 @@ public class GoBackBtnCmd
 
         ViewModel.Instance.Fade(FadeType.Flash);
         SlotModel.Instance.Clear();
-        CamModel.Instance.MoveCameraToElementGroup();
+        CamModel.Instance.MoveCameraToBuilding();
     }
 
 }

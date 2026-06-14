@@ -35,13 +35,13 @@ public class EmitBrickCmd
     private ColoredBrickInfo elementBrickData;
 
     private int groupIndex;
-    private GroupProgressData progress;
+    private BuildingProgressData progress;
 
     public EmitBrickCmd(EmitterSpace emitter)
     {
         Assert.IsTrue(emitter.HasColoredBricks);
-        this.progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
-        this.cityElement = CityModel.Instance.GetElementByDataKey(progress.currentElement.dataKey);
+        this.progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        this.cityElement = CityModel.Instance.GetElementByDataKey(progress.GetCurrentElement().dataKey);
         this.emitter = emitter;
         this.colorIndex = emitter.brickData.color;
         this.emitterBrickData = emitter.brickData;

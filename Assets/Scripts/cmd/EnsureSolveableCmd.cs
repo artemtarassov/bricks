@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -10,25 +11,66 @@ public class EnsureSolveableCmd
         //in case the data changed in the last update, the elements should be renewed to be sure the game is solveable. This is a safety measure to avoid any possible bugs with unsolveable levels.
 
         var pd = PlayerModel.Instance.playerData;
-        var progress = pd.progress;
+        var progress = pd.Progress;
         foreach (var p in progress)
         {
-            if (p.state == GroupState.Unlocked || p.state == GroupState.Playing)
+            if (p.State == BuildingState.Unlocked || p.State == BuildingState.Playing)
             {
-                if (p.currentElement == null)
+                var currentElement = p.GetCurrentElement();
+                if (currentElement == null)
                 {
                     continue;
                 }
-                if (p.currentElement.ElementCompleted() || ColorsValid(p.currentElement))
+                if (currentElement.ElementCompleted())
                 {
                     continue;
                 }
-                var balancing = BalancingModel.Instance.GetDataCopy(p.groupName, p.currentElement.dataKey);
-                p.currentElement.columns = balancing.columns;
-                p.currentElement.brickDataList = balancing.brickDataList;
+                if (!ColorsValid(currentElement))
+                {
+                    p.SetCurrentElement(BalancingModel.Instance.GetDataCopy(p.BuildingName, currentElement.dataKey));
+                }
                 pd.isDirty = true;
             }
         }
+        var result = this.EnsureCurrentElementExists();
+        Debug.Log("EnsureSolveableCmd: EnsureCurrentElementExists result: " + result);
+    }
+
+    private bool EnsureCurrentElementExists()
+    {
+        var pd = PlayerModel.Instance.playerData;
+        var progress = pd.GetCurrentBuildingProgress();
+        if (progress.GetCurrentElement() == null)
+        {
+            return true;
+        }
+        var element = progress.GetCurrentElement();
+        if (element == null)
+        {
+            return true;
+        }
+        var bd = BalancingModel.Instance.GetDataCopy(progress.BuildingName, element.dataKey);
+        if (bd == null)
+        {
+            progress.RemoveCurrentElement();
+            return false;
+        }
+        var building = CityModel.Instance.GetBuildingByName(progress.BuildingName);
+        if (building == null)
+        {
+            progress.RemoveCurrentElement();
+            pd.RemoveCurrentBuilding();
+            return false;
+        }
+        var elements = building.GetElements();
+        var elementExists = elements.ToList().Exists(e => e.dataKey == element.dataKey);
+        if (!elementExists)
+        {
+            progress.RemoveCurrentElement();
+            return false;
+        }
+        return true;
+
     }
 
 

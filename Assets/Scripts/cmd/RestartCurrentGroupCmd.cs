@@ -7,11 +7,12 @@ public class RestartCurrentGroupCmd
 {
     public void Run()
     {
-        var pd = PlayerModel.Instance.playerData;
-        pd.currentElement = null;
-        PlayerModel.Instance.SetCurrentGroup(GroupState.Unlocked);
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        progress.RemoveCurrentElement();
+        progress.SetState(BuildingState.Unlocked);
+        
         CityModel.Instance.DeactivateAllElements();
-        new PlayCurrentGroupCmd().Run();
+        new PlayCurrentBuildingCmd().Run();
     }
 
 }

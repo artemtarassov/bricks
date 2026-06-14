@@ -22,7 +22,10 @@ public class BtnCmd
     {
         if (action == BtnAction.Restart)
         {
-            playerModel.playerData.currentElement = null;
+            var progress = playerModel.playerData.GetCurrentBuildingProgress();
+            progress.ResetElementsCounter();
+            progress.RemoveCurrentElement();
+            progress.SetState(BuildingState.Unlocked);
             cityModel.DeactivateAllElements();
             new UnlockNextCmd().Run();
             return;
@@ -54,9 +57,10 @@ public class BtnCmd
                 Toast("No attempts left");
                 return;
             }
-            var pd = playerModel.playerData;
-            var currentGroup = pd.currentGroupName;
-            pd.currentElement = BalancingModel.Instance.GetDataCopy(currentGroup, pd.currentElement.dataKey);
+            var progress = playerModel.playerData.GetCurrentBuildingProgress();
+            var currentBuilding = progress.BuildingName;
+            var elementDataKey = progress.GetCurrentElement().dataKey;
+            progress.SetCurrentElement(BalancingModel.Instance.GetDataCopy(currentBuilding, elementDataKey));
             new UnlockNextCmd().Run();
             return;
         }

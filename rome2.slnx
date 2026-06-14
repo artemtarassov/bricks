@@ -9,7 +9,6 @@
   <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="GoogleMobileAds.Editor.csproj" />
   <Project Path="Boxophobic.Utils.Scripts.csproj" />
-  <Project Path="scripts.utils.csproj" />
   <Project Path="BezierSolution.Editor.csproj" />
   <Project Path="CodeStage.AFPSCounter.Examples.csproj" />
   <Project Path="Boxophobic.PolyverseSkies.Runtime.csproj" />

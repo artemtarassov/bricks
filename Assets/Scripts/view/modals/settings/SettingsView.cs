@@ -9,14 +9,21 @@ public class SettingsView : DefaultView
 {
     [SerializeField] private Button restoreBtn;
     [SerializeField] private Button rateBtn;
+    [SerializeField] private Button goldenTicketBtn;
     void Start()
     {
         this.restoreBtn.onClick.AddListener(OnRestoreBtnClick);
         this.rateBtn.onClick.AddListener(OnRateBtnClick);
+        this.goldenTicketBtn.onClick.AddListener(OnGoldenTicketBtnClick);
     }
     void OnDestroy()
     {
         PlayerModel.Instance.OnPlayerDataChanged -= OnPlayerDataChanged;
+    }
+
+    private void OnGoldenTicketBtnClick()
+    {
+        new ShowViewCmd(ViewName.GoldenTicketView).Run();
     }
 
     public override void OnBackgroundTap()

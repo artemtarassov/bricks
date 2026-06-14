@@ -110,7 +110,7 @@ public class CamAdjustWindow : EditorWindow
 
     private void EnableNextCityElement()
     {
-        var activeGroup = GameObject.FindObjectsByType<CityElementGroup>().ToList().Where(g => g.gameObject.activeSelf).FirstOrDefault();
+        var activeGroup = GameObject.FindObjectsByType<BuildingElement>().ToList().Where(g => g.gameObject.activeSelf).FirstOrDefault();
         var elements = activeGroup.GetComponentsInChildren<CityElement>(true);
         var lastActiveElement = elements.ToList().FindLast(e => e.gameObject.activeSelf);
         var lastActiveIndex = System.Array.IndexOf(elements, lastActiveElement);

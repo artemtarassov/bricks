@@ -21,8 +21,8 @@ public class SecUpdateCmd
         {
             return;
         }
-        var progress = PlayerModel.Instance.playerData.GetCurrentGroupProgress();
-        if (progress.state == GroupState.Playing)
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (progress.State == BuildingState.Playing)
         {
             UpdateOutOfSpace();
             UpdateAdditionalEmitter();
@@ -33,7 +33,7 @@ public class SecUpdateCmd
     private void UpdateDailyReward()
     {
         var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket);
-        var hasGoldenTicketTemp = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicketTemp);
+        var hasGoldenTicketTemp = IAPModel.Instance.HasTempGoldenTicket();
         if (!hasGoldenTicket && !hasGoldenTicketTemp)
         {
             return;
