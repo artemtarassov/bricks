@@ -66,6 +66,11 @@ public class BuildingProgressData
         this.completedElementsCounter = 0;
     }
 
+    public void IncCompletedElementsCounter()
+    {
+        this.completedElementsCounter++;
+    }
+
     public void IncCompletedBuildingCounter()
     {
         this.completedBuildingCounter++;

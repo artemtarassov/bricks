@@ -10,7 +10,8 @@ public class EmitterBrick : MonoBehaviour
 
     [SerializeField] private TMP_Text count;
     [SerializeField] private TMP_Text timeout;
-    [SerializeField] private Image colorImg;
+    [SerializeField] private UIBrick uiBrick;
+    [SerializeField] private GameObject death;
     [SerializeField] private GameObject content;
 
 
@@ -27,7 +28,8 @@ public class EmitterBrick : MonoBehaviour
         this.timeoutTimestamp = 0;
         this.timeout.gameObject.SetActive(false);
         this.count.gameObject.SetActive(false);
-        this.colorImg.transform.localScale = Vector3.zero;
+        this.death.SetActive(false);
+        this.uiBrick.transform.localScale = Vector3.zero;
     }
 
     public void SetTimeout(int timeoutTimestamp)
@@ -107,25 +109,26 @@ public class EmitterBrick : MonoBehaviour
         }
     }
 
-    public void Setup(BrickData eb = null, bool animate = false)
+    public void Setup(Color clr, EmitterSpace eb, bool animate = false)
     {
-        this.brickData = eb;
+        this.brickData = eb.brickData;
 
-        if (eb == null)
+        if (this.brickData == null)
         {
             var wasOpen = this.count.gameObject.activeSelf == true;
             if (wasOpen)
                 new SoundCmd(SoundModel.Instance.EMITTER_CLOSE).Run();
             this.count.gameObject.SetActive(false);
-            this.colorImg.transform.DOKill();
+            this.uiBrick.gameObject.SetActive(false);
+            this.death.SetActive(eb.isDead);
             if (animate)
             {
                 this.isAnimating = true;
-                this.colorImg.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc).OnComplete(() => this.isAnimating = false);
+                this.uiBrick.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc).OnComplete(() => this.isAnimating = false);
             }
             else
             {
-                this.colorImg.transform.localScale = Vector3.zero;
+                this.uiBrick.transform.localScale = Vector3.zero;
             }
             this.UpdateContentPos();
             return;
@@ -135,30 +138,39 @@ public class EmitterBrick : MonoBehaviour
         if (wasClosed)
         {
             new SoundCmd(SoundModel.Instance.EMITTER_OPEN).Run();
-        } else
+        }
+        else
         {
             //new SoundCmd(SoundModel.Instance.CLICK).Run();
         }
 
+        if (eb.isDead)
+        {
+            this.isAnimating = false;
+            this.uiBrick.transform.DOKill();
+            this.count.gameObject.SetActive(false);
+            this.uiBrick.ShowGloss(false);
+            this.death.SetActive(true);
+            this.UpdateContentPos();
+            return;
+        }
 
-        this.count.text = eb.coloredAmount.ToString();
+
+        this.count.text = brickData.coloredAmount.ToString();
         this.count.gameObject.SetActive(true);
-        this.colorImg.color = Color.white;
-        this.colorImg.sprite = ColoredMaterials.Instance.GetSpriteByColorIndex(eb.color);
+        this.uiBrick.gameObject.SetActive(true);
+        this.uiBrick.SetColor(clr, brickData.color);
+        this.uiBrick.ShowGloss(true);
         if (animate)
         {
-            //this.colorImg.transform.localScale = Vector3.zero;
+            //this.uiBrick.transform.localScale = Vector3.zero;
             this.isAnimating = true;
-            this.colorImg.transform.DOKill();
-            this.colorImg.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack).OnComplete(() => this.isAnimating = false);
+            this.uiBrick.transform.DOKill();
+            this.uiBrick.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack).OnComplete(() => this.isAnimating = false);
         }
         else
         {
-            if (!this.isAnimating)
-            {
-                //this.colorImg.transform.localScale = Vector3.one;
-            }
-            this.colorImg.transform.localScale = Vector3.one;
+            this.uiBrick.transform.localScale = Vector3.one;
         }
         this.UpdateContentPos();
     }

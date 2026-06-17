@@ -12,13 +12,16 @@ public class CompleteCurrentBuildingCmd
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
 
-        var state = pd.GetBuildingProgressByName(currentBuildingName).State;
+
+        var progress = pd.GetBuildingProgressByName(currentBuildingName);
+        var state = progress.State;     
 
         if (state == BuildingState.Locked)
         {
             throw new System.Exception($"CompleteCurrentBuildingCmd: current building {currentBuildingName} is locked");
         }
 
+        progress.IncCompletedBuildingCounter();
         playerModel.SetCurrentBuilding(BuildingState.Completed);
 
         var currentBuilding = cityModel.GetBuildingByName(currentBuildingName);

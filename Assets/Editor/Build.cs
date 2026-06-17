@@ -21,6 +21,7 @@ public class Build
 
     private static string[] Scenes = new string[]
     {
+        //"Assets/Scenes/MainMatTest.unity"
         "Assets/Scenes/Main2.unity"
     };
 

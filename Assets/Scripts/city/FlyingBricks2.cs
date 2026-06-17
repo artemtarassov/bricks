@@ -142,7 +142,7 @@ public class FlyingBricks2
             }
         }
 
-        Debug.LogError("FlyingBricks2: all candidate approach positions are occupied, defaulting to upward direction");
+        Debug.Log("FlyingBricks2: all candidate approach positions are occupied, defaulting to upward direction");
         return upwardOffset;
     }
 
@@ -156,7 +156,7 @@ public class FlyingBricks2
                 continue;
             }
 
-            var renderer = brick.GetComponent<Renderer>();
+            var renderer = brick.GetComponentInChildren<Renderer>();
             if (renderer == null || !renderer.enabled)
             {
                 continue;

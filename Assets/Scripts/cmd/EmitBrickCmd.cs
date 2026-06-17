@@ -34,22 +34,22 @@ public class EmitBrickCmd
     private BrickData emitterBrickData;
     private ColoredBrickInfo elementBrickData;
 
-    private int groupIndex;
     private BuildingProgressData progress;
 
     public EmitBrickCmd(EmitterSpace emitter)
     {
-        Assert.IsTrue(emitter.HasColoredBricks);
+        Assert.IsTrue(emitter.HasColoredBricks, "EmitterSpace must have colored bricks to emit");
+        Assert.IsTrue(emitter.brickData.inEmitter, "EmitterSpace must have brickData with inEmitter true");
         this.progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         this.cityElement = CityModel.Instance.GetElementByDataKey(progress.GetCurrentElement().dataKey);
         this.emitter = emitter;
         this.colorIndex = emitter.brickData.color;
         this.emitterBrickData = emitter.brickData;
         this.elementBrickData = cityElement.GetFurthestColoredBrick(this.colorIndex);
+        Assert.IsFalse(this.elementBrickData.brickData.inEmitter, "Element brick data must not be in emitter");
 
         Assert.IsNotNull(this.cityElement, "No current city element found");
         Assert.AreNotEqual(this.colorIndex, ColorIndex.Undefined, "Color index must be defined");
-        this.groupIndex = ModelUtils.GetCurrentGroupIndex();
     }
 
     private Vector3 GetFromPos()
@@ -93,15 +93,13 @@ public class EmitBrickCmd
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
             CityModel.Instance.EnableDifferentColors(cityElement, BalancingModel.AdditionalBricksOnEmptyElement);
+            SlotModel.Instance.EmitterAlive();
             new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
         }
 
         if (elementDataContainer.ElementCompleted())
         {
-            var delay = 0.25f;
-            new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK, delay).Run();
-            DOVirtual.DelayedCall(delay, CamModel.Instance.MoveCamBack);
-            CityModel.Instance.OnElementCompleted?.Invoke(cityElement);
+            new CompleteElementCmd().Run(cityElement);
         }
 
     }

@@ -62,7 +62,9 @@ public class AdModel
 
     private const string savekey = "adsdata";
 
-    public bool shouldLoadAds = true;
+    public bool shouldLoadBanner = false;
+    public bool shouldLoadInterstitial = false;
+    public bool shouldLoadRewarded = true;
 
     public void Load()
     {
@@ -121,9 +123,9 @@ public class AdModel
 
     public void HideAd(string adUnit)
     {
-        SetAdReady(adUnit, false);
         this.adData.requested.RemoveAll(rd => rd.adUnit == adUnit);
         this.adData.dirty = true;
+        this.SetAdReady(adUnit, false);
         OnAdHide?.Invoke(adUnit);
     }
 

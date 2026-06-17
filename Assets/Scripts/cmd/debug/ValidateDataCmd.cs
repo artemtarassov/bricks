@@ -27,6 +27,7 @@ public class ValidateDataCmd
                 var brickDataAmount = elementData.brickDataList.Sum(b => b.max);
                 var cityElement = building.GetElements().ToList().Find(e => e.dataKey == elementDataKey);
                 var brickGameObjects = cityElement.FindAllBricks().Count;
+                Debug.Log($"ValidateDataCmd: validating element {elementDataKey} in building {buildingName}. brickGameObjecs " + brickGameObjects + ", brickDataAmount " + brickDataAmount);
                 Assert.AreEqual(brickDataAmount, brickGameObjects, $"ValidateDataCmd: brick count mismatch for element {elementDataKey} in building {buildingName}. brickGameObjecs " + brickGameObjects + ", brickDataAmount " + brickDataAmount);
             }
         }

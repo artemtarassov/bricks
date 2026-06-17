@@ -44,6 +44,7 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
+        SlotModel.Instance.OnEmitterDeath += OnEmitterDeath;
         SlotModel.Instance.OnRemovedFromColumn += OnRemovedFromColumn;
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
         CityModel.Instance.OnElementCompleted += OnCityElementCompleted;
@@ -94,7 +95,8 @@ public class SlotController : MonoBehaviour
 
     private void UpdateAddSpaceButtonVisibility()
     {
-        this.addSpaceButton.gameObject.SetActive(PlayerModel.Instance.playerData.additionalEmitterUnlockTimeoutTimestamp == 0);
+        var allUnlocked = SlotModel.Instance.Emitters.All(e => e.isUnlocked);
+        this.addSpaceButton.gameObject.SetActive(!allUnlocked);
     }
 
     private void OnAddSpaceButtonClicked()
@@ -132,6 +134,7 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnEmitterChanged -= OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged -= OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter -= OnBrickMovedFromColumnToEmitter;
+        SlotModel.Instance.OnEmitterDeath -= OnEmitterDeath;
         SlotModel.Instance.OnRemovedFromColumn -= OnRemovedFromColumn;
         ViewModel.Instance.OnBottomNavChange -= OnBottomNavChange;
         CityModel.Instance.OnElementCompleted -= OnCityElementCompleted;
@@ -141,6 +144,13 @@ public class SlotController : MonoBehaviour
     {
         //Debug.Log("SlotController: OnEmitterChanged called");
         var slotModel = SlotModel.Instance;
+        var cityElement = ModelUtils.GetCurrentElement();
+        var clr = Color.white;
+
+        if (cityElement != null && es != null && es.brickData != null)
+        {
+            clr = cityElement.GetBrickColor(es.brickData.color);
+        }
 
         if (es == null)
         {
@@ -150,7 +160,7 @@ public class SlotController : MonoBehaviour
             {
                 var eb = GetEmitterByIndex(e.index);
                 eb.gameObject.SetActive(true);
-                eb.Setup(e.brickData, false);
+                eb.Setup(Color.white, e, false);
             }
             foreach (var e in lockedEmitters)
             {
@@ -166,7 +176,7 @@ public class SlotController : MonoBehaviour
             if (es.isUnlocked)
             {
                 eb.gameObject.SetActive(true);
-                eb.Setup(es.brickData, animate);
+                eb.Setup(clr, es, animate);
             }
             else
             {
@@ -190,12 +200,13 @@ public class SlotController : MonoBehaviour
 
     private void OnColumnsChanged()
     {
-        Debug.Log("SlotController: OnColumnsChanged called");
+        //Debug.Log("SlotController: OnColumnsChanged called");
         var slotModel = SlotModel.Instance;
+        var element = ModelUtils.GetCurrentElement();
         foreach (var c in slotModel.Columns)
         {
-            Debug.Log($"SlotController Setting up slot column {c.columnIndex} with {c.list.Count} elements");
-            GetSlotColumnByIndex(c.columnIndex).Setup(c);
+            //Debug.Log($"SlotController Setting up slot column {c.columnIndex} with {c.list.Count} elements");
+            GetSlotColumnByIndex(c.columnIndex).Setup(c, element.brickColors);
         }
     }
     private void OnBrickMovedFromColumnToEmitter(BrickData bd, int emitterIndex)
@@ -205,10 +216,17 @@ public class SlotController : MonoBehaviour
             var removedSlot = column.Remove(bd);
             if (removedSlot != null)
             {
-                GetEmitterByIndex(emitterIndex).Setup(bd, true);
+                var clr = ModelUtils.GetCurrentElement().brickColors[(int)bd.color];
+                var emitter = SlotModel.Instance.Emitters.Find(e => e.index == emitterIndex);
+                GetEmitterByIndex(emitterIndex).Setup(clr, emitter, true);
                 break;
             }
         }
+    }
+
+    private void OnEmitterDeath(EmitterSpace es)
+    {
+        GetEmitterByIndex(es.index).Setup(Color.white, es, false);
     }
 
     private void OnCityElementCompleted(CityElement cityElement)

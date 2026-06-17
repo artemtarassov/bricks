@@ -24,7 +24,7 @@ public class PlayerModel
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
         FilePrefs.Save();
-        Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
+       // Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
     }
 
 

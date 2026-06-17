@@ -6,11 +6,15 @@ public class PrepareScene
 
     public void Run()
     {
+        Debug.Log("PrepareScene Run called");
         var groups = GameObject.FindObjectsOfType<BuildingElement>(true);
         foreach (var group in groups)
         {
             Run(group);
         }
+
+        var sc = GameObject.FindObjectOfType<SlotTextureCameraController>(true);
+        sc.gameObject.SetActive(false);
     }
 
     public void Run(BuildingElement group)
@@ -19,8 +23,8 @@ public class PrepareScene
         var elements = group.GetElements();
         foreach (var element in elements)
         {
-   
-      
+
+
             if (element.__EnclosingGameObject == null)
                 element.__EnclosingGameObject = element.GetChildByName("__EnclosingGameObject");
 

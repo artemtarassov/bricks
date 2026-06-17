@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class AddSpaceView : DefaultView
@@ -5,6 +6,8 @@ public class AddSpaceView : DefaultView
 
     [SerializeField] private BtnAddSpaceAd btnAddSpaceAd;
     [SerializeField] private BtnIAP btnAddSpaceIAP;
+
+    [SerializeField] private TMP_Text minutes;
 
     void Start()
     {
@@ -29,6 +32,9 @@ public class AddSpaceView : DefaultView
     public override void OnShown()
     {
         Debug.Log("AddSpaceView");
+        var seconds = RemoteConfigModel.Instance.RemoteConfig.AdditionalEmitterSec;
+        var min = Mathf.RoundToInt(seconds / 60.0f);
+        this.minutes.text = min + " min";
     }
 
     public override void OnHidden()

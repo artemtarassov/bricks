@@ -43,33 +43,34 @@ public class UnlockNextCmd
             progress.SetCurrentElement(currentElementData);
         }
         else
-        if (currentElementData.ElementCompleted())
-        {
-            var currentBuilding = cm.GetBuildingByName(this.currentBuildingName);
-            var elementsInBuilding = currentBuilding.GetElements().ToList();
-            var elementIndexInBuilding = elementsInBuilding.FindIndex((e) => e.dataKey == currentElementData.dataKey);
-            var nextElementIndexInBuilding = elementIndexInBuilding + 1;
+            if (currentElementData.ElementCompleted())
+            {
+                var currentBuilding = cm.GetBuildingByName(this.currentBuildingName);
+                var elementsInBuilding = currentBuilding.GetElements().ToList();
+                var elementIndexInBuilding = elementsInBuilding.FindIndex((e) => e.dataKey == currentElementData.dataKey);
+                var nextElementIndexInBuilding = elementIndexInBuilding + 1;
 
-            {
-                var completedElementsCounter = progress.CompletedElementsCounter;
-                var buildingIndex = cm.GetBuildingNameIndex(currentBuildingName);
-                var dict = new Dictionary<string, object>();
-                dict["completedElementsCounter"] = completedElementsCounter;
-                dict["elementName"] = currentElementData.dataKey;
-                dict["themeIndex"] = buildingIndex;
-                new LogEventCmd().Run("complete_element", dict);
+                {
+                    progress.IncCompletedElementsCounter();
+                    var completedElementsCounter = progress.CompletedElementsCounter;
+                    var buildingIndex = cm.GetBuildingNameIndex(currentBuildingName);
+                    var dict = new Dictionary<string, object>();
+                    dict["completedElementsCounter"] = completedElementsCounter;
+                    dict["elementName"] = currentElementData.dataKey;
+                    dict["themeIndex"] = buildingIndex;
+                    new LogEventCmd().Run("complete_element", dict);
+                }
+                if (nextElementIndexInBuilding >= elementsInBuilding.Count)
+                {
+                    //no more elements in building.
+                    //new CompleteCurrentBuildingCmd().Run();
+                    return;
+                }
+                var nextElement = elementsInBuilding[nextElementIndexInBuilding];
+                var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
+                progress.SetCurrentElement(nextElementData);
+                currentElementData = nextElementData;
             }
-            if (nextElementIndexInBuilding >= elementsInBuilding.Count)
-            {
-                //no more elements in building.
-                //new CompleteCurrentBuildingCmd().Run();
-                return;
-            }
-            var nextElement = elementsInBuilding[nextElementIndexInBuilding];
-            var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
-            progress.SetCurrentElement(nextElementData);
-            currentElementData = nextElementData;
-        }
 
         new AddExtrasCmd().Run(currentElementData);
         UnlockElement(currentElementData);
@@ -92,7 +93,12 @@ public class UnlockNextCmd
         cityElement.Setup(currentElementData);
         slotModel.Fill(currentElementData.columns);
 
+        ViewModel.Instance.ChangeBottomNav(BottomNav.Slots);
 
+
+#if UNITY_EDITOR
+        ValidateAmounts(cityElement, currentElementData);
+#endif
 
         if (currentElementData.ElementCountColoredBricks() == 0)
         {
@@ -100,6 +106,22 @@ public class UnlockNextCmd
         }
 
         this.MoveCam(cityElement);
+    }
+
+    private void ValidateAmounts(CityElement cityElement, CityElementDataContainer currentElementData)
+    {
+        /*
+        var bricksInSlots = currentElementData.columns.FindAll(c => c.list.Any(e => e.brickData != null)).SelectMany(c => c.list).Where(e => e.brickData != null).Select(e => e.brickData);
+        var bricksInElement = currentElementData.brickDataList;
+
+        var sum1 = bricksInSlots.Sum(b => b.max);
+        var sum2 = bricksInElement.Sum(b => b.max);
+        Debug.Log("UnlockNextCmd ValidateAmounts: sum of colored bricks in slots " + sum1 + ", sum of colored bricks in element data " + sum2);
+        Assert.IsTrue(sum1 > 0, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in slots should be greater than 0");
+        Assert.IsTrue(sum2 > 0, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in element data should be greater than 0");
+        Assert.AreEqual(bricksInSlots.Count(), bricksInElement.Count(), "UnlockNextCmd ValidateAmounts: number of brick entries in slots should be equal to number of brick entries in element data. slots count: " + bricksInSlots.Count() + ", element data count: " + bricksInElement.Count());
+        Assert.AreEqual(sum1, sum2, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in slots should be equal to total amount of colored bricks in element data. sum1: " + sum1 + ", sum2: " + sum2);
+    */
     }
 
 

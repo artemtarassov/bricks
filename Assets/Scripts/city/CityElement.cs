@@ -22,6 +22,7 @@ public class CityElement : MonoBehaviour
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
     [SerializeField] public Vector3 lightRot;
+    [SerializeField] public List<Color> brickColors;
 
     [SerializeField] public Transform __GeneratedBricks = null;
     [SerializeField] public Transform __EnclosingGameObject = null;
@@ -33,15 +34,31 @@ public class CityElement : MonoBehaviour
     private Dictionary<Transform, BrickInfo> brickInfo = new Dictionary<Transform, BrickInfo>();
     private BrickLayersContainer brickLayersContainer;
 
-    private BrickExplosion explosion;
+    private BrickExplosion explosion1;
+    private BrickExplosionSteps explosion2;
 
-    //private readonly string genereatedBrickGameObjectName = "__GeneratedBricks";
 
     void Awake()
     {
         Assert.IsNotNull(__GeneratedBricks, "Generated bricks container not assigned in inspector for " + this.gameObject.name);
         this.EnableBricks(false);
         this.EnableVisuals(true);
+    }
+
+    public void SetActive(bool active)
+    {
+        //Debug.Log($"CityElement SetActive: setting active {active} for city element {this.name}");
+        this.gameObject.SetActive(active);
+    }
+
+    public Color GetBrickColor(ColorIndex colorIndex)
+    {
+        if (colorIndex == ColorIndex.Undefined || brickColors == null || brickColors.Count == 0)
+        {
+            return Color.white;
+        }
+        var clr = this.brickColors[(int)colorIndex];
+        return clr;
     }
 
     public BrickLayersContainer GetBrickLayersContainer()
@@ -63,7 +80,6 @@ public class CityElement : MonoBehaviour
         return brickLayersContainer;
     }
 
-    public BricksMatrix matrix { get; private set; }
 
     public void Setup(CityElementDataContainer dataContainer)
     {
@@ -71,12 +87,16 @@ public class CityElement : MonoBehaviour
         Assert.IsNotNull(dataContainer, "Data container should not be null when setting up city element " + this.gameObject.name);
         this.dataContainer = dataContainer;
 
+        var sum1 = this.dataContainer.brickDataList.Sum(b => b.max);
+        Assert.IsTrue(sum1 > 0, "Total amount of bricks in element data should be greater than 0 when setting up city element " + this.gameObject.name);
+        Assert.IsTrue(this.SortedBricks.Count == sum1, $"Number of sorted bricks in city element should be equal to total amount of bricks in element data. sorted bricks count: {this.SortedBricks.Count}, total bricks in data: {sum1}, city element: {this.gameObject.name}");
+
         this.EnableBricks(true);
         this.EnableVisuals(false);
         this.SetBrickColors();
         this.ShowCurrentState();
 
-        this.matrix = new BricksMatrix(this);
+
     }
 
     public List<Transform> FindAllBricks()
@@ -93,13 +113,6 @@ public class CityElement : MonoBehaviour
         Assert.IsTrue(this.brickInfo.ContainsKey(brick), "Brick transform not found in city element");
         return this.brickInfo[brick].color;
     }
-
-    public HashSet<ColorIndex> GetBrickColors()
-    {
-        return this.dataContainer.GetBrickColors();
-    }
-
-
 
     private Material GetMaterialByName(string name)
     {
@@ -148,15 +161,35 @@ public class CityElement : MonoBehaviour
         }
     }
 
-    public void Explode()
+    public void Explode1()
     {
-        if (this.explosion == null)
+        if (this.explosion1 == null)
         {
-            this.explosion = this.gameObject.AddComponent<BrickExplosion>();
+            this.explosion1 = this.gameObject.AddComponent<BrickExplosion>();
         }
-        this.explosion.Play();
+        this.explosion1.Play();
         this.EnableVisuals(true);
     }
+
+    public bool NextExplosionStep()
+    {
+        if (this.explosion2 == null)
+        {
+            this.explosion2 = this.gameObject.AddComponent<BrickExplosionSteps>();
+            var sortedBricks = this.GetBrickLayersContainer().sortedBricks.ToList();
+            sortedBricks.Reverse();
+            this.explosion2.Setup(sortedBricks);
+        }
+        this.explosion2.NextExplosionStep();
+        this.EnableVisuals(true);
+        return this.explosion2.ExplosionStepsCompleted();
+    }
+
+    public bool ExplosionStepsCompleted()
+    {
+        return this.explosion2 != null && this.explosion2.ExplosionStepsCompleted();
+    }
+
 
 
     public ColoredBrickInfo GetFurthestColoredBrick(ColorIndex colorIndex)
@@ -166,7 +199,7 @@ public class CityElement : MonoBehaviour
         var closestBricks = allColoredBricks.OrderBy(b => Vector3.Distance(b.brickTransform.position, camPos));
         if (closestBricks.Count() == 0)
         {
-            return default(ColoredBrickInfo);
+            throw new System.Exception("No colored bricks of color " + colorIndex + " found on city element " + this.gameObject.name);
         }
         var furthestBrick = closestBricks.Last();
         return furthestBrick;
@@ -179,7 +212,7 @@ public class CityElement : MonoBehaviour
         var coloredBricks = new List<ColoredBrickInfo>();
         foreach (var brickData in dataContainer.brickDataList)
         {
-            if (brickData.coloredAmount > 0 && (colorIndex == ColorIndex.Undefined || brickData.color == colorIndex))
+            if (brickData.coloredAmount > 0 && brickData.inEmitter == false && (colorIndex == ColorIndex.Undefined || brickData.color == colorIndex))
             {
                 var indexList = brickData.GetBrickIndexList(BrickState.Colored);
                 foreach (var index in indexList)
@@ -200,7 +233,10 @@ public class CityElement : MonoBehaviour
         {
             if (bd == find)
             {
-                return SortedBricks[j + index];
+                var n = j + index;
+                Assert.IsTrue(n < SortedBricks.Count, "Calculated brick index is out of range of sorted bricks. index " + n + ", bricks count " + SortedBricks.Count + ", passed " + index + ", j " + j);
+                Assert.IsNotNull(SortedBricks[n], "Sorted brick is null at calculated index " + n);
+                return SortedBricks[n];
             }
             else
             {
@@ -218,7 +254,7 @@ public class CityElement : MonoBehaviour
         }
         //Debug.Log("ShowBrickState " + state);
         this.brickInfo[t].state = state;
-        var mr = t.GetComponent<MeshRenderer>();
+        var mr = t.GetComponentInChildren<MeshRenderer>();
 
         switch (state)
         {
@@ -246,9 +282,13 @@ public class CityElement : MonoBehaviour
     public void EnableBricks(bool enable)
     {
         __GeneratedBricks.gameObject.SetActive(enable);
-        if (enable && this.explosion != null)
+        if (enable && this.explosion1 != null)
         {
-            this.explosion.ResetExplosion();
+            this.explosion1.ResetExplosion();
+        }
+        if (enable && this.explosion2 != null)
+        {
+            this.explosion2.ResetExplosion();
         }
         if (enable && __EnclosingGameObject != null)
         {

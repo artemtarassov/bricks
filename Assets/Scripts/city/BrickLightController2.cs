@@ -18,7 +18,7 @@ public class BrickLightController2 : MonoBehaviour
         CityModel.Instance.OnEnableDifferentColors += ShowLightForCityElement;//update light position when new colors are enabled, as it may change which brick is lit.
     }
 
-    private void ShowLightForCityElement(CityElement cityElement)
+    public void ShowLightForCityElement(CityElement cityElement)
     {
         this.lightComponent.gameObject.SetActive(true);
         if (cityElement.lightRot == Vector3.zero)

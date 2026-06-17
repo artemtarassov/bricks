@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 using System.Linq;
 public class SlotColumn : MonoBehaviour
 {
-    private List<SlotElement> slotElements;
+    private List<SlotElement> slotElements = new List<SlotElement>();
 
     [SerializeField]
     private SlotElement slotBrickPrefab;
@@ -25,7 +25,6 @@ public class SlotColumn : MonoBehaviour
 
     void Awake()
     {
-        this.slotElements = new List<SlotElement>();
         this.slotBrickPrefab.gameObject.SetActive(false);
         this.checkmark.gameObject.SetActive(false);
         this.blinkingArrow.gameObject.SetActive(false);
@@ -52,17 +51,21 @@ public class SlotColumn : MonoBehaviour
         return this.slotElements[index];
     }
 
-    public void Setup(SlotColumnData sc)
+    private bool IsVisible(SlotElementData e)
+    {
+        return e.IsVisible();
+    }
+
+    public void Setup(SlotColumnData sc, List<Color> brickColors)
     {
         this.columnData = sc;
         var nextIndex = 0;
-        //Debug.Log($"SlotColumn: Setup: columnIndex={sc.columnIndex}, elements={sc.list.Count}");
-        var list = sc.list.FindAll((e) => e.type != SlotElementType.Undefined && e.IsInEmitter() == false);
+        var visibleList = sc.list.FindAll((e) => IsVisible(e));
 
-        foreach (var data in list)
+        foreach (var data in visibleList)
         {
             var e = CreateSlotElementByIndex(nextIndex);
-            e.Setup(data);
+            e.Setup(nextIndex, data, brickColors);
             e.gameObject.name = "SlotElement_" + nextIndex;
             e.gameObject.SetActive(true);
             e.transform.DOKill();
@@ -87,6 +90,7 @@ public class SlotColumn : MonoBehaviour
         for (var i = 0; i < this.slotElements.Count; i++)
         {
             var e = this.slotElements[i];
+            e.UpdateIndex(i);
             e.gameObject.SetActive(i < 4);
         }
         var hasElements = this.slotElements.Any((e) => e.gameObject.activeSelf);

@@ -13,7 +13,7 @@ public class SwitchBuildingCmd
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
 
-        var buildingNames = PlayerModel.Instance.GetUnlockedBuildings();
+        var buildingNames = playerModel.GetUnlockedBuildings();
         var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
         var nextGroupIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
         if (nextGroupIndex < 0)
@@ -35,8 +35,8 @@ public class SwitchBuildingCmd
         if (progress.GetCurrentElement() != null)
         {
             var currentElement = cityModel.GetElementByDataKey(progress.GetCurrentElement().dataKey);
-            var index = CityModel.Instance.GetElementIndex(currentElement);
-            CityModel.Instance.ActivateElements(index - 1);
+            var index = cityModel.GetElementIndex(currentElement);
+            cityModel.ActivateElements(index - 1);
         }
 
 
@@ -55,24 +55,24 @@ public class SwitchBuildingCmd
         ChangeSkyMaterial(nextGroupName);
     }
 
-    private void ChangeSkyMaterial(BuildingName nextGroupName)
+    private void ChangeSkyMaterial(BuildingName nextBuildingName)
     {
         var cm = ColoredMaterials.Instance;
         if (cm == null)
         {
             return;
         }
-        if (nextGroupName == BuildingName.Preset_House_05)
+        if (nextBuildingName == BuildingName.Preset_House_05)
         {
             RenderSettings.skybox = cm.GetMaterialByName("Sky 01");
         }
-        else if (nextGroupName == BuildingName.Tower_House)
+        else if (nextBuildingName == BuildingName.Tower_House)
         {
             RenderSettings.skybox = cm.GetMaterialByName("Sky 04");
         }
-        else if (nextGroupName == BuildingName.Ruins1_House)
+        else if (nextBuildingName == BuildingName.Ruins1_House)
         {
-            RenderSettings.skybox = cm.GetMaterialByName("Sky 02");
+            RenderSettings.skybox = cm.GetMaterialByName("Sky 03");
         }
         else
             RenderSettings.skybox = cm.GetMaterialByName("Sky 01");

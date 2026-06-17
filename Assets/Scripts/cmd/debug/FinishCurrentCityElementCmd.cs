@@ -23,12 +23,5 @@ public class FinishCurrentCityElementCmd
 
         new UnlockNextCmd().Run();
 
-        cityElement = ModelUtils.GetCurrentElement();
-        foreach (var bd in cityElement.dataContainer.brickDataList)
-        {
-            bd.SetAll(BrickState.Colored);
-        }
-        cityElement.ShowCurrentState();
-
     }
 }

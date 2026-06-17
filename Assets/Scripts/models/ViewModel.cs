@@ -23,6 +23,7 @@ public enum BottomNav
     None,
     Slots,
     MainNav,
+    FinishElement,
 }
 
 
@@ -89,12 +90,21 @@ public class ViewModel
 
     public int GoldenTicketViewTriggerTimestamp = 0;
 
+    public Action<float> OnFinishElement;
+
 
     public ViewModel(Transform root)
     {
         this.root = root;
         this.CurrentBottomNav = BottomNav.MainNav;
     }
+
+
+    public void FinishPercent(float percent)
+    {
+        OnFinishElement?.Invoke(percent);
+    }
+  
 
     public void ChangeBottomNav(BottomNav nav)
     {

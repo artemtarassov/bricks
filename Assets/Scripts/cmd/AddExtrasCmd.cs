@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 public class AddExtrasCmd
 {
-    private CityElementDataContainer currentElementData;
+    private CityElementDataContainer dataContainer;
     public void Run(CityElementDataContainer currentElementData)
     {
         Debug.Log($"AddExtrasCmd: adding extras to element {currentElementData.dataKey}");
@@ -14,15 +14,15 @@ public class AddExtrasCmd
         Assert.IsTrue(currentElementData.columns.Count > 0, "AddExtrasCmd Run: data container should have at least 1 column");
         var totalBricks = currentElementData.columns.Sum(c => c.list.Count(e => e.type == SlotElementType.Bricks));
         Assert.IsTrue(totalBricks > 0, "AddExtrasCmd Run: data container should have at least 1 brick to add extras");
-        this.currentElementData = currentElementData;
+        this.dataContainer = currentElementData;
 
-        var extrasApplied = currentElementData.columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
+        var extrasApplied = currentElementData.columns.Any(c => c.list.Any(e => e.type != SlotElementType.Bricks));
         if (extrasApplied)
         {
             return;
         }
         ApplyDifficulty();
-        AddExplosion();
+        // AddExplosion();
     }
 
     private bool ShouldAddAd()
@@ -47,7 +47,7 @@ public class AddExtrasCmd
 
     private void ApplyDifficulty()
     {
-        var difficulties = new int[] { 0, 0, 1, 2, 3, 4, 2 };
+        var difficulties = new int[] { 0, 1, 2, 3, 4, 5, 6, 2 };
         var pd = PlayerModel.Instance.playerData;
 
         pd.difficultyIndex++;
@@ -61,44 +61,56 @@ public class AddExtrasCmd
 
         if (difficultyToApply == 0)
         {
-            AddCoinsIfAbsent(currentElementData);
+            AddCoinsIfAbsent();
             return;
         }
 
         if (difficultyToApply == 1)
         {
-            AddCoinsIfAbsent(currentElementData);
-            AddBicksMultiplier(currentElementData);
+            AddAd();
+            AddBicksMultiplier();
             return;
         }
         if (difficultyToApply == 2)
         {
-            if (ShouldAddAd())
-                AddAd(currentElementData);
-            AddCoinsIfAbsent(currentElementData);
-            AddBicksMultiplier(currentElementData);
-            SetHiddenBricks(currentElementData, 1);
+            AddCoinsIfAbsent();
+            SetHiddenBricks(1);
             return;
         }
         if (difficultyToApply == 3)
         {
-            AddBicksMultiplier(currentElementData);
-            SetHiddenBricks(currentElementData, 2);
+            AddAd();
+            AddDeath(1);
+            AddBicksMultiplier();
             return;
         }
         if (difficultyToApply == 4)
         {
-            if (ShouldAddAd())
-                AddAd(currentElementData);
-            AddCoinsIfAbsent(currentElementData);
-            SetHiddenBricks(currentElementData, 2);
+            AddCoinsIfAbsent();
+            SetHiddenBricks(1);
+            AddDeath(2);
+            return;
+        }
+        if (difficultyToApply == 5)
+        {
+            AddAd();
+            SetHiddenBricks(2);
+            AddDeath(3);
+            AddBicksMultiplier();
+            return;
+        }
+        if (difficultyToApply == 6)
+        {
+            AddCoinsIfAbsent();
+            SetHiddenBricks(2);
+            AddDeath(3);
             return;
         }
 
     }
 
 
-    private void SetHiddenBricks(CityElementDataContainer dataContainer, int amount = 1)
+    private void SetHiddenBricks(int amount = 1)
     {
         var countExisting = dataContainer.columns.Sum(c => c.list.Count(e => e.type == SlotElementType.HiddenBricks));
         if (countExisting >= amount)
@@ -123,23 +135,41 @@ public class AddExtrasCmd
         }
     }
 
+    private bool HasSlotElementType(SlotElementType type)
+    {
+        return dataContainer.columns.Any(c => c.list.Any(e => e.type == type));
+    }
+
+    private void AddDeath(int amount = 1)
+    {
+        var columns = dataContainer.columns.FindAll((c) => c.list.Count > 5);
+        RandHelper.Shuffle(columns);
+        for (var i = 0; i < columns.Count && amount > 0; i++)
+        {
+            var column = columns[i];
+            var randIndex = Random.Range(2, column.list.Count - 1);
+            column.list.Insert(randIndex, new SlotElementData(SlotElementType.EmitterDeathWaiting));
+            amount--;
+        }
+    }
+
 
     private void AddExplosion()
     {
-        var hasExplosion = currentElementData.columns.Any(s => s.list.Any(e => e.type == SlotElementType.FinalExplosion));
+        var hasExplosion = HasSlotElementType(SlotElementType.FinalExplosion);
         if (hasExplosion)
         {
             Debug.LogError("AddExtrasCmd: explosion already present, skipping adding explosion");
             return;
         }
-        var randColumn = RandHelper.GetRandomElement(currentElementData.columns);
+        var randColumn = RandHelper.GetRandomElement(dataContainer.columns);
         randColumn.list.Add(new SlotElementData(SlotElementType.FinalExplosion));
         Debug.Log("AddExtrasCmd: explosion added to column " + randColumn.columnIndex);
     }
 
-    private void AddBicksMultiplier(CityElementDataContainer dataContainer)
+    private void AddBicksMultiplier()
     {
-        var hasMult = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.AddMoreBricks));
+        var hasMult = HasSlotElementType(SlotElementType.AddMoreBricks);
         if (hasMult)
         {
             return;
@@ -161,9 +191,9 @@ public class AddExtrasCmd
         Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddBicksMultiplier: failed to add additional bricks multiplier to column");
     }
 
-    private void AddCoinsIfAbsent(CityElementDataContainer dataContainer)
+    private void AddCoinsIfAbsent()
     {
-        var hasCoins = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.Coins));
+        var hasCoins = HasSlotElementType(SlotElementType.Coins);
         if (hasCoins)
         {
             return;
@@ -174,14 +204,22 @@ public class AddExtrasCmd
         {
             return;
         }
-        var randIndex = Random.Range(2, randColumn.list.Count - 1);
-        randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Coins));
+        var pd = PlayerModel.Instance.playerData;
+        if (pd.coins < 1000 || Random.value > 0.9f)
+        {
+            var randIndex = Random.Range(2, randColumn.list.Count - 1);
+            randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Coins));
+        }
     }
 
-    private void AddAd(CityElementDataContainer dataContainer)
+    private void AddAd()
     {
-        var hasAd = dataContainer.columns.Any(s => s.list.Any(e => e.type == SlotElementType.Ad));
+        var hasAd = HasSlotElementType(SlotElementType.Ad);
         if (hasAd)
+        {
+            return;
+        }
+        if (!ShouldAddAd())
         {
             return;
         }

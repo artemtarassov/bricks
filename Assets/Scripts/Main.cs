@@ -13,6 +13,11 @@ public class Main : MonoBehaviour
         DOTween.Sequence(this).AppendInterval(1).AppendCallback(OnSecUpdate).SetLoops(-1);
     }
 
+    void OnDisable()
+    {
+       // throw new System.NotImplementedException();
+    }
+
     void OnDestroy()
     {
 
@@ -27,7 +32,7 @@ public class Main : MonoBehaviour
 
     private void OnSecUpdate()
     {
-        new SecUpdateCmd().Run();
+        //new SecUpdateCmd().Run();
     }
 
     //on Application Quit, save player data

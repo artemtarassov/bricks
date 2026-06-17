@@ -60,6 +60,7 @@ public class SelectColumnCmd
         {
             CityModel.Instance.EnableDifferentColors(element, BalancingModel.AdditionalBricksOnEmptyElement);
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            SlotModel.Instance.EmitterAlive();
             new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
             return;
         }
@@ -68,9 +69,9 @@ public class SelectColumnCmd
         {
             if (AdModel.Instance.IsAdReady(RewardName.MID_SESSION_INTERSTITIAL))
                 new ShowAdCmd().Run(RewardName.MID_SESSION_INTERSTITIAL);
-            else 
-            if (AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED))
-                new ShowAdCmd().Run(RewardName.MID_SESSION_REWARDED);
+            else
+                if (AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED))
+                    new ShowAdCmd().Run(RewardName.MID_SESSION_REWARDED);
 
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             return;
@@ -87,6 +88,14 @@ public class SelectColumnCmd
             {
                 new SoundCmd(SoundModel.Instance.ERROR).Run();
             }
+            return;
+        }
+
+        if (this.data.type == SlotElementType.EmitterDeathWaiting)
+        {
+            SlotModel.Instance.Replace(this.data, SlotElementType.EmitterDeathActive); 
+            SlotModel.Instance.EmitterDeath();
+            new SoundCmd(SoundModel.Instance.CLICK2).Run();
             return;
         }
 

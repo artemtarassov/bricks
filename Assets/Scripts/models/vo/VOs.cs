@@ -62,6 +62,8 @@ public enum SlotElementType
     Coins = 4,
     Ad = 5,
     FinalExplosion = 6,
+    EmitterDeathWaiting = 7,
+    EmitterDeathActive = 8
 }
 
 [Serializable]
@@ -69,6 +71,20 @@ public class SlotElementData
 {
     public SlotElementType type;
     public BrickData brickData = null;
+
+    public bool IsVisible()
+    {
+        if (this.type == SlotElementType.Undefined || this.type == SlotElementType.EmitterDeathActive)
+        {
+            return false;
+        }
+        if (this.IsInEmitter())
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     public bool IsInEmitterSpace()
     {
@@ -196,8 +212,15 @@ public class EmitterSpace
     public BrickData brickData = null;
     public int index;
     public bool isUnlocked = false;
+    public bool isDead = false;
     public bool HasColoredBricks => isUnlocked && brickData != null && brickData.coloredAmount > 0;
-    public bool IsEmpty => isUnlocked && brickData == null;
+    public bool IsEmpty => isDead == false && isUnlocked && brickData == null;
+
+    public void Reset()
+    {
+        this.brickData = null;
+        this.isDead = false;
+    }
 }
 
 
@@ -217,7 +240,7 @@ public class BuildingData
     public BuildingName BuildingName => buildingName;
 
     public List<CityElementDataContainer> cityElementDataList;
-    
+
     public BuildingData(BuildingName n)
     {
         this.buildingName = n;

@@ -47,7 +47,6 @@ public class PlayCurrentBuildingCmd
         }
 
         PlayerModel.Instance.SetCurrentBuilding(buildingName, BuildingState.Playing);
-        ViewModel.Instance.ChangeBottomNav(BottomNav.Slots);
         new UnlockNextCmd().Run();
     }
 

@@ -34,16 +34,7 @@ public static class BeforePlayMode
 
         if (state == PlayModeStateChange.EnteredPlayMode)
         {
-            new PrepareScene().Run();
             EnableEditorLights(false);
-
-            /*
-            new PrepareScene().Run();
-
-            if (UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().isDirty)
-            {
-                UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
-            }*/
             return;
         }
 

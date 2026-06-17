@@ -18,6 +18,7 @@ public class SoundModel
     public readonly string MUSIC1 = "music1";
 
     public readonly string BRICK_CLICK = "switch_button_push_small_05";
+    public readonly string EXPLOSION1 = "explosion1";
 
     public readonly string CAM_MOVE_BACK = "camMoveBack";
 

@@ -19,6 +19,7 @@ public class SlotModel
     public Action<EmitterSpace> OnEmitterChanged;
     public Action<BrickData, int> OnBrickMovedFromColumnToEmitter;
     public Action<SlotElementData> OnRemovedFromColumn;
+    public Action<EmitterSpace> OnEmitterDeath;
 
 
     public SlotModel()
@@ -75,7 +76,7 @@ public class SlotModel
     {
         for (var i = 0; i < this.Emitters.Count; i++)
         {
-            this.Emitters[i].brickData = null;
+            this.Emitters[i].Reset();
         }
         this.Columns = new List<SlotColumnData>();
         this.OnEmitterChanged?.Invoke(null);
@@ -84,12 +85,12 @@ public class SlotModel
 
     public void Fill(List<SlotColumnData> columns)
     {
-        var hasExplosive = columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
-        Assert.IsTrue(hasExplosive, "SlotModel Fill: columns should contain explosive elements");
+        //var hasExplosive = columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
+        //Assert.IsTrue(hasExplosive, "SlotModel Fill: columns should contain explosive elements");
 
         for (var i = 0; i < this.Emitters.Count; i++)
         {
-            this.Emitters[i].brickData = null;
+            this.Emitters[i].Reset();
         }
         Assert.IsTrue(columns.Count > 0, "City element should have at least 1 column of slot data");
         foreach (var column in columns)
@@ -138,7 +139,7 @@ public class SlotModel
     public SlotElementData GetNextSlotElementDataInColumn(int columnIndex, int rowIndex = 0)
     {
         var slotColumn = Columns.Find(c => c.columnIndex == columnIndex);
-        var list = slotColumn.list.FindAll(e => e.type != SlotElementType.Undefined && e.IsInEmitter() == false);
+        var list = slotColumn.list.FindAll(e => e.IsVisible());
         if (list.Count <= rowIndex)
         {
             return null;
@@ -159,6 +160,27 @@ public class SlotModel
         this.Emitters[emptyIndex].brickData = brickData;
         this.OnEmitterChanged?.Invoke(this.Emitters[emptyIndex]);
         return emptyIndex;
+    }
+
+    public void EmitterDeath()
+    {
+        var emptyEmitterIndex = this.GetEmptyEmitterIndex();
+        if(emptyEmitterIndex >= 0)
+        {
+            var emitter = this.Emitters[emptyEmitterIndex];
+            emitter.isDead = true;  
+            this.OnEmitterDeath?.Invoke(emitter);
+        }
+    }
+
+    public void EmitterAlive()
+    {
+        var deadEmitter = this.Emitters.FindAll(e => e.isDead);
+        foreach(var emitter in deadEmitter)
+        {
+            emitter.isDead = false;
+            this.OnEmitterDeath?.Invoke(emitter);
+        }
     }
 
     public void MoveFromColumnToEmitter(BrickData brickData)

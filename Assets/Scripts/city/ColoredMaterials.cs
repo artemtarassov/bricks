@@ -45,6 +45,16 @@ public class ColoredMaterials : MonoBehaviour
         return material;
     }
 
+    public Material GetEmptyMaterialByColor(ColorIndex colorIndex)
+    {
+        var material = GetMaterialByName($"BrickMatColored_{(int)colorIndex}_empty");
+        if (material == null)
+        {
+            throw new System.Exception($"Material with name BrickMatColored_{(int)colorIndex}_empty not found");
+        }
+        return material;
+    }
+
     public Sprite GetSpriteByColorIndex(ColorIndex colorIndex)
     {
         if (cachedSprites.TryGetValue(colorIndex, out var cachedSprite))

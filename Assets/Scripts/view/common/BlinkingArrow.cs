@@ -9,9 +9,17 @@ public class BlinkingArrow : MonoBehaviour
 {
     private List<Image> arrows = new List<Image>();
     private Sequence tween;
+    public float fadeDuration = 0.33f;
+
     void Awake()
     {
-        this.arrows = new List<Image>(this.GetComponentsInChildren<Image>(true));
+        if (this.arrows == null || this.arrows.Count == 0)
+            this.arrows = new List<Image>(this.GetComponentsInChildren<Image>(true));
+    }
+
+    public void SetArrowImages(List<Image> images)
+    {
+        this.arrows = images;
     }
 
     void OnEnable()
@@ -30,8 +38,8 @@ public class BlinkingArrow : MonoBehaviour
         for (int i = 0; i < arrows.Count; i++)
         {
             var arrow = arrows[arrows.Count - 1 - i];
-            tween = tween.Append(arrow.DOFade(1, 0.33f));
-            tween = tween.Append(arrow.DOFade(0, 0.33f));
+            tween = tween.Append(arrow.DOFade(1, fadeDuration));
+            tween = tween.Append(arrow.DOFade(0, fadeDuration));
         }
         tween = tween.SetLoops(-1).SetTarget(this.gameObject).SetLink(this.gameObject);
 

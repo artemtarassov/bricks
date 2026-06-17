@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,14 +12,22 @@ public class SlotElement : MonoBehaviour
 
     [SerializeField] public GameObject ad;
 
+    [SerializeField] public GameObject death;
+
+
     [SerializeField] private TMP_Text count;
-    [SerializeField] private Image colorImg;
+    [SerializeField] private UIBrick uiBrick;
 
     [HideInInspector]
     public SlotElementData slotElementData;
 
-    public void Setup(SlotElementData data)
+    private List<Color> brickColors;
+    private int index;
+
+    public void Setup(int index, SlotElementData data, List<Color> brickColors)
     {
+        this.index = index;
+        this.brickColors = brickColors;
         this.slotElementData = data;
         if (data == null)
         {
@@ -55,6 +64,21 @@ public class SlotElement : MonoBehaviour
             SetupWithAd();
             return;
         }
+        if (data.type == SlotElementType.EmitterDeathWaiting)
+        {
+            SetupWithDeath();
+            return;
+        }
+    }
+
+    public void UpdateIndex(int newIndex)
+    {
+        if (this.index == newIndex)
+        {
+            return;
+        }
+        this.index = newIndex;
+        this.uiBrick.ShowGloss(this.index == 0);
     }
 
     private void SetupWithAd()
@@ -69,6 +93,12 @@ public class SlotElement : MonoBehaviour
         this.explosion.SetActive(true);
     }
 
+    private void SetupWithDeath()
+    {
+        this.SetupAsEmpty();
+        this.death.SetActive(true);
+    }
+
     private void SetupWithHiddenBricks()
     {
         this.SetupAsEmpty();
@@ -78,9 +108,10 @@ public class SlotElement : MonoBehaviour
 
     private void ShowColor()
     {
-        this.colorImg.gameObject.SetActive(true);
-        this.colorImg.color = Color.white;
-        this.colorImg.sprite = ColoredMaterials.Instance.GetSpriteByColorIndex(this.slotElementData.brickData.color);
+        this.uiBrick.gameObject.SetActive(true);
+        var clrIndex = this.slotElementData.brickData.color;
+        this.uiBrick.SetColor(this.brickColors[(int)clrIndex], clrIndex);
+        this.uiBrick.ShowGloss(this.index == 0);
     }
 
     private void ShowAmount()
@@ -112,12 +143,13 @@ public class SlotElement : MonoBehaviour
 
     private void SetupAsEmpty()
     {
-        this.colorImg.gameObject.SetActive(false);
+        this.uiBrick.gameObject.SetActive(false);
         this.addMoreBricks.SetActive(false);
         this.coins.SetActive(false);
         this.hiddenBricks.SetActive(false);
         this.count.gameObject.SetActive(false);
         this.ad.SetActive(false);
         this.explosion.SetActive(false);
+        this.death.SetActive(false);
     }
 }

@@ -26,8 +26,45 @@ public class SecUpdateCmd
         {
             UpdateOutOfSpace();
             UpdateAdditionalEmitter();
+
         }
         UpdateDailyReward();
+        UpdateAdLoading();
+    }
+
+    private void UpdateAdLoading()
+    {
+        var pm = PlayerModel.Instance.playerData;
+        var secPlaying = pm.secondsPlaying;
+        var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket);
+        var hasGoldenTicketTemp = IAPModel.Instance.HasTempGoldenTicket();
+
+        if (hasGoldenTicket || hasGoldenTicketTemp)
+        {
+            AdModel.Instance.shouldLoadBanner = false;
+            AdModel.Instance.shouldLoadInterstitial = false;
+            return;
+        }
+
+        var secSinceInstall = TimeUtils.GetUnixTimestamp() - pm.installTimestamp;
+       // var daysSinceInstall = secSinceInstall / (24 * 60 * 60);
+
+        var didPlayHour = secPlaying >= 3600;
+        if (didPlayHour)
+        {
+            AdModel.Instance.shouldLoadInterstitial = true;
+        }
+
+        if (didPlayHour && secSinceInstall >= RemoteConfigModel.Instance.RemoteConfig.ShowBannerAfterSec)
+        {
+            AdModel.Instance.shouldLoadBanner = true;
+        }
+
+/*#if UNITY_EDITOR
+        AdModel.Instance.shouldLoadBanner = true;
+        AdModel.Instance.shouldLoadInterstitial = true;
+#endif*/
+
     }
 
     private void UpdateDailyReward()
@@ -66,7 +103,7 @@ public class SecUpdateCmd
             ViewModel.Instance.ResetOutOfSpaceCounter();
             return;
         }
-        ViewModel.Instance.IncOutOfSpaceCounter(); 
+        ViewModel.Instance.IncOutOfSpaceCounter();
         if (ViewModel.Instance.OutOfSpaceCounter == 3)
         {
             new ShowOutOfSpaceCmd().Run();
@@ -93,7 +130,7 @@ public class SecUpdateCmd
 
         if (SlotModel.Instance.Emitters[SlotModel.AdditionalEmitterIndex].IsEmpty)
         {
-            SlotModel.Instance.LockAdditionalEmitter();
+            SlotModel.Instance.LockAdditionalEmitter(); 
         }
 
     }

@@ -12,6 +12,8 @@ public class DebugController : MonoBehaviour
 
     [SerializeField] Button rocketBtn;
 
+    [SerializeField] Button completeElement;
+
     void Awake()
     {
 #if !UNITY_EDITOR
@@ -27,11 +29,17 @@ public class DebugController : MonoBehaviour
         this.moveCameraToElementGroupBtn.onClick.AddListener(OnMoveCameraToElementGroupClicked);
         this.completeCurrentGroupBtn.onClick.AddListener(OnCompleteCurrentGroupClicked);
         this.rocketBtn.onClick.AddListener(OnRocketBtnClicked);
+         this.completeElement.onClick.AddListener(OnCompleteElementClicked);
     }
 
     private void OnRocketBtnClicked()
     {
         new FlyRocketCmd().Run();
+    }
+
+    private void OnCompleteElementClicked()
+    {
+        new CompleteElementCmd().Run(ModelUtils.GetCurrentElement());
     }
 
     public void OnMoveCameraToElementGroupClicked()

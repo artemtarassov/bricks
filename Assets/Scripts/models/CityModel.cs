@@ -37,13 +37,13 @@ public class CityModel
         return this.buildings.Find((g) => g.BuildingName == buildingName);
     }
 
-    public void SetBuildings(List<BuildingElement> groups, BuildingName currentBuildingName)
+    public void SetBuildings(List<BuildingElement> buildings, BuildingName currentBuildingName)
     {
-        Assert.IsNotNull(groups, "CityModel SetBuildings: groups list is null");
-        Assert.IsTrue(groups.Count > 0, "CityModel SetBuildings: groups list is empty");
+        Assert.IsNotNull(buildings, "CityModel SetBuildings: groups list is null");
+        Assert.IsTrue(buildings.Count > 0, "CityModel SetBuildings: groups list is empty");
         Assert.IsFalse(currentBuildingName == BuildingName.Undefined, "CityModel SetBuildings: currentBuildingName should not be undefined");
         Debug.Log($"CityModel SetBuildings: setting groups with current building name {currentBuildingName}");
-        this.buildings = groups;
+        this.buildings = buildings;
         this.SetCurrentBuildingName(currentBuildingName);
         OnCurrentBuildingChanged?.Invoke(currentBuildingName);
     }
@@ -51,9 +51,9 @@ public class CityModel
     public void SetCurrentBuildingName(BuildingName currentBuildingName)
     {
         Debug.Log($"CityModel SetCurrentBuildingName: setting current building name to {currentBuildingName}");
-        var group = this.buildings.Find(g => g.BuildingName == currentBuildingName);
-        Assert.IsNotNull(group, $"CityModel SetCurrentBuildingName: failed to find group with name {currentBuildingName}");
-        this.cityElements = group.GetElements().ToList();
+        var b = this.buildings.Find(g => g.BuildingName == currentBuildingName);
+        Assert.IsNotNull(b, $"CityModel SetCurrentBuildingName: failed to find group with name {currentBuildingName}");
+        this.cityElements = b.GetElements().ToList();
     }
 
 
@@ -80,28 +80,30 @@ public class CityModel
 
     public void DeactivateAllElements()
     {
+        Debug.Log("CityModel DeactivateAllElements: deactivating all city elements");
         Assert.IsNotNull(cityElements, "CityModel DeactivateAllElements: cityElements list is null");
         Assert.IsTrue(cityElements.Count > 0, "CityModel DeactivateAllElements: cityElements list is empty");
         foreach (var ce in cityElements)
         {
-            ce.gameObject.SetActive(false);
+            ce.SetActive(false);
         }
     }
 
     public void ActivateElements(int toIndex)
     {
+        Debug.Log($"CityModel ActivateElements: activating elements up to index {toIndex}");
         Assert.IsNotNull(cityElements, "CityModel ActivateElements: cityElements list is null");
         Assert.IsTrue(cityElements.Count > 0, "CityModel ActivateElements: cityElements list is empty");
         Assert.IsTrue(toIndex < cityElements.Count, $"CityModel ActivateElements: toIndex {toIndex} is out of range");
         for (var i = 0; i <= toIndex && i < cityElements.Count; i++)
         {
-            cityElements[i].gameObject.SetActive(true);
+            cityElements[i].SetActive(true);
             cityElements[i].EnableVisuals(true);
             cityElements[i].EnableBricks(false);
         }
         for (var i = toIndex + 1; i < cityElements.Count; i++)
         {
-            cityElements[i].gameObject.SetActive(false);
+            cityElements[i].SetActive(false);
         }
 
     }
@@ -144,22 +146,6 @@ public class CityModel
         cityElement.ShowCurrentState();
         OnEnableDifferentColors?.Invoke(cityElement);
     }
-
-    /*public CityElement UnlockElements(string dataKey)
-    {
-        for (var i = 0; i < cityElements.Count; i++)
-        {
-            var ce = cityElements[i];
-            ce.gameObject.SetActive(true);
-            if (ce.dataKey == dataKey)
-            {
-                return ce;
-            }
-        }
-        Debug.LogError($"CityModel UnlockElement: failed to find city element with dataKey {dataKey}");
-        return null;
-    }*/
-
 
     public CityElement GetElementByIndex(int index)
     {

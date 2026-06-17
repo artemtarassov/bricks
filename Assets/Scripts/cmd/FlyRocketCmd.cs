@@ -15,7 +15,7 @@ public class FlyRocketCmd
         ViewModel.Instance.FlyRocket(GetFromPos(), toPos);
         CamModel.Instance.AnticipateRocketFly();
 
-        DOVirtual.DelayedCall(Durations.RocketFlyDuration, currentElement.Explode);
+        DOVirtual.DelayedCall(Durations.RocketFlyDuration, currentElement.Explode1);
         DOVirtual.DelayedCall(Durations.RocketFlyDuration, new SoundCmd("rocketExplosion").Run);
         DOVirtual.DelayedCall(Durations.RocketFlyDuration + 1.0f, OnNext);
 
