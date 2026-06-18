@@ -23,13 +23,14 @@ public class EmitterBrick : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("EmitterBrick: Awake called");
         this.content.transform.localPosition = Vector3.zero;
         this.timeoutUpdateSequence = null;
         this.timeoutTimestamp = 0;
         this.timeout.gameObject.SetActive(false);
         this.count.gameObject.SetActive(false);
         this.death.SetActive(false);
-        this.uiBrick.transform.localScale = Vector3.zero;
+        //this.uiBrick.transform.localScale = Vector3.zero;
     }
 
     public void SetTimeout(int timeoutTimestamp)
@@ -112,6 +113,7 @@ public class EmitterBrick : MonoBehaviour
     public void Setup(Color clr, EmitterSpace eb, bool animate = false)
     {
         this.brickData = eb.brickData;
+        Debug.Log($"EmitterBrick: Setup1 called with brickData {(brickData != null ? brickData.color.ToString() : "null")} and isDead {eb.isDead}");
 
         if (this.brickData == null)
         {
@@ -121,6 +123,11 @@ public class EmitterBrick : MonoBehaviour
             this.count.gameObject.SetActive(false);
             this.uiBrick.gameObject.SetActive(false);
             this.death.SetActive(eb.isDead);
+            if (eb.isDead)
+            {
+                this.count.text = eb.deadCounter.ToString();
+                this.count.gameObject.SetActive(true);
+            }
             if (animate)
             {
                 this.isAnimating = true;
@@ -148,19 +155,22 @@ public class EmitterBrick : MonoBehaviour
         {
             this.isAnimating = false;
             this.uiBrick.transform.DOKill();
-            this.count.gameObject.SetActive(false);
-            this.uiBrick.ShowGloss(false);
+            this.uiBrick.gameObject.SetActive(false);
+            this.count.gameObject.SetActive(true);
+            this.count.text = eb.deadCounter.ToString();
             this.death.SetActive(true);
             this.UpdateContentPos();
             return;
         }
 
+        Debug.Log($"EmitterBrick: Setup2 called with brickData {(brickData != null ? brickData.color.ToString() : "null")} and isDead {eb.isDead}");
 
         this.count.text = brickData.coloredAmount.ToString();
         this.count.gameObject.SetActive(true);
         this.uiBrick.gameObject.SetActive(true);
         this.uiBrick.SetColor(clr, brickData.color);
         this.uiBrick.ShowGloss(true);
+
         if (animate)
         {
             //this.uiBrick.transform.localScale = Vector3.zero;

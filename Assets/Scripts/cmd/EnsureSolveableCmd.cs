@@ -27,6 +27,7 @@ public class EnsureSolveableCmd
                 }
                 if (!ColorsValid(currentElement))
                 {
+                    Debug.LogError($"EnsureSolveableCmd: Colors not valid for building {p.BuildingName}, element {currentElement.dataKey}, renewing element data");
                     p.SetCurrentElement(BalancingModel.Instance.GetDataCopy(p.BuildingName, currentElement.dataKey));
                 }
                 pd.isDirty = true;
@@ -77,20 +78,15 @@ public class EnsureSolveableCmd
     private bool ColorsValid(CityElementDataContainer p)
     {
         var slotColorsLeft = new Dictionary<ColorIndex, int>();
-        foreach (var column in p.columns)
+        var bricksInColumns = p.columns.SelectMany(c => c.list).Where(e => e.BrickData != null).Select(e => e.BrickData).ToList();
+        foreach (var b in bricksInColumns)
         {
-            foreach (var slotElementData in column.list)
+            var color = b.color;
+            if (!slotColorsLeft.ContainsKey(color))
             {
-                if (slotElementData.type == SlotElementType.Bricks || slotElementData.type == SlotElementType.HiddenBricks)
-                {
-                    var color = slotElementData.brickData.color;
-                    if (!slotColorsLeft.ContainsKey(color))
-                    {
-                        slotColorsLeft[color] = 0;
-                    }
-                    slotColorsLeft[color]++;
-                }
+                slotColorsLeft[color] = 0;
             }
+            slotColorsLeft[color] += b.coloredAmount;
         }
 
         var elementColorsNeeded = new Dictionary<ColorIndex, int>();
@@ -100,7 +96,7 @@ public class EnsureSolveableCmd
             {
                 elementColorsNeeded[brick.color] = 0;
             }
-            elementColorsNeeded[brick.color] += brick.coloredAmount;
+            elementColorsNeeded[brick.color] += brick.coloredAmount + brick.transparentAmount;
         }
 
         return CompareDicts(slotColorsLeft, elementColorsNeeded);

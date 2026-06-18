@@ -97,6 +97,8 @@ public class SlotElement : MonoBehaviour
     {
         this.SetupAsEmpty();
         this.death.SetActive(true);
+        this.count.text = this.slotElementData.deadCounter.ToString();
+        this.count.gameObject.SetActive(true);
     }
 
     private void SetupWithHiddenBricks()
@@ -109,14 +111,14 @@ public class SlotElement : MonoBehaviour
     private void ShowColor()
     {
         this.uiBrick.gameObject.SetActive(true);
-        var clrIndex = this.slotElementData.brickData.color;
+        var clrIndex = this.slotElementData.BrickData.color;
         this.uiBrick.SetColor(this.brickColors[(int)clrIndex], clrIndex);
         this.uiBrick.ShowGloss(this.index == 0);
     }
 
     private void ShowAmount()
     {
-        this.count.text = this.slotElementData.brickData.coloredAmount.ToString();
+        this.count.text = this.slotElementData.BrickData.coloredAmount.ToString();
         this.count.gameObject.SetActive(true);
     }
 

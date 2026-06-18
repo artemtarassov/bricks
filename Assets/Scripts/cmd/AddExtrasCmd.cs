@@ -12,11 +12,11 @@ public class AddExtrasCmd
         Debug.Log($"AddExtrasCmd: adding extras to element {currentElementData.dataKey}");
         Assert.IsNotNull(currentElementData, "AddExtrasCmd Run: data container is null");
         Assert.IsTrue(currentElementData.columns.Count > 0, "AddExtrasCmd Run: data container should have at least 1 column");
-        var totalBricks = currentElementData.columns.Sum(c => c.list.Count(e => e.type == SlotElementType.Bricks));
+        var totalBricks = currentElementData.columns.Sum(c => c.list.Count(e => e.IsBrick));
         Assert.IsTrue(totalBricks > 0, "AddExtrasCmd Run: data container should have at least 1 brick to add extras");
         this.dataContainer = currentElementData;
 
-        var extrasApplied = currentElementData.columns.Any(c => c.list.Any(e => e.type != SlotElementType.Bricks));
+        var extrasApplied = currentElementData.columns.Any(c => c.list.Any(e => !e.IsBrick));
         if (extrasApplied)
         {
             return;
@@ -59,6 +59,10 @@ public class AddExtrasCmd
 
         var difficultyToApply = difficulties[pd.difficultyIndex];
 
+#if UNITY_EDITOR
+        AddDeath(1);
+#endif
+
         if (difficultyToApply == 0)
         {
             AddCoinsIfAbsent();
@@ -88,14 +92,14 @@ public class AddExtrasCmd
         {
             AddCoinsIfAbsent();
             SetHiddenBricks(1);
-            AddDeath(2);
+            AddDeath(1);
             return;
         }
         if (difficultyToApply == 5)
         {
             AddAd();
             SetHiddenBricks(2);
-            AddDeath(3);
+            AddDeath(2);
             AddBicksMultiplier();
             return;
         }
@@ -103,7 +107,7 @@ public class AddExtrasCmd
         {
             AddCoinsIfAbsent();
             SetHiddenBricks(2);
-            AddDeath(3);
+            AddDeath(2);
             return;
         }
 
@@ -123,7 +127,7 @@ public class AddExtrasCmd
         for (int i = 0; i < columns.Count && amount > 0; i++)
         {
             var randColumn = columns[i];
-            var allBrickElements = randColumn.list.Where(e => e.type == SlotElementType.Bricks).ToList();
+            var allBrickElements = randColumn.list.Where(e => e.IsBrick).ToList();
             if (allBrickElements.Count < 5)
             {
                 continue;
@@ -140,15 +144,22 @@ public class AddExtrasCmd
         return dataContainer.columns.Any(c => c.list.Any(e => e.type == type));
     }
 
+
+    private static NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 2, 3, 4 });
+
     private void AddDeath(int amount = 1)
     {
         var columns = dataContainer.columns.FindAll((c) => c.list.Count > 5);
         RandHelper.Shuffle(columns);
+
         for (var i = 0; i < columns.Count && amount > 0; i++)
         {
             var column = columns[i];
             var randIndex = Random.Range(2, column.list.Count - 1);
-            column.list.Insert(randIndex, new SlotElementData(SlotElementType.EmitterDeathWaiting));
+            column.list.Insert(randIndex, new SlotElementData(SlotElementType.EmitterDeathWaiting)
+            {
+                deadCounter = deadCounter.GetNext()
+            });
             amount--;
         }
     }
@@ -174,7 +185,7 @@ public class AddExtrasCmd
         {
             return;
         }
-        var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.type == SlotElementType.Bricks)).ToList();
+        var columnsWithBricks = dataContainer.columns.Where(c => c.list.All(e => e.IsBrick)).ToList();
         if (columnsWithBricks.Count == 0)
         {
             return;
@@ -223,7 +234,7 @@ public class AddExtrasCmd
         {
             return;
         }
-        var totalBricks = dataContainer.columns.Sum(c => c.list.Count(e => e.type == SlotElementType.Bricks));
+        var totalBricks = dataContainer.columns.Sum(c => c.list.Count(e => e.IsBrick));
         if (totalBricks <= 10)
         {
             //small element

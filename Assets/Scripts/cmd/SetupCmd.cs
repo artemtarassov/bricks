@@ -9,7 +9,7 @@ public class SetupCmd
         Application.targetFrameRate = 60;
 
 #if UNITY_EDITOR
-        FilePrefs.DeleteAll(); //for testing only, remove in production
+        //FilePrefs.DeleteAll(); //for testing only, remove in production
 #endif
 
         PlayerModel.Instance = new PlayerModel();

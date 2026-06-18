@@ -54,9 +54,9 @@ public class AutoPlayCmd
                 {
                     continue;
                 }
-                if (clrInColumn.type == SlotElementType.Bricks)
+                if (clrInColumn.IsBrick)
                 {
-                    var clrInElement = coloredBricksInElement.Find(c => c.color == clrInColumn.brickData.color);
+                    var clrInElement = coloredBricksInElement.Find(c => c.color == clrInColumn.BrickData.color);
                     if (clrInElement != null)
                     {
                         new SelectColumnCmd(column.columnIndex).Run();

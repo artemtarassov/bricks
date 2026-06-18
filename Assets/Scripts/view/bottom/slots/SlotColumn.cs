@@ -26,9 +26,6 @@ public class SlotColumn : MonoBehaviour
     void Awake()
     {
         this.slotBrickPrefab.gameObject.SetActive(false);
-        this.checkmark.gameObject.SetActive(false);
-        this.blinkingArrow.gameObject.SetActive(false);
-        this.topSlot.gameObject.SetActive(false);
         this.GetComponent<HoldButton>().OnClick.AddListener(OnClick);
     }
 
@@ -58,6 +55,10 @@ public class SlotColumn : MonoBehaviour
 
     public void Setup(SlotColumnData sc, List<Color> brickColors)
     {
+        this.checkmark.gameObject.SetActive(false);
+        this.blinkingArrow.gameObject.SetActive(false);
+        this.topSlot.gameObject.SetActive(false);
+
         this.columnData = sc;
         var nextIndex = 0;
         var visibleList = sc.list.FindAll((e) => IsVisible(e));
@@ -149,7 +150,7 @@ public class SlotColumn : MonoBehaviour
 
     private SlotElement GetSlotElementByBrickData(BrickData bd)
     {
-        return this.slotElements.Find(e => e.slotElementData.brickData == bd);
+        return this.slotElements.Find(e => e.slotElementData.BrickData == bd);
     }
     private SlotElement GetSlotElement(SlotElementData sed)
     {

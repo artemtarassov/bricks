@@ -32,7 +32,7 @@ public class Main : MonoBehaviour
 
     private void OnSecUpdate()
     {
-        //new SecUpdateCmd().Run();
+        new SecUpdateCmd().Run();
     }
 
     //on Application Quit, save player data

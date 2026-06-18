@@ -88,6 +88,9 @@ public class SlotModel
         //var hasExplosive = columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
         //Assert.IsTrue(hasExplosive, "SlotModel Fill: columns should contain explosive elements");
 
+        var bricksInEmitter = columns.SelectMany(c => c.list).Where(e => e.IsBrick && e.BrickData.inEmitter).Select(e => e.BrickData).ToList();
+        Debug.Log($"SlotModel Fill: filling slot with {columns.Count} columns. bricks in emitter: {bricksInEmitter.Count}");
+
         for (var i = 0; i < this.Emitters.Count; i++)
         {
             this.Emitters[i].Reset();
@@ -97,11 +100,18 @@ public class SlotModel
         {
             foreach (var element in column.list)
             {
-                if (element.type == SlotElementType.Bricks && element.brickData.inEmitter && element.brickData.coloredAmount > 0)
+                var emptyIndex = GetEmptyEmitterIndex();
+                if (emptyIndex == -1)
                 {
-                    var emptyIndex = GetEmptyEmitterIndex();
-                    if (emptyIndex >= 0)
-                        this.Emitters[emptyIndex].brickData = element.brickData;
+                    break;
+                }
+                if (element.IsBrick && element.BrickData.inEmitter)
+                {
+                    this.Emitters[emptyIndex].brickData = element.BrickData;
+                }
+                if (element.type == SlotElementType.EmitterDeathActive && element.deadCounter > 0)
+                {
+                    this.Emitters[emptyIndex].deadCounter = element.deadCounter;
                 }
             }
         }
@@ -162,13 +172,13 @@ public class SlotModel
         return emptyIndex;
     }
 
-    public void EmitterDeath()
+    public void EmitterDeath(int counter)
     {
         var emptyEmitterIndex = this.GetEmptyEmitterIndex();
-        if(emptyEmitterIndex >= 0)
+        if (emptyEmitterIndex >= 0)
         {
             var emitter = this.Emitters[emptyEmitterIndex];
-            emitter.isDead = true;  
+            emitter.deadCounter = counter;
             this.OnEmitterDeath?.Invoke(emitter);
         }
     }
@@ -176,9 +186,9 @@ public class SlotModel
     public void EmitterAlive()
     {
         var deadEmitter = this.Emitters.FindAll(e => e.isDead);
-        foreach(var emitter in deadEmitter)
+        foreach (var emitter in deadEmitter)
         {
-            emitter.isDead = false;
+            emitter.deadCounter--;
             this.OnEmitterDeath?.Invoke(emitter);
         }
     }
@@ -189,7 +199,7 @@ public class SlotModel
         Assert.IsTrue(brickData.coloredAmount > 0, "Only bricks with colored amount can be moved to emitter");
 
         Assert.IsTrue(brickData.color != ColorIndex.Undefined, "Brick color must be defined");
-        Assert.IsTrue(this.Columns.Any(c => c.list.Any(e => e.brickData == brickData)), "Brick data not found in any column");
+        Assert.IsTrue(this.Columns.Any(c => c.list.Any(e => e.BrickData == brickData)), "Brick data not found in any column");
         Assert.IsFalse(brickData.inEmitter, "Brick data is already in emitter");
 
         var emitterIndex = AddToUnlockedEmitter(brickData);
@@ -197,7 +207,7 @@ public class SlotModel
         this.OnBrickMovedFromColumnToEmitter?.Invoke(brickData, emitterIndex);
     }
 
-    public void Replace(SlotElementData sed, SlotElementType t)
+    public SlotElementData Replace(SlotElementData sed, SlotElementType t)
     {
         var column = this.Columns.Find(c => c.list.Any(e => e == sed));
         Assert.IsNotNull(column, "Column not found for SlotElementData");
@@ -205,13 +215,24 @@ public class SlotModel
         Assert.IsTrue(element >= 0, "SlotElementData not found in column");
         column.list[element] = new SlotElementData(t);
         this.OnRemovedFromColumn?.Invoke(sed);
+        return column.list[element];
+    }
+
+    public void Replace(SlotElementData sed, SlotElementData newSd)
+    {
+        var column = this.Columns.Find(c => c.list.Any(e => e == sed));
+        Assert.IsNotNull(column, "Column not found for SlotElementData");
+        var element = column.list.FindIndex(e => e == sed);
+        Assert.IsTrue(element >= 0, "SlotElementData not found in column");
+        column.list[element] = newSd;
+        this.OnRemovedFromColumn?.Invoke(sed);
     }
 
     public void Replace(BrickData sed, SlotElementType t)
     {
-        var column = this.Columns.Find(c => c.list.Any(e => e.brickData == sed));
+        var column = this.Columns.Find(c => c.list.Any(e => e.BrickData == sed));
         Assert.IsNotNull(column, "Column not found for BrickData");
-        var e = column.list.Find(e => e.brickData == sed);
+        var e = column.list.Find(e => e.BrickData == sed);
         this.Replace(e, t);
     }
 

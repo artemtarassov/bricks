@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 
 public class FinishCurrentCityElementCmd
 
@@ -10,7 +9,7 @@ public class FinishCurrentCityElementCmd
         {
             foreach (var ci in c.list)
             {
-                ci.brickData = null;
+                ci.BrickData = null;
                 ci.type = SlotElementType.Undefined;
             }
         }

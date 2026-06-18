@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
@@ -78,6 +79,7 @@ public class SlotController : MonoBehaviour
         {
             return;
         }
+        Debug.Log("SlotController: AnimateIn called");
         this.content.SetActive(true);
         this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
         this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
@@ -142,7 +144,7 @@ public class SlotController : MonoBehaviour
 
     private void OnEmitterChanged(EmitterSpace es = null)
     {
-        //Debug.Log("SlotController: OnEmitterChanged called");
+        Debug.Log("SlotController: OnEmitterChanged called es " + (es != null ? es.index.ToString() : "null"));
         var slotModel = SlotModel.Instance;
         var cityElement = ModelUtils.GetCurrentElement();
         var clr = Color.white;
@@ -154,13 +156,31 @@ public class SlotController : MonoBehaviour
 
         if (es == null)
         {
+            Assert.IsTrue(slotModel.Emitters.Count > 0, "SlotController: OnEmitterChanged: Emitters list should not be empty");
             var unlockedEmitters = slotModel.Emitters.FindAll(e => e.isUnlocked);
             var lockedEmitters = slotModel.Emitters.FindAll(e => !e.isUnlocked);
+
+            Debug.Log($"SlotController: OnEmitterChanged: updating all emitters. unlocked {unlockedEmitters.Count} locked {lockedEmitters.Count}");
+
+
+
             foreach (var e in unlockedEmitters)
             {
                 var eb = GetEmitterByIndex(e.index);
                 eb.gameObject.SetActive(true);
-                eb.Setup(Color.white, e, false);
+
+
+                if (cityElement != null && e.brickData != null && e.brickData.coloredAmount > 0)
+                {
+                    var clr2 = cityElement.GetBrickColor(e.brickData.color);
+                    eb.Setup(clr2, e, false);
+                }
+                else
+                {
+                    eb.Setup(clr, e, false);
+                }
+
+                Debug.Log($"SlotController: OnEmitterChanged: updated unlocked emitter {e.index} with color {(e.brickData != null ? e.brickData.color.ToString() : "null")}");
             }
             foreach (var e in lockedEmitters)
             {

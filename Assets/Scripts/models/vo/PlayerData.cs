@@ -56,6 +56,7 @@ public class BuildingProgressData
 
     public void SetCurrentElement(CityElementDataContainer element)
     {
+        Debug.Log($"BuildingProgressData: SetCurrentElement: setting current element to {element.dataKey} for building {buildingName}");
         Assert.IsNotNull(element, "BuildingProgressData: SetCurrentElement: element should not be null");
         Assert.IsFalse(string.IsNullOrEmpty(element.dataKey), "BuildingProgressData: SetCurrentElement: element dataKey should not be null or empty");
         this.currentElement = element;

@@ -96,10 +96,6 @@ public class UnlockNextCmd
         ViewModel.Instance.ChangeBottomNav(BottomNav.Slots);
 
 
-#if UNITY_EDITOR
-        ValidateAmounts(cityElement, currentElementData);
-#endif
-
         if (currentElementData.ElementCountColoredBricks() == 0)
         {
             CityModel.Instance.EnableDifferentColors(cityElement, BalancingModel.AdditionalBricksOnEmptyElement);
@@ -108,21 +104,7 @@ public class UnlockNextCmd
         this.MoveCam(cityElement);
     }
 
-    private void ValidateAmounts(CityElement cityElement, CityElementDataContainer currentElementData)
-    {
-        /*
-        var bricksInSlots = currentElementData.columns.FindAll(c => c.list.Any(e => e.brickData != null)).SelectMany(c => c.list).Where(e => e.brickData != null).Select(e => e.brickData);
-        var bricksInElement = currentElementData.brickDataList;
 
-        var sum1 = bricksInSlots.Sum(b => b.max);
-        var sum2 = bricksInElement.Sum(b => b.max);
-        Debug.Log("UnlockNextCmd ValidateAmounts: sum of colored bricks in slots " + sum1 + ", sum of colored bricks in element data " + sum2);
-        Assert.IsTrue(sum1 > 0, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in slots should be greater than 0");
-        Assert.IsTrue(sum2 > 0, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in element data should be greater than 0");
-        Assert.AreEqual(bricksInSlots.Count(), bricksInElement.Count(), "UnlockNextCmd ValidateAmounts: number of brick entries in slots should be equal to number of brick entries in element data. slots count: " + bricksInSlots.Count() + ", element data count: " + bricksInElement.Count());
-        Assert.AreEqual(sum1, sum2, "UnlockNextCmd ValidateAmounts: total amount of colored bricks in slots should be equal to total amount of colored bricks in element data. sum1: " + sum1 + ", sum2: " + sum2);
-    */
-    }
 
 
 

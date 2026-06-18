@@ -33,7 +33,7 @@ public class SetupCityCmd
         {
             cityModel.SetBuildings(buildings, pd.CurrentBuildingName);
         }
-        new EnsureSolveableCmd().Run();
+        //new EnsureSolveableCmd().Run();
         new SwitchBuildingCmd().Run(0);
 
 #if UNITY_EDITOR    

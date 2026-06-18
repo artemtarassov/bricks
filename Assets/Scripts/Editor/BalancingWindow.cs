@@ -66,9 +66,9 @@ public class BalancingWindow : EditorWindow
                 var from = randColumn.list[i];
                 var to = randColumn.list[i - 1];
 
-                if (from.type == SlotElementType.Bricks && to.type == SlotElementType.Bricks)
+                if (from.IsBrick)
                 {
-                    var isSame = from.brickData.color == to.brickData.color;
+                    var isSame = from.BrickData.color == to.BrickData.color;
                     if (!isSame)
                     {
                         ListUtil.Swap(randColumn.list, i, i - 1);

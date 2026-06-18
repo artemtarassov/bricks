@@ -24,7 +24,13 @@ public class PlayerModel
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
         FilePrefs.Save();
-       // Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
+        Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
+
+        var ce = this.playerData.GetCurrentBuildingProgress().GetCurrentElement();
+        var columns = ce.columns;
+        var bricksInEmitter = columns.SelectMany(c => c.list).Where(e => e.IsBrick && e.BrickData.inEmitter).Select(e => e.BrickData).ToList();
+        Debug.Log($"PlayerModel Save: current element {ce.dataKey} has {columns.Count} columns, bricks in emitter: {bricksInEmitter.Count}");
+
     }
 
 
@@ -200,6 +206,12 @@ public class PlayerModel
             element.brickDataList.ForEach((e) => e.ResetEmittingStates());
             element.columns.ForEach((s) => s.ResetEmittingStates());
         }
+
+
+        var ce = this.playerData.GetCurrentBuildingProgress().GetCurrentElement();
+        var columns = ce.columns;
+        var bricksInEmitter = columns.SelectMany(c => c.list).Where(e => e.IsBrick && e.BrickData.inEmitter).Select(e => e.BrickData).ToList();
+        Debug.Log($"PlayerModel Load: current element {ce.dataKey} has {columns.Count} columns, bricks in emitter: {bricksInEmitter.Count}");
     }
 
 

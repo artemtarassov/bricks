@@ -18,14 +18,14 @@ public class SelectColumnCmd
 
     public void Run()
     {
-        //Debug.Log($"SelectColumnCmd: type={this.data.type}, brickData={this.data.brickData}");
-
 
         if (ModelUtils.IsOutOfSpace())
         {
             this.ShowOutOfSpace();
             return;
         }
+
+        PlayerModel.Instance.playerData.isDirty = true;
 
         if (this.data.type == SlotElementType.Coins)
         {
@@ -43,7 +43,7 @@ public class SelectColumnCmd
         }
 
 
-        if (this.data.type == SlotElementType.Bricks || this.data.type == SlotElementType.HiddenBricks)
+        if (this.data.IsBrick)
         {
             var hasEmitterSpace = SlotModel.Instance.HasEmitterSpace();
             if (!hasEmitterSpace)
@@ -51,7 +51,7 @@ public class SelectColumnCmd
                 new SoundCmd(SoundModel.Instance.ERROR).Run();
                 return;
             }
-            SlotModel.Instance.MoveFromColumnToEmitter(this.data.brickData);
+            SlotModel.Instance.MoveFromColumnToEmitter(this.data.BrickData);
             return;
         }
 
@@ -93,8 +93,11 @@ public class SelectColumnCmd
 
         if (this.data.type == SlotElementType.EmitterDeathWaiting)
         {
-            SlotModel.Instance.Replace(this.data, SlotElementType.EmitterDeathActive); 
-            SlotModel.Instance.EmitterDeath();
+            var dc = this.data.deadCounter;
+            SlotModel.Instance.EmitterDeath(this.data.deadCounter);
+            var newSed = new SlotElementData(SlotElementType.EmitterDeathActive);
+            newSed.deadCounter = dc;
+            SlotModel.Instance.Replace(this.data, newSed);
             new SoundCmd(SoundModel.Instance.CLICK2).Run();
             return;
         }

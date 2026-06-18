@@ -13,9 +13,12 @@ public class FinishElementController : MonoBehaviour
     [SerializeField] private SlideDown slideDown;
     [SerializeField] private Button nextButton;
 
+    private Vector3 startPos;
+
     private float currentPercent;
     void Start()
     {
+        this.startPos = this.content.transform.localPosition;
         this.slideDown.OnScroll += OnSlideDownScroll;
         this.content.SetActive(false);
         var br = this.content.AddComponent<BlinkingArrow>();
@@ -27,18 +30,17 @@ public class FinishElementController : MonoBehaviour
     {
         var c = slideDown.GetContent();
         var images = c.GetComponentsInChildren<Image>(true).ToList().FindAll(i => i.gameObject.name == "Arrow");
+        images.Reverse();
         return images;
     }
     private void OnBottomNavChange(BottomNav nav)
     {
+        UpdateVisibility();
         if (nav == BottomNav.FinishElement)
         {
-            this.content.SetActive(true);
             this.slideDown.Reset();
             this.currentPercent = 0;
-            return;
         }
-        this.content.SetActive(false);
     }
     private void OnSlideDownScroll()
     {
@@ -55,5 +57,30 @@ public class FinishElementController : MonoBehaviour
         this.slideDown.OnScroll -= OnSlideDownScroll;
         ViewModel.Instance.OnBottomNavChange -= OnBottomNavChange;
     }
+
+    private void UpdateVisibility()
+    {
+        var nav = ViewModel.Instance.CurrentBottomNav;
+        if (nav == BottomNav.FinishElement)
+        {
+            this.AnimateIn();
+        }
+        else
+        {
+            this.content.SetActive(false);
+        }
+    }
+
+    private void AnimateIn()
+    {
+        if (this.content.activeSelf)
+        {
+            return;
+        }
+        this.content.SetActive(true);
+        this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
+        this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
+    }
+
 
 }

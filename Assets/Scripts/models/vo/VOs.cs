@@ -69,8 +69,39 @@ public enum SlotElementType
 [Serializable]
 public class SlotElementData
 {
-    public SlotElementType type;
-    public BrickData brickData = null;
+    public SlotElementType type = SlotElementType.Undefined;
+
+    public bool IsBrick => type == SlotElementType.Bricks || type == SlotElementType.HiddenBricks;
+
+    [SerializeField]
+    private BrickData brickData = null;
+
+    public int deadCounter = 0;
+
+    public BrickData BrickData
+    {
+        get
+        {
+            if (this.IsBrick)
+            {
+                return this.brickData;
+            }
+            return null;
+        }
+        set
+        {
+            if (this.IsBrick)
+            {
+                this.brickData = value;
+            }
+            else
+            {
+                if (value != null)
+                    throw new InvalidOperationException($"SlotElementData: cannot set BrickData for type {this.type}");
+                this.brickData = null;
+            }
+        }
+    }
 
     public bool IsVisible()
     {
@@ -78,60 +109,52 @@ public class SlotElementData
         {
             return false;
         }
-        if (this.IsInEmitter())
+        /*if (this.IsInEmitter())
         {
             return false;
-        }
+        }*/
 
         return true;
     }
 
-    public bool IsInEmitterSpace()
-    {
-        if (this.brickData == null)
-        {
-            return false;
-        }
-        return this.brickData.emittingAmount > 0;
-    }
-
-    public bool IsInEmitter()
+    /*public bool IsInEmitter()
     {
         if (this.brickData == null)
         {
             return false;
         }
         return this.brickData.inEmitter;
-    }
+    }*/
     public void ResetEmittingStates()
     {
-        if (brickData != null)
+        if (BrickData != null)
         {
-            brickData.ResetEmittingStates();
+            BrickData.ResetEmittingStates();
         }
     }
 
     public SlotElementData()
     {
         this.type = SlotElementType.Undefined;
-        this.brickData = null;
+        this.BrickData = null;
     }
     public SlotElementData(BrickData brickData)
     {
         this.type = SlotElementType.Bricks;
-        this.brickData = brickData;
+        this.BrickData = brickData;
     }
     public SlotElementData(SlotElementType type)
     {
         this.type = type;
-        this.brickData = null;
+        this.BrickData = null;
     }
     public SlotElementData Clone()
     {
         return new SlotElementData()
         {
             type = this.type,
-            brickData = this.brickData != null ? this.brickData.Clone() : null
+            brickData = (this.BrickData != null) ? this.BrickData.Clone() : null,
+            deadCounter = this.deadCounter
         };
     }
 }
@@ -167,7 +190,7 @@ public class SlotColumnData
             {
                 case SlotElementType.Bricks:
                 case SlotElementType.HiddenBricks:
-                    if (e.brickData.coloredAmount > 0)
+                    if (e.BrickData.coloredAmount > 0)
                     {
                         return false;
                     }
@@ -206,20 +229,21 @@ public enum BrickState
     Colored = 5,
 }
 
-[Serializable]
+
 public class EmitterSpace
 {
     public BrickData brickData = null;
     public int index;
     public bool isUnlocked = false;
-    public bool isDead = false;
+    public bool isDead => deadCounter > 0;
     public bool HasColoredBricks => isUnlocked && brickData != null && brickData.coloredAmount > 0;
     public bool IsEmpty => isDead == false && isUnlocked && brickData == null;
+    public int deadCounter = 0;
 
     public void Reset()
     {
         this.brickData = null;
-        this.isDead = false;
+        this.deadCounter = 0;
     }
 }
 
