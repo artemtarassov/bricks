@@ -109,11 +109,10 @@ public class SlotElementData
         {
             return false;
         }
-        /*if (this.IsInEmitter())
+        if (this.IsBrick)
         {
-            return false;
-        }*/
-
+            return !this.BrickData.inEmitter;
+        }
         return true;
     }
 

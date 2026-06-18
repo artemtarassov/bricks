@@ -93,10 +93,18 @@ public class ViewModel
     public Action<float> OnFinishElement;
 
 
+    public Action OnAnnouncer;
+
+
     public ViewModel(Transform root)
     {
         this.root = root;
         this.CurrentBottomNav = BottomNav.MainNav;
+    }
+
+    public void PlayAnnouncer()
+    {
+        OnAnnouncer?.Invoke();
     }
 
 

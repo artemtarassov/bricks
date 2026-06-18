@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
@@ -8,40 +7,54 @@ using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
 {
+    private const float AnimateInOffsetY = 500f;
+
     [SerializeField] private GameObject content;
+    [SerializeField] private Button addSpaceButton;
+
     private List<SlotColumn> columns;
     private SlotColumn columnPrefab;
-
     private List<EmitterBrick> emitters;
     private EmitterBrick emitterPrefab;
-
-    [SerializeField]
-    private Button addSpaceButton;
-
     private Vector3 startPos;
 
-    void Awake()
+    private void Awake()
     {
-        this.columns = new List<SlotColumn>();
-        this.emitters = new List<EmitterBrick>();
-        this.columnPrefab = this.gameObject.GetComponentInChildren<SlotColumn>(true);
-        this.emitterPrefab = this.gameObject.GetComponentInChildren<EmitterBrick>(true);
+        columns = new List<SlotColumn>();
+        emitters = new List<EmitterBrick>();
+        columnPrefab = GetComponentInChildren<SlotColumn>(true);
+        emitterPrefab = GetComponentInChildren<EmitterBrick>(true);
     }
 
-    void Start()
+    private void Start()
     {
-        this.startPos = this.content.transform.localPosition;
-        this.emitterPrefab.gameObject.SetActive(false);
-        this.columnPrefab.gameObject.SetActive(false);
+        startPos = content.transform.localPosition;
+        emitterPrefab.gameObject.SetActive(false);
+        columnPrefab.gameObject.SetActive(false);
 
+        InitializeEmitters();
+        SubscribeToEvents();
+        addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
+        UpdateVisibility();
+    }
 
+    private void OnDestroy()
+    {
+        UnsubscribeFromEvents();
+    }
+
+    private void InitializeEmitters()
+    {
         for (var i = 0; i < SlotModel.MaxEmitters; i++)
         {
-            var eb = GetEmitterByIndex(i);
-            ViewModel.Instance.Emitters.Add(eb.transform);
-            eb.gameObject.SetActive(false);
+            var emitter = GetEmitterByIndex(i);
+            ViewModel.Instance.Emitters.Add(emitter.transform);
+            emitter.gameObject.SetActive(false);
         }
+    }
 
+    private void SubscribeToEvents()
+    {
         SlotModel.Instance.OnEmitterChanged += OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged += OnColumnsChanged;
         SlotModel.Instance.OnBrickMovedFromColumnToEmitter += OnBrickMovedFromColumnToEmitter;
@@ -49,89 +62,9 @@ public class SlotController : MonoBehaviour
         SlotModel.Instance.OnRemovedFromColumn += OnRemovedFromColumn;
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
         CityModel.Instance.OnElementCompleted += OnCityElementCompleted;
-
-        this.addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
-
-        this.UpdateVisibility();
     }
 
-    private void OnBottomNavChange(BottomNav nav)
-    {
-        UpdateVisibility();
-    }
-
-    private void UpdateVisibility()
-    {
-        var nav = ViewModel.Instance.CurrentBottomNav;
-        if (nav == BottomNav.Slots)
-        {
-            this.AnimateIn();
-        }
-        else
-        {
-            this.content.SetActive(false);
-        }
-    }
-
-    private void AnimateIn()
-    {
-        if (this.content.activeSelf)
-        {
-            return;
-        }
-        Debug.Log("SlotController: AnimateIn called");
-        this.content.SetActive(true);
-        this.content.transform.localPosition = this.startPos - new Vector3(0, 500, 0);
-        this.content.transform.DOLocalMove(this.startPos, Durations.NavTransition).SetEase(Ease.OutSine);
-    }
-
-
-
-    private void OnRemovedFromColumn(SlotElementData data)
-    {
-        foreach (var column in this.columns)
-        {
-            column.Remove(data);
-        }
-    }
-
-    private void UpdateAddSpaceButtonVisibility()
-    {
-        var allUnlocked = SlotModel.Instance.Emitters.All(e => e.isUnlocked);
-        this.addSpaceButton.gameObject.SetActive(!allUnlocked);
-    }
-
-    private void OnAddSpaceButtonClicked()
-    {
-        new ShowViewCmd(ViewName.AddSpaceView).Run();
-    }
-
-    private SlotColumn GetSlotColumnByIndex(int index)
-    {
-        if (index >= this.columns.Count)
-        {
-            var column = Instantiate(this.columnPrefab, this.columnPrefab.transform.parent);
-            column.gameObject.SetActive(true);
-            this.columns.Add(column);
-            return column;
-        }
-        return this.columns[index];
-    }
-
-    private EmitterBrick GetEmitterByIndex(int index)
-    {
-        if (index >= this.emitters.Count)
-        {
-            var emitter = Instantiate(this.emitterPrefab, this.emitterPrefab.transform.parent);
-            this.emitters.Add(emitter);
-            return emitter;
-        }
-        return this.emitters[index];
-    }
-
-
-
-    void OnDestroy()
+    private void UnsubscribeFromEvents()
     {
         SlotModel.Instance.OnEmitterChanged -= OnEmitterChanged;
         SlotModel.Instance.OnColumnsChanged -= OnColumnsChanged;
@@ -142,119 +75,201 @@ public class SlotController : MonoBehaviour
         CityModel.Instance.OnElementCompleted -= OnCityElementCompleted;
     }
 
-    private void OnEmitterChanged(EmitterSpace es = null)
+    private void OnBottomNavChange(BottomNav _)
     {
-        Debug.Log("SlotController: OnEmitterChanged called es " + (es != null ? es.index.ToString() : "null"));
-        var slotModel = SlotModel.Instance;
-        var cityElement = ModelUtils.GetCurrentElement();
-        var clr = Color.white;
+        UpdateVisibility();
+    }
 
-        if (cityElement != null && es != null && es.brickData != null)
+    private void UpdateVisibility()
+    {
+        if (ViewModel.Instance.CurrentBottomNav == BottomNav.Slots)
         {
-            clr = cityElement.GetBrickColor(es.brickData.color);
-        }
-
-        if (es == null)
-        {
-            Assert.IsTrue(slotModel.Emitters.Count > 0, "SlotController: OnEmitterChanged: Emitters list should not be empty");
-            var unlockedEmitters = slotModel.Emitters.FindAll(e => e.isUnlocked);
-            var lockedEmitters = slotModel.Emitters.FindAll(e => !e.isUnlocked);
-
-            Debug.Log($"SlotController: OnEmitterChanged: updating all emitters. unlocked {unlockedEmitters.Count} locked {lockedEmitters.Count}");
-
-
-
-            foreach (var e in unlockedEmitters)
-            {
-                var eb = GetEmitterByIndex(e.index);
-                eb.gameObject.SetActive(true);
-
-
-                if (cityElement != null && e.brickData != null && e.brickData.coloredAmount > 0)
-                {
-                    var clr2 = cityElement.GetBrickColor(e.brickData.color);
-                    eb.Setup(clr2, e, false);
-                }
-                else
-                {
-                    eb.Setup(clr, e, false);
-                }
-
-                Debug.Log($"SlotController: OnEmitterChanged: updated unlocked emitter {e.index} with color {(e.brickData != null ? e.brickData.color.ToString() : "null")}");
-            }
-            foreach (var e in lockedEmitters)
-            {
-                var eb = GetEmitterByIndex(e.index);
-                eb.gameObject.SetActive(false);
-                eb.RemoveTimeout();
-            }
+            AnimateIn();
             return;
         }
-        {
-            var animate = es.IsEmpty;
-            var eb = GetEmitterByIndex(es.index);
-            if (es.isUnlocked)
-            {
-                eb.gameObject.SetActive(true);
-                eb.Setup(clr, es, animate);
-            }
-            else
-            {
-                eb.gameObject.SetActive(false);
-                eb.RemoveTimeout();
-            }
 
+        content.SetActive(false);
+    }
+
+    private void AnimateIn()
+    {
+        if (content.activeSelf)
+        {
+            return;
         }
 
-        var curTimestamp = TimeUtils.GetUnixTimestamp();
-        var playerData = PlayerModel.Instance.playerData;
-        var additionalEmitterUnlockTimeoutTimestamp = playerData.additionalEmitterUnlockTimeoutTimestamp;
-        if (additionalEmitterUnlockTimeoutTimestamp > 0)
-        {
-            var additionalEmitter = GetEmitterByIndex(SlotModel.AdditionalEmitterIndex);
-            additionalEmitter.SetTimeout(additionalEmitterUnlockTimeoutTimestamp);
-        }
-        this.UpdateAddSpaceButtonVisibility();
+        //Debug.Log("SlotController: AnimateIn called");
 
+        content.SetActive(true);
+        content.transform.localPosition = startPos - new Vector3(0f, AnimateInOffsetY, 0f);
+        content.transform.DOLocalMove(startPos, Durations.NavTransition).SetEase(Ease.OutSine);
+    }
+
+    private void OnRemovedFromColumn(SlotElementData data)
+    {
+        foreach (var column in columns)
+        {
+            column.Remove(data);
+        }
+    }
+
+    private void UpdateAddSpaceButtonVisibility()
+    {
+        var allUnlocked = SlotModel.Instance.Emitters.All(e => e.isUnlocked);
+        addSpaceButton.gameObject.SetActive(!allUnlocked);
+    }
+
+    private void OnAddSpaceButtonClicked()
+    {
+        new ShowViewCmd(ViewName.AddSpaceView).Run();
+    }
+
+    private SlotColumn GetSlotColumnByIndex(int index)
+    {
+        while (columns.Count <= index)
+        {
+            var column = Instantiate(columnPrefab, columnPrefab.transform.parent);
+            column.gameObject.SetActive(true);
+            columns.Add(column);
+        }
+
+        return columns[index];
+    }
+
+    private EmitterBrick GetEmitterByIndex(int index)
+    {
+        while (emitters.Count <= index)
+        {
+            var emitter = Instantiate(emitterPrefab, emitterPrefab.transform.parent);
+            emitters.Add(emitter);
+        }
+
+        return emitters[index];
+    }
+
+    private void OnEmitterChanged(EmitterSpace emitterSpace = null)
+    {
+        //Debug.Log("SlotController: OnEmitterChanged called es " + (emitterSpace != null ? emitterSpace.index.ToString() : "null"));
+
+        if (emitterSpace == null)
+        {
+            RefreshAllEmitters();
+            return;
+        }
+
+        RefreshEmitter(emitterSpace);
+        UpdateAdditionalEmitterTimeout();
+        UpdateAddSpaceButtonVisibility();
+    }
+
+    private void RefreshAllEmitters()
+    {
+        var slotModel = SlotModel.Instance;
+        Assert.IsTrue(slotModel.Emitters.Count > 0, "SlotController: OnEmitterChanged: Emitters list should not be empty");
+
+        var unlockedEmitters = slotModel.Emitters.FindAll(e => e.isUnlocked);
+        var lockedEmitters = slotModel.Emitters.FindAll(e => !e.isUnlocked);
+
+        //Debug.Log($"SlotController: OnEmitterChanged: updating all emitters. unlocked {unlockedEmitters.Count} locked {lockedEmitters.Count}");
+
+        foreach (var unlockedEmitter in unlockedEmitters)
+        {
+            ShowEmitter(unlockedEmitter, ResolveEmitterColor(unlockedEmitter), false);
+            //Debug.Log($"SlotController: OnEmitterChanged: updated unlocked emitter {unlockedEmitter.index} with color {(unlockedEmitter.brickData != null ? unlockedEmitter.brickData.color.ToString() : "null")}");
+        }
+
+        foreach (var lockedEmitter in lockedEmitters)
+        {
+            HideEmitter(lockedEmitter);
+        }
+    }
+
+    private void RefreshEmitter(EmitterSpace emitterSpace)
+    {
+        if (!emitterSpace.isUnlocked)
+        {
+            HideEmitter(emitterSpace);
+            return;
+        }
+
+        ShowEmitter(emitterSpace, ResolveEmitterColor(emitterSpace), emitterSpace.IsEmpty);
+    }
+
+    private void ShowEmitter(EmitterSpace emitterSpace, Color color, bool animate)
+    {
+        var emitterView = GetEmitterByIndex(emitterSpace.index);
+        emitterView.gameObject.SetActive(true);
+        emitterView.Setup(color, emitterSpace, animate);
+    }
+
+    private void HideEmitter(EmitterSpace emitterSpace)
+    {
+        var emitterView = GetEmitterByIndex(emitterSpace.index);
+        emitterView.gameObject.SetActive(false);
+        emitterView.RemoveTimeout();
+    }
+
+    private Color ResolveEmitterColor(EmitterSpace emitterSpace)
+    {
+        var cityElement = ModelUtils.GetCurrentElement();
+        if (cityElement == null || emitterSpace.brickData == null || emitterSpace.brickData.coloredAmount <= 0)
+        {
+            return Color.white;
+        }
+
+        return cityElement.GetBrickColor(emitterSpace.brickData.color);
+    }
+
+    private void UpdateAdditionalEmitterTimeout()
+    {
+        var timeoutTimestamp = PlayerModel.Instance.playerData.additionalEmitterUnlockTimeoutTimestamp;
+        if (timeoutTimestamp <= 0)
+        {
+            return;
+        }
+
+        var additionalEmitter = GetEmitterByIndex(SlotModel.AdditionalEmitterIndex);
+        additionalEmitter.SetTimeout(timeoutTimestamp);
     }
 
     private void OnColumnsChanged()
     {
-        //Debug.Log("SlotController: OnColumnsChanged called");
         var slotModel = SlotModel.Instance;
         var element = ModelUtils.GetCurrentElement();
-        foreach (var c in slotModel.Columns)
+
+        foreach (var column in slotModel.Columns)
         {
-            //Debug.Log($"SlotController Setting up slot column {c.columnIndex} with {c.list.Count} elements");
-            GetSlotColumnByIndex(c.columnIndex).Setup(c, element.brickColors);
+            GetSlotColumnByIndex(column.columnIndex).Setup(column, element.brickColors);
         }
     }
-    private void OnBrickMovedFromColumnToEmitter(BrickData bd, int emitterIndex)
+
+    private void OnBrickMovedFromColumnToEmitter(BrickData brickData, int emitterIndex)
     {
-        foreach (var column in this.columns)
+        foreach (var column in columns)
         {
-            var removedSlot = column.Remove(bd);
-            if (removedSlot != null)
+            if (column.Remove(brickData) == null)
             {
-                var clr = ModelUtils.GetCurrentElement().brickColors[(int)bd.color];
-                var emitter = SlotModel.Instance.Emitters.Find(e => e.index == emitterIndex);
-                GetEmitterByIndex(emitterIndex).Setup(clr, emitter, true);
-                break;
+                continue;
             }
+
+            var color = ModelUtils.GetCurrentElement().brickColors[(int)brickData.color];
+            var emitterSpace = SlotModel.Instance.Emitters.Find(e => e.index == emitterIndex);
+            GetEmitterByIndex(emitterIndex).Setup(color, emitterSpace, true);
+            break;
         }
     }
 
-    private void OnEmitterDeath(EmitterSpace es)
+    private void OnEmitterDeath(EmitterSpace emitterSpace)
     {
-        GetEmitterByIndex(es.index).Setup(Color.white, es, false);
+        GetEmitterByIndex(emitterSpace.index).Setup(Color.white, emitterSpace, false);
     }
 
-    private void OnCityElementCompleted(CityElement cityElement)
+    private void OnCityElementCompleted(CityElement _)
     {
         var slotModel = SlotModel.Instance;
-        foreach (var c in slotModel.Columns)
+        foreach (var column in slotModel.Columns)
         {
-            GetSlotColumnByIndex(c.columnIndex).OnElementCompleted();
+            GetSlotColumnByIndex(column.columnIndex).OnElementCompleted();
         }
     }
 }

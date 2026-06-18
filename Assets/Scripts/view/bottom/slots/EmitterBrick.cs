@@ -1,10 +1,12 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class EmitterBrick : MonoBehaviour
 {
+    private const float ContentRaisedY = 20f;
+    private const float ContentMoveDuration = 0.3f;
+
     [HideInInspector]
     public BrickData brickData;
 
@@ -14,174 +16,236 @@ public class EmitterBrick : MonoBehaviour
     [SerializeField] private GameObject death;
     [SerializeField] private GameObject content;
 
-
     private Tween timeoutUpdateSequence;
-
-    private bool isAnimating = false;
-
     private int timeoutTimestamp;
+    private bool moveContentUp;
+    private bool isInitialized;
 
-    void Awake()
+    private void Awake()
     {
-        Debug.Log("EmitterBrick: Awake called");
-        this.content.transform.localPosition = Vector3.zero;
-        this.timeoutUpdateSequence = null;
-        this.timeoutTimestamp = 0;
-        this.timeout.gameObject.SetActive(false);
-        this.count.gameObject.SetActive(false);
-        this.death.SetActive(false);
-        //this.uiBrick.transform.localScale = Vector3.zero;
+        EnsureInitialized();
+    }
+
+    private void OnDestroy()
+    {
+        StopTimeoutUpdates();
+        content.transform.DOKill();
+        uiBrick.transform.DOKill();
     }
 
     public void SetTimeout(int timeoutTimestamp)
     {
-        if (this.timeoutUpdateSequence == null)
+        EnsureInitialized();
+
+        if (timeoutUpdateSequence == null)
         {
-            this.timeoutUpdateSequence = DOTween.Sequence(this).AppendInterval(1)
+            timeoutUpdateSequence = DOTween.Sequence(this).AppendInterval(1)
                 .AppendCallback(OnTimeoutUpdate)
                 .SetLoops(-1);
         }
+
         this.timeoutTimestamp = timeoutTimestamp;
-        this.OnTimeoutUpdate();
+        OnTimeoutUpdate();
     }
 
     public void RemoveTimeout()
     {
-        if (this.timeoutUpdateSequence != null)
+        EnsureInitialized();
+
+        StopTimeoutUpdates();
+        timeout.gameObject.SetActive(false);
+        timeoutTimestamp = 0;
+        UpdateContentPosition();
+    }
+
+    public void Setup(Color color, EmitterSpace emitterSpace, bool animate = false)
+    {
+        EnsureInitialized();
+
+        brickData = emitterSpace.brickData;
+        //Debug.Log($"EmitterBrick: Setup called with brickData {(brickData != null ? brickData.color.ToString() : "null")} and isDead {emitterSpace.isDead}");
+
+        if (emitterSpace.isDead)
         {
-            this.timeoutUpdateSequence.Kill();
-            this.timeoutUpdateSequence = null;
+            ShowDeadEmitter(emitterSpace);
+            return;
         }
-        this.timeout.gameObject.SetActive(false);
-        this.timeoutTimestamp = 0;
-        this.UpdateContentPos();
+
+        if (brickData == null)
+        {
+            ShowEmptyEmitter(animate);
+            return;
+        }
+
+        ShowFilledEmitter(color, animate);
+    }
+
+    private void EnsureInitialized()
+    {
+        if (isInitialized)
+        {
+            return;
+        }
+
+        //Debug.Log("EmitterBrick: initializing");
+
+        isInitialized = true;
+        timeoutUpdateSequence = null;
+        timeoutTimestamp = 0;
+        moveContentUp = false;
+
+        content.transform.localPosition = Vector3.zero;
+        timeout.gameObject.SetActive(false);
+        count.gameObject.SetActive(false);
+        uiBrick.gameObject.SetActive(false);
+        uiBrick.transform.localScale = Vector3.zero;
+        death.SetActive(false);
+    }
+
+    private void StopTimeoutUpdates()
+    {
+        if (timeoutUpdateSequence == null)
+        {
+            return;
+        }
+
+        timeoutUpdateSequence.Kill();
+        timeoutUpdateSequence = null;
     }
 
     private void OnTimeoutUpdate()
     {
         var currentTimestamp = TimeUtils.GetUnixTimestamp();
-        var remaining = this.timeoutTimestamp - currentTimestamp;
+        var remaining = timeoutTimestamp - currentTimestamp;
         if (remaining < 0)
         {
-            this.RemoveTimeout();
+            RemoveTimeout();
             return;
         }
-        int minutesLeft = remaining / 60;
+
+        var minutesLeft = remaining / 60;
         if (minutesLeft >= 1)
         {
-            this.timeout.text = "- " + minutesLeft + "m -";
+            timeout.text = "- " + minutesLeft + "m -";
         }
         else
         {
-            this.timeout.text = TimeUtils.GetTimeLeft(remaining, "en");
+            timeout.text = TimeUtils.GetTimeLeft(remaining, "en");
         }
-        if (this.count.gameObject.activeSelf == false)
-            this.timeout.gameObject.SetActive(true);
-        this.UpdateContentPos();
+
+        if (!count.gameObject.activeSelf)
+        {
+            timeout.gameObject.SetActive(true);
+        }
+
+        UpdateContentPosition();
     }
 
-    private bool moveContentUp = false;
-    private void UpdateContentPos()
+    private void ShowEmptyEmitter(bool animate)
     {
-        if (this.timeout.gameObject.activeSelf || this.count.gameObject.activeSelf)
+        var wasOpen = count.gameObject.activeSelf;
+        if (wasOpen)
         {
-            if (this.timeout.gameObject.activeSelf && this.count.gameObject.activeSelf)
-            {
-                this.timeout.gameObject.SetActive(false);
-            }
+            new SoundCmd(SoundModel.Instance.EMITTER_CLOSE).Run();
+        }
 
-            if (moveContentUp)
-            {
-                return;
-            }
-            moveContentUp = true;
-            this.content.transform.DOKill();
-            this.content.transform.DOLocalMoveY(20, 0.3f).SetEase(Ease.OutQuad);
+        count.gameObject.SetActive(false);
+        uiBrick.gameObject.SetActive(false);
+        death.SetActive(false);
+
+        if (animate)
+        {
+            uiBrick.transform.DOKill();
+            uiBrick.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc);
         }
         else
         {
-            if (!moveContentUp)
-            {
-                return;
-            }
-            moveContentUp = false;
-            this.content.transform.DOKill();
-            this.content.transform.DOLocalMoveY(0, 0.3f).SetEase(Ease.OutBack);
+            uiBrick.transform.localScale = Vector3.zero;
         }
+
+        UpdateContentPosition();
     }
 
-    public void Setup(Color clr, EmitterSpace eb, bool animate = false)
+    private void ShowDeadEmitter(EmitterSpace emitterSpace)
     {
-        this.brickData = eb.brickData;
-        Debug.Log($"EmitterBrick: Setup1 called with brickData {(brickData != null ? brickData.color.ToString() : "null")} and isDead {eb.isDead}");
+        uiBrick.transform.DOKill();
+        uiBrick.gameObject.SetActive(false);
+        uiBrick.transform.localScale = Vector3.zero;
 
-        if (this.brickData == null)
-        {
-            var wasOpen = this.count.gameObject.activeSelf == true;
-            if (wasOpen)
-                new SoundCmd(SoundModel.Instance.EMITTER_CLOSE).Run();
-            this.count.gameObject.SetActive(false);
-            this.uiBrick.gameObject.SetActive(false);
-            this.death.SetActive(eb.isDead);
-            if (eb.isDead)
-            {
-                this.count.text = eb.deadCounter.ToString();
-                this.count.gameObject.SetActive(true);
-            }
-            if (animate)
-            {
-                this.isAnimating = true;
-                this.uiBrick.transform.DOScale(Vector3.zero, Durations.SlotElementFade).SetEase(Ease.InCirc).OnComplete(() => this.isAnimating = false);
-            }
-            else
-            {
-                this.uiBrick.transform.localScale = Vector3.zero;
-            }
-            this.UpdateContentPos();
-            return;
-        }
+        count.gameObject.SetActive(true);
+        count.text = emitterSpace.deadCounter.ToString();
+        death.SetActive(true);
 
-        var wasClosed = this.count.gameObject.activeSelf == false;
+        UpdateContentPosition();
+    }
+
+    private void ShowFilledEmitter(Color color, bool animate)
+    {
+        var wasClosed = !count.gameObject.activeSelf;
         if (wasClosed)
         {
             new SoundCmd(SoundModel.Instance.EMITTER_OPEN).Run();
         }
+
+        death.SetActive(false);
+        count.text = brickData.coloredAmount.ToString();
+        count.gameObject.SetActive(true);
+        uiBrick.gameObject.SetActive(true);
+        uiBrick.SetColor(color, brickData.color);
+        uiBrick.ShowGloss(true);
+
+        uiBrick.transform.DOKill();
+        if (animate)
+        {
+            uiBrick.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack);
+        }
         else
         {
-            //new SoundCmd(SoundModel.Instance.CLICK).Run();
+            uiBrick.transform.localScale = Vector3.one;
         }
 
-        if (eb.isDead)
+        UpdateContentPosition();
+    }
+
+    private void UpdateContentPosition()
+    {
+        var shouldRaiseContent = timeout.gameObject.activeSelf || count.gameObject.activeSelf;
+        if (timeout.gameObject.activeSelf && count.gameObject.activeSelf)
         {
-            this.isAnimating = false;
-            this.uiBrick.transform.DOKill();
-            this.uiBrick.gameObject.SetActive(false);
-            this.count.gameObject.SetActive(true);
-            this.count.text = eb.deadCounter.ToString();
-            this.death.SetActive(true);
-            this.UpdateContentPos();
+            timeout.gameObject.SetActive(false);
+            shouldRaiseContent = true;
+        }
+
+        if (shouldRaiseContent)
+        {
+            MoveContentUp();
             return;
         }
 
-        Debug.Log($"EmitterBrick: Setup2 called with brickData {(brickData != null ? brickData.color.ToString() : "null")} and isDead {eb.isDead}");
+        MoveContentDown();
+    }
 
-        this.count.text = brickData.coloredAmount.ToString();
-        this.count.gameObject.SetActive(true);
-        this.uiBrick.gameObject.SetActive(true);
-        this.uiBrick.SetColor(clr, brickData.color);
-        this.uiBrick.ShowGloss(true);
+    private void MoveContentUp()
+    {
+        if (moveContentUp)
+        {
+            return;
+        }
 
-        if (animate)
+        moveContentUp = true;
+        content.transform.DOKill();
+        content.transform.DOLocalMoveY(ContentRaisedY, ContentMoveDuration).SetEase(Ease.OutQuad);
+    }
+
+    private void MoveContentDown()
+    {
+        if (!moveContentUp)
         {
-            //this.uiBrick.transform.localScale = Vector3.zero;
-            this.isAnimating = true;
-            this.uiBrick.transform.DOKill();
-            this.uiBrick.transform.DOScale(Vector3.one, Durations.SlotElementFade).SetEase(Ease.OutBack).OnComplete(() => this.isAnimating = false);
+            return;
         }
-        else
-        {
-            this.uiBrick.transform.localScale = Vector3.one;
-        }
-        this.UpdateContentPos();
+
+        moveContentUp = false;
+        content.transform.DOKill();
+        content.transform.DOLocalMoveY(0f, ContentMoveDuration).SetEase(Ease.OutBack);
     }
 }

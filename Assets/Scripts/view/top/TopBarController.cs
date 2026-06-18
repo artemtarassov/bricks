@@ -20,11 +20,17 @@ public class TopBarController : MonoBehaviour
     void Start()
     {
         this.coinsObject.SetActive(false);
-        OnPlayerDataChanged();
-        PlayerModel.Instance.OnPlayerDataChanged += OnPlayerDataChanged;
+        UpdateVisibility();
+        ViewModel.Instance.OnBottomNavChange += OnBottomNavChanged;
+        PlayerModel.Instance.OnPlayerDataChanged += UpdateVisibility;
         this.settingsButton.onClick.AddListener(OnSettingsButtonClicked);
         this.backButton.onClick.AddListener(OnBackButtonClicked);
 
+    }
+
+    private void OnBottomNavChanged(BottomNav _)
+    {
+        UpdateVisibility();
     }
 
     private void OnSettingsButtonClicked()
@@ -40,18 +46,21 @@ public class TopBarController : MonoBehaviour
 
     void OnDestroy()
     {
-        PlayerModel.Instance.OnPlayerDataChanged -= OnPlayerDataChanged;
+        ViewModel.Instance.OnBottomNavChange -= OnBottomNavChanged;
+        this.settingsButton.onClick.RemoveListener(OnSettingsButtonClicked);
+        this.backButton.onClick.RemoveListener(OnBackButtonClicked);
+        PlayerModel.Instance.OnPlayerDataChanged -= UpdateVisibility;
     }
 
 
-    private void OnPlayerDataChanged()
+    private void UpdateVisibility()
     {
         var pd = PlayerModel.Instance.playerData;
         var coins = pd.coins;
-        var state = pd.GetCurrentBuildingProgress().State;
+        var bottomNav = ViewModel.Instance.CurrentBottomNav;
 
-        this.backButton.gameObject.SetActive(state == BuildingState.Playing);
-        this.coinsObject.SetActive(coins > 0 || state == BuildingState.Playing);
+        this.backButton.gameObject.SetActive(bottomNav != BottomNav.MainNav);
+        this.coinsObject.SetActive(coins > 0 && bottomNav != BottomNav.MainNav);
 
 
         if (prevCoinsAmount == coins)

@@ -17,6 +17,7 @@ public class CompleteElementCmd
         var delay = 0.25f;
         new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK, delay).Run();
         DOVirtual.DelayedCall(delay, CamModel.Instance.MoveCamBack);
+        DOVirtual.DelayedCall(0.4f + delay, ViewModel.Instance.PlayAnnouncer);
         CityModel.Instance.OnElementCompleted?.Invoke(cityElement);
         ViewModel.Instance.ChangeBottomNav(BottomNav.FinishElement);
     }

@@ -7,6 +7,8 @@ using UnityEngine.Assertions;
 public class AddExtrasCmd
 {
     private CityElementDataContainer dataContainer;
+    private int coins => PlayerModel.Instance.playerData.coins;
+    private int attempts => PlayerModel.Instance.playerData.attempts;
     public void Run(CityElementDataContainer currentElementData)
     {
         Debug.Log($"AddExtrasCmd: adding extras to element {currentElementData.dataKey}");
@@ -59,10 +61,6 @@ public class AddExtrasCmd
 
         var difficultyToApply = difficulties[pd.difficultyIndex];
 
-#if UNITY_EDITOR
-        AddDeath(1);
-#endif
-
         if (difficultyToApply == 0)
         {
             AddCoinsIfAbsent();
@@ -99,7 +97,7 @@ public class AddExtrasCmd
         {
             AddAd();
             SetHiddenBricks(2);
-            AddDeath(2);
+            AddDeath(attempts > 0 ? 2 : 1);
             AddBicksMultiplier();
             return;
         }
@@ -215,8 +213,7 @@ public class AddExtrasCmd
         {
             return;
         }
-        var pd = PlayerModel.Instance.playerData;
-        if (pd.coins < 1000 || Random.value > 0.9f)
+        if (coins < 1000 || Random.value > 0.9f)
         {
             var randIndex = Random.Range(2, randColumn.list.Count - 1);
             randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Coins));
@@ -242,11 +239,11 @@ public class AddExtrasCmd
         }
         var randColumn = RandHelper.GetRandomElement(dataContainer.columns);
         var prevLength = randColumn.list.Count;
-        if (prevLength <= 4)
+        if (prevLength < 6)
         {
             return;
         }
-        var randIndex = Random.Range(2, randColumn.list.Count - 1);
+        var randIndex = Random.Range(4, randColumn.list.Count - 1);
         //var randIndex = 0;
         randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Ad));
         Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddAd: failed to add ad to column");
