@@ -14,7 +14,8 @@ public class ShowOutOfSpaceCmd
         new ShowViewCmd(ViewName.OutOfSpaceView).Run();
         new SoundCmd("impact_deep_thud_bounce_01").Run();
         SoundModel.Instance.Stop(SoundModel.Instance.MUSIC1);
-        PlayerModel.Instance.playerData.difficultyIndex = 0;
+        PlayerModel.Instance.playerData.difficultyIndex = Random.Range(0, 3);
+        PlayerModel.Instance.playerData.isDirty = true;
         ViewModel.Instance.DisableOutOfSpaceCounter();
     }
 

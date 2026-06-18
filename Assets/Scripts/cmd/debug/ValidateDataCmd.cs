@@ -8,13 +8,26 @@ public class ValidateDataCmd
 {
     public void Run()
     {
-        
+
         var list = BuildingNameUtil.GetAllBuildingNames();
         Debug.Log("ValidateDataCmd: validating data for buildings " + string.Join(", ", list));
-        
+
         foreach (var buildingName in list)
         {
             var buildingData = BalancingModel.Instance.GetDataCopy(buildingName);
+
+            foreach (var elementData in buildingData.cityElementDataList)
+            {
+                foreach (var brickData in elementData.brickDataList)
+                {
+                    Assert.IsTrue(brickData.max > 0, $"ValidateDataCmd: brick data max should be greater than 0 for building {buildingName}, element {elementData.dataKey}");
+                }
+                foreach (var columnData in elementData.columns)
+                {
+                    Assert.IsTrue(columnData.list.Count > 2, $"ValidateDataCmd: column data list should have more than 2 items for building {buildingName}, element {elementData.dataKey}, column {columnData.columnIndex}. contains "+ columnData.list.Count + " items.");
+                }
+            }
+
             Assert.IsNotNull(buildingData, $"ValidateDataCmd: no data found for building {buildingName}");
             var elementDataList = buildingData.cityElementDataList;
 

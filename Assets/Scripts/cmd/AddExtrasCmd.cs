@@ -130,7 +130,7 @@ public class AddExtrasCmd
             {
                 continue;
             }
-            var randIndex = Random.Range(1, allBrickElements.Count - 2);
+            var randIndex = RandHelper.GetRandIndex(allBrickElements, 2, RandHelper.RandPos.SecondHalf);
             var randBrick = allBrickElements[randIndex];
             randBrick.type = SlotElementType.HiddenBricks;
             amount--;
@@ -148,12 +148,16 @@ public class AddExtrasCmd
     private void AddDeath(int amount = 1)
     {
         var columns = dataContainer.columns.FindAll((c) => c.list.Count > 5);
+        if (columns.Count == 0)
+        {
+            return;
+        }
         RandHelper.Shuffle(columns);
 
         for (var i = 0; i < columns.Count && amount > 0; i++)
         {
             var column = columns[i];
-            var randIndex = Random.Range(2, column.list.Count - 1);
+            var randIndex = RandHelper.GetRandIndex(column.list, 1, RandHelper.RandPos.Random);
             column.list.Insert(randIndex, new SlotElementData(SlotElementType.EmitterDeathWaiting)
             {
                 deadCounter = deadCounter.GetNext()
@@ -190,11 +194,11 @@ public class AddExtrasCmd
         }
         var randColumn = RandHelper.GetRandomElement(columnsWithBricks);
         var prevLength = randColumn.list.Count;
-        if (prevLength <= 4)
+        if (prevLength <= 3)
         {
             return;
         }
-        var randIndex = Random.Range(1, randColumn.list.Count - 2);
+        var randIndex =  RandHelper.GetRandIndex(randColumn.list, 1, RandHelper.RandPos.SecondThird);
         //var randIndex = 0;
         randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.AddMoreBricks));
         Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddBicksMultiplier: failed to add additional bricks multiplier to column");
@@ -215,7 +219,7 @@ public class AddExtrasCmd
         }
         if (coins < 1000 || Random.value > 0.9f)
         {
-            var randIndex = Random.Range(2, randColumn.list.Count - 1);
+            var randIndex = RandHelper.GetRandIndex(randColumn.list, 1, RandHelper.RandPos.LastThird);
             randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Coins));
         }
     }
@@ -239,11 +243,11 @@ public class AddExtrasCmd
         }
         var randColumn = RandHelper.GetRandomElement(dataContainer.columns);
         var prevLength = randColumn.list.Count;
-        if (prevLength < 6)
+        if (prevLength < 5)
         {
             return;
         }
-        var randIndex = Random.Range(4, randColumn.list.Count - 1);
+        var randIndex = RandHelper.GetRandIndex(randColumn.list, 1, RandHelper.RandPos.SecondHalf);
         //var randIndex = 0;
         randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.Ad));
         Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddAd: failed to add ad to column");

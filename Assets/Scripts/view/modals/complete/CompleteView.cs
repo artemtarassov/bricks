@@ -78,7 +78,7 @@ public class CompleteView : DefaultView
         this.particles.SetActive(true);
         this.coinsIcon.gameObject.SetActive(true);
         this.coins.gameObject.SetActive(true);
-        this.coins.text = RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins.ToString();
+        this.coins.text = "Bonus: " + RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins.ToString() + "";
         this.title.text = Loca.GetThemeName(currentBuildingName);
 
         var canvasGroup = this.GetComponent<CanvasGroup>();

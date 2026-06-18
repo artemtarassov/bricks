@@ -1,36 +1,64 @@
 using DG.Tweening;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 public class TopBarController : MonoBehaviour
 {
+    private const float CoinsPunchScale = 0.1f;
+    private const float CoinsPunchDuration = 0.1f;
+    private const int CoinsPunchVibrato = 1;
+    private const float CoinsPunchElasticity = 0.5f;
+    private const float CoinsCountAnimationDuration = 0.1f;
+
     [SerializeField] private TMP_Text coinsText;
     [SerializeField] private Transform coinsIcon;
-    [SerializeField] private GameObject coinsObject;
-
+    [SerializeField] private GameObject coinsObject;//Horizontal layout group containing coins icon and text, used to hide/show them together
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button backButton;
-    private int prevCoinsAmount = 0;
-    private int fromAmount = 0;
 
+    private ViewModel viewModel => ViewModel.Instance;
+    private PlayerModel playerModel => PlayerModel.Instance;
+    private RectTransform rootRectTransform;
+    private RectTransform coinsObjectRectTransform;
+    private int targetCoinsAmount;
+    private int displayedCoinsAmount;
+    private bool isCoinsInitialized;
+    private bool isInitialized;
 
-
-    void Start()
+    private void Start()
     {
-        this.coinsObject.SetActive(false);
-        UpdateVisibility();
-        ViewModel.Instance.OnBottomNavChange += OnBottomNavChanged;
-        PlayerModel.Instance.OnPlayerDataChanged += UpdateVisibility;
-        this.settingsButton.onClick.AddListener(OnSettingsButtonClicked);
-        this.backButton.onClick.AddListener(OnBackButtonClicked);
+        AssertDependencies();
+        this.rootRectTransform = (RectTransform)transform;
+        this.coinsObjectRectTransform = this.coinsObject.GetComponent<RectTransform>();
 
+        this.coinsObject.SetActive(false);
+        this.backButton.gameObject.SetActive(false);
+
+        Subscribe();
+        this.isInitialized = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (!this.isInitialized)
+        {
+            return;
+        }
+
+        Unsubscribe();
+        KillCoinTweens();
     }
 
     private void OnBottomNavChanged(BottomNav _)
     {
-        UpdateVisibility();
+        Refresh(true);
+    }
+
+    private void OnPlayerDataChanged()
+    {
+        Refresh();
     }
 
     private void OnSettingsButtonClicked()
@@ -44,49 +72,141 @@ public class TopBarController : MonoBehaviour
         new GoBackBtnCmd().Run();
     }
 
-    void OnDestroy()
+    private void Subscribe()
     {
-        ViewModel.Instance.OnBottomNavChange -= OnBottomNavChanged;
-        this.settingsButton.onClick.RemoveListener(OnSettingsButtonClicked);
-        this.backButton.onClick.RemoveListener(OnBackButtonClicked);
-        PlayerModel.Instance.OnPlayerDataChanged -= UpdateVisibility;
+        this.viewModel.OnBottomNavChange += OnBottomNavChanged;
+        this.playerModel.OnPlayerDataChanged += OnPlayerDataChanged;
+        this.settingsButton.onClick.AddListener(OnSettingsButtonClicked);
+        this.backButton.onClick.AddListener(OnBackButtonClicked);
     }
 
-
-    private void UpdateVisibility()
+    private void Unsubscribe()
     {
-        var pd = PlayerModel.Instance.playerData;
-        var coins = pd.coins;
-        var bottomNav = ViewModel.Instance.CurrentBottomNav;
+        this.viewModel.OnBottomNavChange -= OnBottomNavChanged;
+        this.playerModel.OnPlayerDataChanged -= OnPlayerDataChanged;
+        this.settingsButton.onClick.RemoveListener(OnSettingsButtonClicked);
+        this.backButton.onClick.RemoveListener(OnBackButtonClicked);
+    }
 
-        this.backButton.gameObject.SetActive(bottomNav != BottomNav.MainNav);
-        this.coinsObject.SetActive(coins > 0 && bottomNav != BottomNav.MainNav);
+    private void Refresh(bool forceCoinsSync = false)
+    {
+        Assert.IsNotNull(this.playerModel.playerData, "TopBarController: PlayerModel.playerData is not initialized.");
 
+        var coins = this.playerModel.playerData.coins;
+        var bottomNav = this.viewModel.CurrentBottomNav;
 
-        if (prevCoinsAmount == coins)
+        UpdateNavigationVisibility(bottomNav, coins);
+        UpdateCoinsDisplay(coins, forceCoinsSync || !this.isCoinsInitialized);
+        if (forceCoinsSync || !this.isCoinsInitialized)
+        {
+            ForceLayoutRefresh();
+        }
+        this.isCoinsInitialized = true;
+    }
+
+    private void UpdateNavigationVisibility(BottomNav bottomNav, int coins)
+    {
+        this.backButton.gameObject.SetActive(bottomNav != BottomNav.MainNav && bottomNav != BottomNav.None);
+        this.coinsObject.SetActive(coins > 0 || bottomNav == BottomNav.Slots);
+    }
+
+    private void UpdateCoinsDisplay(int coins, bool forceImmediate)
+    {
+        if (forceImmediate)
+        {
+            SetCoinsImmediately(coins);
+            return;
+        }
+
+        if (this.targetCoinsAmount == coins)
         {
             return;
         }
 
-
-        if (prevCoinsAmount > coins)
+        if (coins < this.targetCoinsAmount)
         {
-            this.coinsText.DOKill();
-            this.coinsIcon.DOKill();
-            this.coinsIcon.localScale = Vector3.one;
-            this.coinsText.text = coins.ToString("N0");
-            this.prevCoinsAmount = coins;
+            SetCoinsImmediately(coins);
             return;
         }
-        this.coinsIcon.DOKill();
-        this.coinsIcon.localScale = Vector3.one;
-        this.coinsIcon.DOPunchScale(Vector3.one * 0.1f, 0.1f, 1, 0.5f).SetEase(Ease.OutCubic);
+
+        AnimateCoinsIncrease(coins);
+    }
+
+    private void SetCoinsImmediately(int coins)
+    {
+        KillCoinTweens();
+        ResetCoinsIconScale();
+        this.targetCoinsAmount = coins;
+        SetCoinsText(coins);
+    }
+
+    private void AnimateCoinsIncrease(int coins)
+    {
+        var startCoins = this.displayedCoinsAmount;
+        var tweenedCoins = startCoins;
+
+        KillCoinTweens();
+        ResetCoinsIconScale();
+
+        this.coinsIcon
+            .DOPunchScale(Vector3.one * CoinsPunchScale, CoinsPunchDuration, CoinsPunchVibrato, CoinsPunchElasticity)
+            .SetEase(Ease.OutCubic)
+            .SetTarget(this.coinsIcon);
+
+        this.targetCoinsAmount = coins;
+
+        DOTween.To(
+                () => tweenedCoins,
+                value =>
+                {
+                    tweenedCoins = value;
+                    SetCoinsText(value);
+                },
+                coins,
+                CoinsCountAnimationDuration
+            )
+            .SetEase(Ease.Linear)
+            .SetTarget(this.coinsText)
+            .OnComplete(() => SetCoinsText(coins));
+    }
+
+    private void SetCoinsText(int coins)
+    {
+        this.displayedCoinsAmount = coins;
+        this.coinsText.text = coins.ToString("N0");
+    }
+
+    private void KillCoinTweens()
+    {
         this.coinsText.DOKill();
+        this.coinsIcon.DOKill();
+    }
 
-        this.fromAmount = prevCoinsAmount;
-        this.prevCoinsAmount = coins;
+    private void ResetCoinsIconScale()
+    {
+        this.coinsIcon.localScale = Vector3.one;
+    }
 
-        DOTween.To(() => fromAmount, x => coinsText.text = x.ToString("N0"), coins, 0.1f).SetEase(Ease.Linear).SetTarget(this.coinsText);
+    private void ForceLayoutRefresh()
+    {
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(this.coinsText.rectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(this.coinsObjectRectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(this.rootRectTransform);
+        Canvas.ForceUpdateCanvases();
+    }
 
+    private void AssertDependencies()
+    {
+        Assert.IsNotNull(this.coinsText, "TopBarController: coinsText is not assigned.");
+        Assert.IsNotNull(this.coinsIcon, "TopBarController: coinsIcon is not assigned.");
+        Assert.IsNotNull(this.coinsObject, "TopBarController: coinsObject is not assigned.");
+        Assert.IsNotNull(this.settingsButton, "TopBarController: settingsButton is not assigned.");
+        Assert.IsNotNull(this.backButton, "TopBarController: backButton is not assigned.");
+        Assert.IsNotNull(ViewModel.Instance, "TopBarController: ViewModel.Instance is not initialized.");
+        Assert.IsNotNull(PlayerModel.Instance, "TopBarController: PlayerModel.Instance is not initialized.");
+        Assert.IsNotNull(PlayerModel.Instance.playerData, "TopBarController: PlayerModel.playerData is not initialized.");
+        Assert.IsNotNull(transform as RectTransform, "TopBarController: expected to be attached to a RectTransform.");
+        Assert.IsNotNull(this.coinsObject.GetComponent<RectTransform>(), "TopBarController: coinsObject is expected to have a RectTransform.");
     }
 }
