@@ -44,6 +44,9 @@ public class AdData
     public List<AdRewardData> requested = new List<AdRewardData>();
 
     public List<int> earnedRewardDayOfYear = new List<int>();
+
+    public int lastInterstitialTimestamp = 0;
+    public int lastRewardedTimestamp = 0;
 }
 
 public class AdModel
@@ -93,6 +96,9 @@ public class AdModel
             adData.requested = new List<AdRewardData>();
         }
     }
+
+    public int LastInterstitialTimestamp => adData.lastInterstitialTimestamp;
+    public int LastRewardedTimestamp => adData.lastRewardedTimestamp;
 
     private float loadErrorTime = 0;
 
@@ -194,6 +200,18 @@ public class AdModel
         {
             Debug.LogError("AdModel.SetRewardEarned - no reward data for adUnit " + adUnit);
             return;
+        }
+        if (rewardDataByAdUnit.rewardName == RewardName.MID_SESSION_INTERSTITIAL || rewardDataByAdUnit.rewardName == RewardName.MID_SESSION_REWARDED)
+        {
+            var curTimestamp = TimeUtils.GetUnixTimestamp();
+            if (rewardDataByAdUnit.rewardName == RewardName.MID_SESSION_INTERSTITIAL)
+            {
+                this.adData.lastInterstitialTimestamp = curTimestamp;
+            }
+            else
+            {
+                this.adData.lastRewardedTimestamp = curTimestamp;
+            }
         }
         this.adData.requested.Remove(rewardDataByAdUnit);
         this.adData.dirty = true;

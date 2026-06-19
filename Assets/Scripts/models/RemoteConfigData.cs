@@ -17,7 +17,8 @@ public enum RemoteConfigProperty
     CompleteRewardCoins = 7,
     ColumnCoins = 8,
     MusicTrack = 9,
-    ShowBannerAfterSec = 10
+    ShowBannerAfterSec = 10,
+    ShowMidSessionAdAfterSec = 11
 }
 
 [Serializable]
@@ -74,7 +75,10 @@ public class RemoteConfigData
 
     public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 0);//disabled by default.
 
-    public int ShowBannerAfterSec => GetValue(RemoteConfigProperty.ShowBannerAfterSec, 60 * 60 * 24 * 5);//5 days by default.
+    public int ShowBannerAfterSec => GetValue(RemoteConfigProperty.ShowBannerAfterSec, 60 * 60 * 24 * 7);//7 days by default.
+
+
+    public int ShowMidSessionAdAfterSec => GetValue(RemoteConfigProperty.ShowMidSessionAdAfterSec, 60 * 5);
 
     public static RemoteConfigData Load()
     {

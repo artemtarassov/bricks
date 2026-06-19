@@ -1,12 +1,8 @@
-using DG.Tweening;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIBrick : MonoBehaviour
 {
-    private static int rotateDuration = 5;
     [SerializeField] private Image bg;
     [SerializeField] private Image rune;
     [SerializeField] private Image gloss;

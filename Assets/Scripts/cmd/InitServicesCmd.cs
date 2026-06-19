@@ -15,6 +15,11 @@ public class InitServicesCmd
     {
         //init unity services
         root.gameObject.AddComponent<InitializeUnityServices>();
+        
+        #if UNITY_ANDROID
+        root.gameObject.AddComponent<AndroidReviewController>();
+        #endif
+
         #if !UNITY_EDITOR
         new ListenToExceptionsCmd().Run();
         new InitFBCmd().Run();

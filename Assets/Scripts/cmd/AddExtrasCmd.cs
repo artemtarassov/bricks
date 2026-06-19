@@ -29,18 +29,29 @@ public class AddExtrasCmd
 
     private bool ShouldAddAd()
     {
-        var installTimestamp = PlayerModel.Instance.playerData.installTimestamp;
-        var secPassed = TimeUtils.GetUnixTimestamp() - installTimestamp;
-        if (secPassed < 60 * 5)
-        {
-            //don't add ad for the first 5 minutes after install
-            return false;
-        }
         var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket) || IAPModel.Instance.HasTempGoldenTicket();
         if (hasGoldenTicket)
         {
             //don't add ad if player has golden ticket
             return false;
+        }
+
+        var installTimestamp = PlayerModel.Instance.playerData.installTimestamp;
+        var secPassedSinceInstall = TimeUtils.GetUnixTimestamp() - installTimestamp;
+        if (secPassedSinceInstall < RemoteConfigModel.Instance.RemoteConfig.ShowMidSessionAdAfterSec)
+        {
+            //don't add ad for the first 5 minutes after install
+            return false;
+        }
+        var lastInterstitialTimestamp = AdModel.Instance.LastInterstitialTimestamp;
+        if (lastInterstitialTimestamp > 0)
+        {
+            var timeDiff = TimeUtils.GetUnixTimestamp() - lastInterstitialTimestamp;
+            if (timeDiff < RemoteConfigModel.Instance.RemoteConfig.ShowMidSessionAdAfterSec)
+            {
+                //don't add ad if the last interstitial was shown less than configured seconds ago
+                return false;
+            }
         }
         var didLoadAd = AdModel.Instance.IsAdReady(RewardName.MID_SESSION_INTERSTITIAL) || AdModel.Instance.IsAdReady(RewardName.MID_SESSION_REWARDED);
         return didLoadAd;
@@ -198,7 +209,7 @@ public class AddExtrasCmd
         {
             return;
         }
-        var randIndex =  RandHelper.GetRandIndex(randColumn.list, 1, RandHelper.RandPos.SecondThird);
+        var randIndex = RandHelper.GetRandIndex(randColumn.list, 1, RandHelper.RandPos.SecondThird);
         //var randIndex = 0;
         randColumn.list.Insert(randIndex, new SlotElementData(SlotElementType.AddMoreBricks));
         Assert.AreEqual(prevLength + 1, randColumn.list.Count, "UnlockCityElementCmd AddBicksMultiplier: failed to add additional bricks multiplier to column");

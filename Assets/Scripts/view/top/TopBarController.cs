@@ -167,7 +167,7 @@ public class TopBarController : MonoBehaviour
             )
             .SetEase(Ease.Linear)
             .SetTarget(this.coinsText)
-            .OnComplete(() => SetCoinsText(coins));
+            .OnComplete(() => { SetCoinsText(coins); ForceLayoutRefresh(); });
     }
 
     private void SetCoinsText(int coins)
