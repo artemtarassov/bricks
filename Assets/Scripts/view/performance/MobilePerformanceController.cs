@@ -23,11 +23,13 @@ public class MobilePerformanceController : MonoBehaviour
     private void SetLow()
     {
         SetQualityLevel("MobileLow");
+        Application.targetFrameRate = 30;
     }
 
     private void SetHigh()
     {
         SetQualityLevel("MobileHigh");
+        Application.targetFrameRate = 60;
     }
 
     void Start()

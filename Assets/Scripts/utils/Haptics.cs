@@ -128,6 +128,8 @@ internal static class HapticsAndroid
             supportsSubtleHaptics = hasVibrator && sdkInt >= 26 && vibrator.Call<bool>("hasAmplitudeControl");
         }
 
+        Debug.Log($"Haptics Android initialized. Has vibrator: {hasVibrator}, Supports subtle haptics: {supportsSubtleHaptics}");
+
         isInitialized = true;
     }
 
@@ -135,6 +137,7 @@ internal static class HapticsAndroid
     {
         if (hasError)
         {
+            //Debug.Log("Haptics Android: Previous error detected, skipping haptic feedback.");
             return;
         }
 
@@ -144,11 +147,13 @@ internal static class HapticsAndroid
 
             if (unityPlayerClass == null || !hasVibrator)
             {
+                //Debug.Log("Haptics Android: No vibrator found.");
                 return;
             }
 
             if (isSubtle && !supportsSubtleHaptics)
             {
+                //Debug.Log("Haptics Android: Subtle haptics not supported on this device.");
                 return;
             }
 
@@ -158,10 +163,15 @@ internal static class HapticsAndroid
 
             if (!view.Call<bool>("performHapticFeedback", feedbackConstant) && Debug.isDebugBuild)
             {
-                Debug.Log(
+               /* Debug.Log(
                     isSubtle
                         ? "Haptics Android: light feedback was not performed."
-                        : "Haptics Android: medium feedback was not performed.");
+                        : "Haptics Android: medium feedback was not performed.");*/
+            } else {
+                /*Debug.Log(
+                    isSubtle
+                        ? "Haptics Android: light feedback performed successfully."
+                        : "Haptics Android: medium feedback performed successfully.");*/
             }
         }
         catch (Exception e)
