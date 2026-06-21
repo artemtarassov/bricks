@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.iOS;
 
 public class RateAppCmd
 {
@@ -17,7 +18,7 @@ public class RateAppCmd
         if (Application.platform == RuntimePlatform.IPhonePlayer)
         {
 #if UNITY_IOS
-            bool popupShown = Device.RequestStoreReview();
+            bool popupShown = UnityEngine.iOS.Device.RequestStoreReview();
             if (popupShown)
             {
                 //
