@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class ColoredMaterials : MonoBehaviour
 {
     public static ColoredMaterials Instance { get; private set; }
+    private readonly Dictionary<string, Material> materialsByName = new Dictionary<string, Material>();
+
     void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
         if (Instance == null)
         {
             Instance = this;
+            CacheMaterials();
+            //OptimizeMaterials();
             //SetMaterialColors();
         }
         else
@@ -37,12 +40,26 @@ public class ColoredMaterials : MonoBehaviour
 
     public Material GetMaterialByName(string name)
     {
-        var material = this.materials.Find(m => m.name == name);
-        if (material == null)
+        if (this.materialsByName.TryGetValue(name, out var material))
         {
-            throw new System.Exception($"Material with name {name} not found");
+            return material;
         }
-        return material;
+
+        throw new System.Exception($"Material with name {name} not found");
+    }
+
+    private void CacheMaterials()
+    {
+        this.materialsByName.Clear();
+        foreach (var material in this.materials)
+        {
+            if (material == null || this.materialsByName.ContainsKey(material.name))
+            {
+                continue;
+            }
+            
+            this.materialsByName.Add(material.name, material);
+        }
     }
 
     public Material GetEmptyMaterialByColor(ColorIndex colorIndex)

@@ -15,13 +15,15 @@ public class CompleteIapCmd
 {
     private string productId;
     private string payload;
+    private string transactionId;
 
     public bool report = true;
 
-    public CompleteIapCmd(string p, string payload = null)
+    public CompleteIapCmd(string p, string payload = null, string transactionId = null)
     {
         this.productId = p;
         this.payload = payload;
+        this.transactionId = transactionId;
     }
 
     public void Run(IapResponse response, bool report = true)
@@ -62,7 +64,11 @@ public class CompleteIapCmd
 
         if (response == IapResponse.Success || response == IapResponse.Restore)
         {
-            IAPModel.Instance.SetPurchaseCompleted(productId);
+            IAPModel.Instance.TrySetPurchaseCompleted(
+                productId,
+                transactionId,
+                response != IapResponse.Success
+            );
         }
 
     }

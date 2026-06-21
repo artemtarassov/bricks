@@ -62,9 +62,9 @@ public class CityElementDataContainer
         for (var i = 0; i < last; i++)
         {
             transparentBricks[i].SetAll(BrickState.Colored);
-            var n = i + amountOfColors;
+            /*var n = i + amountOfColors;
             if (n < transparentBricks.Count)
-                transparentBricks[n].SetAll(BrickState.SemiTransparent);
+                transparentBricks[n].SetAll(BrickState.SemiTransparent);*/
         }
     }
 

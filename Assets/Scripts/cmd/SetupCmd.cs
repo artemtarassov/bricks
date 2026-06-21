@@ -1,46 +1,53 @@
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SetupCmd
 {
-    public void Run(Transform root)
-    {
-        //set fps to 60
-        Application.targetFrameRate = 60;
+        public void Run(Transform root)
+        {
 
 #if UNITY_EDITOR
-        FilePrefs.DeleteAll(); //for testing only, remove in production
+                FilePrefs.DeleteAll(); //for testing only, remove in production
 #endif
 
-        PlayerModel.Instance = new PlayerModel();
-        PlayerModel.Instance.Load();
+                PlayerModel.Instance = new PlayerModel();
+                PlayerModel.Instance.Load();
 
 #if UNITY_EDITOR
-        PlayerModel.Instance.EnableSetting(SettingsKey.Music,false);
+                PlayerModel.Instance.EnableSetting(SettingsKey.Music, false);
 #endif
 
-        RemoteConfigModel.Instance = new RemoteConfigModel();
-        CamModel.Instance = new CamModel();
+                RemoteConfigModel.Instance = new RemoteConfigModel();
+                CamModel.Instance = new CamModel();
 
-        IAPModel.Instance = new IAPModel();
-        IAPModel.Instance.Load();
+                IAPModel.Instance = new IAPModel();
+                IAPModel.Instance.Load();
 
-        AdModel.Instance = new AdModel();
-        AdModel.Instance.Load();
+                AdModel.Instance = new AdModel();
+                AdModel.Instance.Load();
 
-        SoundModel.Instance = new SoundModel();
-        CityModel.Instance = new CityModel();
-        SlotModel.Instance = new SlotModel();
-        ViewModel.Instance = new ViewModel(root);
+                SoundModel.Instance = new SoundModel();
+                CityModel.Instance = new CityModel();
+                SlotModel.Instance = new SlotModel();
+                ViewModel.Instance = new ViewModel(root);
 
-        BalancingModel.Instance = new BalancingModel();
-        BalancingModel.Instance.Load();
+                BalancingModel.Instance = new BalancingModel();
+                BalancingModel.Instance.Load();
 
-        var cityElementGroups = root.GetComponentsInChildren<BuildingElement>(true).ToList();
-        new SetupCityCmd().Run(cityElementGroups);
+                var cityElementGroups = root.GetComponentsInChildren<BuildingElement>(true).ToList();
+                new SetupCityCmd().Run(cityElementGroups);
 
-//#if !UNITY_EDITOR
-        new InitServicesCmd().Run(root);
-//#endif
-    }
+                //#if !UNITY_EDITOR
+                new InitServicesCmd().Run(root);
+
+                root.AddComponent<MobilePerformanceController>();
+                //#endif
+        }
+
+
+
 }
+
+
+

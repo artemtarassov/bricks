@@ -23,6 +23,12 @@ public class SwitchSettingsCmd
             }
             new LogEventCmd().Run("music_settings", "musicEnabled", settingEnabled ? 1 : 0);
         }
+
+        if (key == SettingsKey.NightMode)
+        {
+            var settingEnabled = PlayerModel.Instance.IsSettingEnabled(key);
+            
+        }
     }
 
 }

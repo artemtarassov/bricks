@@ -144,22 +144,22 @@ public class PlayerData
         return progress.Find(g => g.BuildingName == currentBuildingName);
     }
 
-    /*public CityElementDataContainer elementInCurrentBuilding
+    public void EnableSetting(SettingsKey key)
     {
-        get
+        if (!enabledSettings.Contains(key))
         {
-            if (string.IsNullOrEmpty(currentBuildingName))
-            {
-                return null;
-            }
-            return GetCurrentBuildingProgress().GetCurrentElement();
-        }
-        set
-        {
+            enabledSettings.Add(key);
             isDirty = true;
-            GetCurrentBuildingProgress().SetCurrentElement(value);
         }
-    }*/
+    }
+    public void DisableSetting(SettingsKey key)
+    {
+        if (enabledSettings.Contains(key))
+        {
+            enabledSettings.Remove(key);
+            isDirty = true;
+        }
+    }
 
     [SerializeField]
     public List<SettingsKey> enabledSettings;

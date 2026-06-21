@@ -37,7 +37,8 @@ public enum SettingsKey
     Undefined = 0,
     Sounds = 1,
     Music = 2,
-    Vibrations = 3
+    Vibrations = 3,
+    NightMode = 4,
 }
 
 

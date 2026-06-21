@@ -31,7 +31,7 @@ public class FlyingBricks
         brickTransform.position = data.from;
         brickTransform.rotation = Quaternion.identity;
         brickTransform.localScale = brick.initialLocalScale * 0.25f;
-        brick.renderer.material = ColoredMaterials.Instance.GetMaterialByColorIndex(data.colorIndex);
+        brick.renderer.sharedMaterial = ColoredMaterials.Instance.GetMaterialByColorIndex(data.colorIndex);
         brick.gameObject.SetActive(true);
 
         var targetLocalScale = GetLocalScaleForWorldScale(this.parent, data.targetBrick.lossyScale);

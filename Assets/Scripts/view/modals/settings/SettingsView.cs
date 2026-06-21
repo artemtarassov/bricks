@@ -15,6 +15,10 @@ public class SettingsView : DefaultView
         this.restoreBtn.onClick.AddListener(OnRestoreBtnClick);
         this.rateBtn.onClick.AddListener(OnRateBtnClick);
         this.goldenTicketBtn.onClick.AddListener(OnGoldenTicketBtnClick);
+
+#if UNITY_ANDROID
+        restoreBtn.gameObject.SetActive(false);
+#endif
     }
     void OnDestroy()
     {
@@ -52,6 +56,9 @@ public class SettingsView : DefaultView
     {
         Debug.Log("DefaultView OnShown called");
         PlayerModel.Instance.OnPlayerDataChanged += OnPlayerDataChanged;
+
+        var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket) || IAPModel.Instance.HasTempGoldenTicket();
+        this.goldenTicketBtn.gameObject.SetActive(!hasGoldenTicket);
     }
 
     private void OnPlayerDataChanged()

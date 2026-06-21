@@ -9,8 +9,16 @@ public class GoBackBtnCmd
     {
         new HideViewCmd().Run();
 
-        var progress= PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-        
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (progress.State == BuildingState.Playing || progress.State == BuildingState.Completed)
+        {
+            //ok
+        }
+        else
+        {
+            return;
+        }
+
         PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
         var currentElement = ModelUtils.GetCurrentElement();
         var index = CityModel.Instance.GetElementIndex(currentElement);

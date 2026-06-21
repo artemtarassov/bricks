@@ -43,11 +43,11 @@ public class SoundCmd
             {
                 if (sndName == SoundModel.Instance.BRICK_CLICK)
                 {
-                    iOSHapticFeedback.Instance.Trigger(iOSHapticFeedback.iOSFeedbackType.ImpactLight);
+                    Haptics.Light();
                 }
                 else
                 {
-                    iOSHapticFeedback.Instance.Trigger(iOSHapticFeedback.iOSFeedbackType.ImpactMedium);
+                    Haptics.Medium();
                 }
             }
             var sfxEnabled = PlayerModel.Instance.IsSettingEnabled(SettingsKey.Sounds);

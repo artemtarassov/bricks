@@ -16,6 +16,7 @@ public class SlotTextureCameraController : MonoBehaviour
     {
         var cam = this.GetComponentInChildren<Camera>();
         var anyBrick = currentElement.GetBrickLayersContainer().sortedBricks[0];
+        var meshRenderers = this.bricksContainer.GetComponentsInChildren<MeshRenderer>(true);
 
         this.transform.position = currentElement.camPos;
         this.transform.rotation = Quaternion.Euler(currentElement.camRot);
@@ -30,9 +31,10 @@ public class SlotTextureCameraController : MonoBehaviour
             {
                 continue;
             }
-            var meshRenderers = this.bricksContainer.GetComponentsInChildren<MeshRenderer>(true);
             foreach (var mr in meshRenderers)
-                mr.material = ColoredMaterials.Instance.GetMaterialByColorIndex(color);
+            {
+                mr.sharedMaterial = ColoredMaterials.Instance.GetMaterialByColorIndex(color);
+            }
 
             cam.Render();
             yield return WaitForEndOfFrameInstruction;
@@ -47,7 +49,7 @@ public class SlotTextureCameraController : MonoBehaviour
     private static Color GetAvgColor(RenderTexture txt)
     {
         RenderTexture.active = txt;
-        Texture2D tex = new Texture2D(txt.width, txt.height, TextureFormat.RGB24, false);
+        var tex = new Texture2D(txt.width, txt.height, TextureFormat.RGB24, false);
         tex.ReadPixels(new Rect(0, 0, txt.width, txt.height), 0, 0);
         tex.Apply();
         RenderTexture.active = null;
@@ -73,7 +75,13 @@ public class SlotTextureCameraController : MonoBehaviour
                 counter++;
             }
         }
+        if (counter == 0)
+        {
+            UnityEngine.Object.Destroy(tex);
+            return Color.white;
+        }
         var result = new Color(r / counter, g / counter, b / counter, 1);
+        UnityEngine.Object.Destroy(tex);
         return AdjustContrast(result, 1.1f);
     }
 

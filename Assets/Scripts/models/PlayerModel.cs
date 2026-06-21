@@ -20,11 +20,14 @@ public class PlayerModel
         {
             return;
         }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         var data = JsonUtility.ToJson(this.playerData, true);
+#else
+        var data = JsonUtility.ToJson(this.playerData, false);
+#endif
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
         FilePrefs.Save();
-        Debug.Log("PlayerModel saved " + data.Length + " bytes. content " + data);
     }
 
 
@@ -35,7 +38,7 @@ public class PlayerModel
 
     public void SetCurrentBuilding(BuildingName buildingName, BuildingState newState)
     {
-        Debug.Log($"PlayerModel: setting current building to {buildingName} with state {newState}");
+        //Debug.Log($"PlayerModel: setting current building to {buildingName} with state {newState}");
         playerData.SetCurrentBuilding(buildingName, newState);
         OnPlayerDataChanged?.Invoke();
     }
@@ -50,14 +53,12 @@ public class PlayerModel
         var isEnabled = IsSettingEnabled(key);
         if (enable && !isEnabled)
         {
-            playerData.enabledSettings.Add(key);
-            playerData.isDirty = true;
+            playerData.EnableSetting(key);
             OnPlayerDataChanged?.Invoke();
         }
         else if (!enable && isEnabled)
         {
-            playerData.enabledSettings.Remove(key);
-            playerData.isDirty = true;
+            playerData.DisableSetting(key);
             OnPlayerDataChanged?.Invoke();
         }
     }
@@ -93,6 +94,7 @@ public class PlayerModel
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,
         };
+        this.playerData.DisableSetting(SettingsKey.NightMode);
     }
 
 
@@ -201,8 +203,6 @@ public class PlayerModel
             element.columns.ForEach((s) => s.ResetEmittingStates());
         }
 
-
-        
     }
 
 

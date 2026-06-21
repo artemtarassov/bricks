@@ -5,6 +5,12 @@ public class FinishCurrentCityElementCmd
     public void Run()
     {
         var cityElement = ModelUtils.GetCurrentElement();
+        var isCompleted = cityElement.dataContainer.ElementCompleted();
+        if (isCompleted)
+        {
+            new UnlockNextCmd().Run();
+            return;
+        }
         foreach (var c in cityElement.dataContainer.columns)
         {
             foreach (var ci in c.list)
@@ -19,8 +25,6 @@ public class FinishCurrentCityElementCmd
             bd.SetAll(BrickState.Full);
         }
         cityElement.ShowCurrentState();
-
-        new UnlockNextCmd().Run();
 
     }
 }

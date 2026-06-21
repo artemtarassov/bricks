@@ -3,11 +3,13 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering;
 
 class BrickInfo
 {
     public BrickState state;
     public ColorIndex color;
+    public MeshRenderer renderer;
 }
 
 public struct ColoredBrickInfo
@@ -71,10 +73,14 @@ public class CityElement : MonoBehaviour
         this.brickLayersContainer = new BrickLayersContainer(__GeneratedBricks.transform);
         foreach (var brick in this.brickLayersContainer.sortedBricks)
         {
+            var renderer = brick.GetComponentInChildren<MeshRenderer>(true);
+            ConfigureBrickRenderer(renderer);
+            renderer.enabled = false;
             this.brickInfo[brick] = new BrickInfo()
             {
                 state = BrickState.Undefined,
-                color = ColorIndex.Undefined
+                color = ColorIndex.Undefined,
+                renderer = renderer
             };
         }
         return brickLayersContainer;
@@ -252,31 +258,46 @@ public class CityElement : MonoBehaviour
         {
             return;
         }
-        //Debug.Log("ShowBrickState " + state);
-        this.brickInfo[t].state = state;
-        var mr = t.GetComponentInChildren<MeshRenderer>();
+
+        var info = this.brickInfo[t];
+        info.state = state;
+        var mr = info.renderer != null ? info.renderer : t.GetComponentInChildren<MeshRenderer>(true);
+        info.renderer = mr;
+        ConfigureBrickRenderer(mr);
 
         switch (state)
         {
             case BrickState.Undefined:
             case BrickState.Transparent:
-                mr.enabled = false;
-                break;
             case BrickState.SemiTransparent:
-                mr.enabled = true;
-                mr.material = GetMaterialByName("BrickMatTransparent");
+                mr.enabled = false;
                 break;
             case BrickState.Emitting:
                 break;
             case BrickState.Full:
                 mr.enabled = true;
-                mr.material = GetMaterialByName("BrickMatFull");
+                mr.sharedMaterial = GetMaterialByName("BrickMatFull");
                 break;
             case BrickState.Colored:
                 mr.enabled = true;
-                mr.material = GetMaterialByColorIndex(GetColorOfBrick(t));
+                mr.sharedMaterial = GetMaterialByColorIndex(GetColorOfBrick(t));
                 break;
         }
+    }
+
+    private static void ConfigureBrickRenderer(MeshRenderer renderer)
+    {
+        /*
+        if (renderer == null)
+        {
+            return;
+        }
+
+        renderer.shadowCastingMode = ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        renderer.lightProbeUsage = LightProbeUsage.Off;
+        renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+        renderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;*/
     }
 
     public void EnableBricks(bool enable)

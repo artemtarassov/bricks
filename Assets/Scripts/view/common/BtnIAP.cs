@@ -21,6 +21,13 @@ public class BtnIAP : MonoBehaviour
 
     private void OnClicked()
     {
+        string productId = IAPModel.GetProductIdByIAPProductName(productName);
+        var hasPrice = IAPModel.Instance.HasPriceForProduct(productId);
+        if (!hasPrice)
+        {
+            new SoundCmd(SoundModel.Instance.ERROR).Run();
+            return;
+        }
         onClicked?.Invoke(this.productName);
     }
 

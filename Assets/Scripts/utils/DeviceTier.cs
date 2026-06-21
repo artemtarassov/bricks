@@ -4,10 +4,13 @@ public static class DeviceTier
 {
     public static bool IsLowEnd()
     {
-        Debug.Log($"DeviceTier: graphicsShaderLevel={SystemInfo.graphicsShaderLevel}, systemMemorySize={SystemInfo.systemMemorySize}, graphicsMemorySize={SystemInfo.graphicsMemorySize}, screenResolution={Screen.currentResolution.width}x{Screen.currentResolution.height}");
-        // You can check GPU type, shader level, RAM, even Screen.currentResolution
+        var maxScreenDimension = Mathf.Max(Screen.width, Screen.height);
+        var hasReportedGpuMemory = SystemInfo.graphicsMemorySize > 0;
+
         return SystemInfo.graphicsShaderLevel < 35
-               || SystemInfo.systemMemorySize < 2000
-               || Screen.currentResolution.width > 1280 && SystemInfo.graphicsMemorySize < 800;
+               || SystemInfo.systemMemorySize <= 3000
+               || SystemInfo.processorCount <= 6
+               || (hasReportedGpuMemory && SystemInfo.graphicsMemorySize <= 1024)
+               || (maxScreenDimension >= 2400 && hasReportedGpuMemory && SystemInfo.graphicsMemorySize <= 1536);
     }
 }

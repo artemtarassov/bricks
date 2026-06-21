@@ -24,14 +24,16 @@ public class SlotController : MonoBehaviour
         emitters = new List<EmitterBrick>();
         columnPrefab = GetComponentInChildren<SlotColumn>(true);
         emitterPrefab = GetComponentInChildren<EmitterBrick>(true);
+
+        emitterPrefab.gameObject.SetActive(false);
+        columnPrefab.gameObject.SetActive(false);
+        addSpaceButton.gameObject.SetActive(false);
+
+        startPos = content.transform.localPosition;
     }
 
     private void Start()
     {
-        startPos = content.transform.localPosition;
-        emitterPrefab.gameObject.SetActive(false);
-        columnPrefab.gameObject.SetActive(false);
-
         InitializeEmitters();
         SubscribeToEvents();
         addSpaceButton.onClick.AddListener(OnAddSpaceButtonClicked);
@@ -116,7 +118,9 @@ public class SlotController : MonoBehaviour
     private void UpdateAddSpaceButtonVisibility()
     {
         var allUnlocked = SlotModel.Instance.Emitters.All(e => e.isUnlocked);
-        addSpaceButton.gameObject.SetActive(!allUnlocked);
+        var hasVideo = AdModel.Instance.IsAdReady(AdUnits.Rewarded);
+        var hasIap = IAPModel.Instance.HasPriceForProduct(IAPModel.AdditionalSpace);
+        addSpaceButton.gameObject.SetActive(!allUnlocked && (hasVideo || hasIap));
     }
 
     private void OnAddSpaceButtonClicked()

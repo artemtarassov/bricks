@@ -9,6 +9,7 @@ public class FlyingBricks2
     private const float LandingDurationRatio = 0.2f;
     private const float TargetBounceDuration = 0.4f;
     private const float OccupiedPositionThreshold = 0.02f;
+    private const float OccupiedPositionThresholdSqr = OccupiedPositionThreshold * OccupiedPositionThreshold;
 
     private static readonly Vector3[] CandidateApproachDirections =
     {
@@ -78,7 +79,7 @@ public class FlyingBricks2
         brickTransform.rotation = targetBrick.rotation;
 
         var brickMaterial = ColoredMaterials.Instance.GetMaterialByColorIndex(flyData.colorIndex);
-        pooledBrick.renderer.material = brickMaterial;
+        pooledBrick.renderer.sharedMaterial = brickMaterial;
         pooledBrick.gameObject.SetActive(true);
     }
 
@@ -113,10 +114,12 @@ public class FlyingBricks2
     private Vector3 CalculateApproachOffset(List<Transform> occupiedBricks, Transform targetBrick)
     {
         var targetPosition = targetBrick.position;
-        var cameraPosition = Camera.main.transform.position;
+        var mainCamera = Camera.main;
+        var cameraPosition = mainCamera != null ? mainCamera.transform.position : targetPosition;
+        var transparentMaterial = ColoredMaterials.Instance.GetMaterialByName("BrickMatTransparent");
         var upwardOffset = GetWorldAxisOffset(targetBrick, Vector3.up);
 
-        if (!IsOccupiedPosition(occupiedBricks, targetPosition + upwardOffset))
+        if (!IsOccupiedPosition(occupiedBricks, targetPosition + upwardOffset, transparentMaterial))
         {
             return upwardOffset;
         }
@@ -136,7 +139,7 @@ public class FlyingBricks2
         {
             var worldOffset = GetWorldAxisOffset(targetBrick, direction);
             var candidatePosition = targetPosition + worldOffset;
-            if (!IsOccupiedPosition(occupiedBricks, candidatePosition))
+            if (!IsOccupiedPosition(occupiedBricks, candidatePosition, transparentMaterial))
             {
                 return worldOffset;
             }
@@ -146,9 +149,8 @@ public class FlyingBricks2
         return upwardOffset;
     }
 
-    private bool IsOccupiedPosition(List<Transform> occupiedBricks, Vector3 candidatePosition)
+    private bool IsOccupiedPosition(List<Transform> occupiedBricks, Vector3 candidatePosition, Material transparentMaterial)
     {
-        var transparentMaterial = ColoredMaterials.Instance.GetMaterialByName("BrickMatTransparent");
         foreach (var brick in occupiedBricks)
         {
             if (brick == null || !brick.gameObject.activeSelf)
@@ -166,8 +168,8 @@ public class FlyingBricks2
                 continue;
             }
 
-            var distanceToCandidate = Vector3.Distance(brick.position, candidatePosition);
-            if (distanceToCandidate < OccupiedPositionThreshold)
+            var distanceToCandidateSqr = (brick.position - candidatePosition).sqrMagnitude;
+            if (distanceToCandidateSqr < OccupiedPositionThresholdSqr)
             {
                 return true;
             }

@@ -51,12 +51,13 @@ public class SwitchBuildingCmd
 
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
         ViewModel.Instance.Fade(FadeType.Flash);
-#if UNITY_ANDROID
+
+/*
         RenderSettings.skybox = null;
         Camera.main.clearFlags = CameraClearFlags.SolidColor;
         Camera.main.backgroundColor = Color.red;
-#endif
-        //ChangeSkyMaterial(nextGroupName);
+*/
+        ChangeSkyMaterial(nextGroupName);
     }
 
     private void ChangeSkyMaterial(BuildingName nextBuildingName)

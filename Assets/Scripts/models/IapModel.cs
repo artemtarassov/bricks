@@ -15,6 +15,7 @@ public class PriceData
 public class CompletedPurchase
 {
     public string productId;
+    public string transactionId;
     public int timestamp;
 }
 
@@ -102,6 +103,16 @@ public class IAPModel
         {
             completedPurchaseContainer = new CompletedPurchaseContainer();
         }
+
+        if (completedPurchaseContainer == null)
+        {
+            completedPurchaseContainer = new CompletedPurchaseContainer();
+        }
+
+        if (completedPurchaseContainer.purchases == null)
+        {
+            completedPurchaseContainer.purchases = new List<CompletedPurchase>();
+        }
     }
 
     public void Save()
@@ -143,14 +154,53 @@ public class IAPModel
 
     public void SetPurchaseCompleted(string productUd)
     {
-        //Debug.Log("IAPModel.SetPurchaseCompleted: " + productUd);
-        OnPurchaseSuccess?.Invoke(productUd);
-        this.completedPurchaseContainer.purchases.Add(new CompletedPurchase()
+        TrySetPurchaseCompleted(productUd, null, false);
+    }
+
+    public bool HasCompletedTransaction(string transactionId)
+    {
+        if (string.IsNullOrEmpty(transactionId))
         {
-            productId = productUd,
-            timestamp = TimeUtils.GetUnixTimestamp()
-        });
-        this.completedPurchaseContainer.dirty = true;
+            return false;
+        }
+
+        return completedPurchaseContainer.purchases.Exists(
+            p => !string.IsNullOrEmpty(p.transactionId) && p.transactionId == transactionId
+        );
+    }
+
+    public bool HasCompletedProduct(string productId)
+    {
+        return completedPurchaseContainer.purchases.Exists(p => p.productId == productId);
+    }
+
+    public bool TrySetPurchaseCompleted(
+        string productId,
+        string transactionId,
+        bool dedupeByProductId
+    )
+    {
+        if (HasCompletedTransaction(transactionId))
+        {
+            return false;
+        }
+
+        if (dedupeByProductId && HasCompletedProduct(productId))
+        {
+            return false;
+        }
+
+        OnPurchaseSuccess?.Invoke(productId);
+        completedPurchaseContainer.purchases.Add(
+            new CompletedPurchase()
+            {
+                productId = productId,
+                transactionId = transactionId,
+                timestamp = TimeUtils.GetUnixTimestamp()
+            }
+        );
+        completedPurchaseContainer.dirty = true;
+        return true;
     }
 
     public bool HasTempGoldenTicket()

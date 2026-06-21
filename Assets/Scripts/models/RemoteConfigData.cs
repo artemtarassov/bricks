@@ -18,7 +18,8 @@ public enum RemoteConfigProperty
     ColumnCoins = 8,
     MusicTrack = 9,
     ShowBannerAfterSec = 10,
-    ShowMidSessionAdAfterSec = 11
+    ShowMidSessionAdAfterSec = 11,
+    Announcer = 12
 }
 
 [Serializable]
@@ -79,6 +80,8 @@ public class RemoteConfigData
 
 
     public int ShowMidSessionAdAfterSec => GetValue(RemoteConfigProperty.ShowMidSessionAdAfterSec, 60 * 5);
+
+    public bool Announcer => GetValue(RemoteConfigProperty.Announcer, 1) == 1;
 
     public static RemoteConfigData Load()
     {
