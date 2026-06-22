@@ -36,6 +36,10 @@ public class BuildingProgressData
 
     public BuildingState State => state;
 
+
+    [SerializeField]
+    public int currentElementIndex = 0;
+
     [SerializeField]
     private CityElementDataContainer currentElement = null;
 

@@ -69,7 +69,7 @@ public class SetupCityCmd
         if (cityElement == null)
         {
             //whole element was removed.
-            var index = progress.CompletedElementsCounter - 1;
+            var index = progress.currentElementIndex;
             var balancingBuildingData = BalancingModel.Instance.GetDataCopy(building.BuildingName);
             if (index < 0)
             {
@@ -81,6 +81,7 @@ public class SetupCityCmd
             }
             var newElementData = balancingBuildingData.cityElementDataList[index];
             progress.SetCurrentElement(newElementData);
+            progress.currentElementIndex = index;
             Debug.Log($"SetupCityCmd: ValidateProgress: element {element.dataKey} in building {building.BuildingName} was removed since player progress was made. setting element progress to {newElementData.dataKey}.");
             return;
         }

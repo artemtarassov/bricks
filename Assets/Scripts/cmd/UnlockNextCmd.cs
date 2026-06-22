@@ -41,6 +41,7 @@ public class UnlockNextCmd
             currentElementData = currentGroupData.cityElementDataList.Find(e => e.dataKey == firstElementName);
             progress.ResetElementsCounter();
             progress.SetCurrentElement(currentElementData);
+            progress.currentElementIndex = 0;
         }
         else
             if (currentElementData.ElementCompleted())
@@ -49,6 +50,7 @@ public class UnlockNextCmd
                 var elementsInBuilding = currentBuilding.GetElements().ToList();
                 var elementIndexInBuilding = elementsInBuilding.FindIndex((e) => e.dataKey == currentElementData.dataKey);
                 var nextElementIndexInBuilding = elementIndexInBuilding + 1;
+                progress.currentElementIndex = nextElementIndexInBuilding;
 
                 {
                     progress.IncCompletedElementsCounter();
