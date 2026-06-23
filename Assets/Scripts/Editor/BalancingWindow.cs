@@ -20,7 +20,7 @@ public class BalancingWindow : EditorWindow
             new PrepareScene().Run();
             var model = new BalancingWriter();
 
-            var buildings1 = GameObject.FindObjectsByType<BuildingElement>().ToList();
+            var buildings1 = GameObject.FindObjectsByType<BuildingElement>(FindObjectsInactive.Include).ToList();
             foreach (var b in buildings1)
             {
                 var elements = b.GetElements();

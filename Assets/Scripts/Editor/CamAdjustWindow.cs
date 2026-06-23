@@ -33,8 +33,14 @@ public class CamAdjustWindow : EditorWindow
 
         if (GUILayout.Button("Enable next city element"))
         {
-            EnableNextCityElement();
+            ActivateNextCityElement();
         }
+
+        if (GUILayout.Button("Show next bricks"))
+        {
+            ShowNextBricks();
+        }
+
 
         if (GUILayout.Button("Copy camera position"))
         {
@@ -108,7 +114,7 @@ public class CamAdjustWindow : EditorWindow
         sceneView.Repaint();
     }
 
-    private void EnableNextCityElement()
+    private void ActivateNextCityElement()
     {
         var activeGroup = GameObject.FindObjectsByType<BuildingElement>().ToList().Where(g => g.gameObject.activeSelf).FirstOrDefault();
         var elements = activeGroup.GetComponentsInChildren<CityElement>(true);
@@ -118,63 +124,81 @@ public class CamAdjustWindow : EditorWindow
         {
             lastActiveIndex = 0;
         }
-        for (var i = 0; i < lastActiveIndex; i++)
+        for (var i = 0; i <= lastActiveIndex; i++)
         {
-            var ce = elements[i];
-            ce.EnableVisuals(true);
-            ce.__GeneratedBricks.gameObject.SetActive(false);
-            if (ce.__EnclosingGameObject != null)
-                ce.__EnclosingGameObject.gameObject.SetActive(false);
+            elements[i].EnableVisuals(true);
+            elements[i].EnableBricks(false);
+        }
+        var nextIndex = lastActiveIndex + 1;
+        var ce = elements[nextIndex];
+        ce.gameObject.SetActive(true);
+        SelectCityElement(ce);
+        ce.EnableVisuals(true);
+
+    }
+
+
+
+    private void ShowNextBricks()
+    {
+        var activeGroup = GameObject.FindObjectsByType<BuildingElement>().ToList().Where(g => g.gameObject.activeSelf).FirstOrDefault();
+        var elements = activeGroup.GetComponentsInChildren<CityElement>(true);
+        var lastActiveElement = elements.ToList().FindLast(e => e.gameObject.activeSelf);
+        var lastActiveIndex = System.Array.IndexOf(elements, lastActiveElement);
+        if (lastActiveIndex == -1)
+        {
+            lastActiveIndex = 0;
         }
 
-        for (var i = lastActiveIndex; i < elements.Length; i++)
+        var i = lastActiveIndex;
         {
             var ce = elements[i];
-            if (!ce.gameObject.activeSelf)
-            {
-                SelectCityElement(ce);
-                ce.gameObject.SetActive(true);
-                return;
-            }
+            SelectCityElement(ce);
+            ce.EnableVisuals(false);
 
             if (true)
             {
-                if (ce.__GeneratedBricks.gameObject.activeSelf == false)
+                ce.__GeneratedBricks.gameObject.SetActive(true);
+
+                var brickLayers = ce.__GeneratedBricks.GetComponentsInChildren<BricksLayer>(true);
+                foreach (var brickLayer in brickLayers)
                 {
-                    ce.__GeneratedBricks.gameObject.SetActive(true);
-                    if (ce.__EnclosingGameObject != null)
-                        ce.__EnclosingGameObject.gameObject.SetActive(true);
-                    return;
+                    brickLayer.gameObject.SetActive(true);
                 }
 
                 var brickElements = new BrickLayersContainer(ce.__GeneratedBricks).sortedBricks.ToList();
-                brickElements.Reverse();
-                var visibleBricks = brickElements.Where(b => b.gameObject.activeSelf).ToList();
-                if (visibleBricks.Count > 0)
+                //brickElements.Reverse();
+                var invisibleBricks = brickElements.Where(b => b.gameObject.activeSelf == false).ToList();
+                if (invisibleBricks.Count > 0)
                 {
-                    var len = brickElements.Count / 10;
-                    if (len < 10)
+                    var len = brickElements.Count / 19;
+                    if (len < 19)
                     {
-                        len = 10;
+                        len = 19;
                     }
-                    for (var j = 0; j < len && j < visibleBricks.Count; j++)
+                    for (var j = 0; j < len && j < invisibleBricks.Count; j++)
                     {
-                        visibleBricks[j].gameObject.SetActive(false);
+                        invisibleBricks[j].gameObject.SetActive(true);
                     }
-                    SelectCityElement(ce);
-                    ce.EnableVisuals(false);
                     return;
+                }
+                else
+                {
+                    for (var j = 0; j < brickElements.Count; j++)
+                    {
+                        brickElements[j].gameObject.SetActive(false);
+                    }
                 }
             }
         }
-        for (var i = 0; i < elements.Length; i++)
+        /*for (var i2 = 0; i2 < elements.Length; i2++)
         {
-            var ce = elements[i];
+            var ce = elements[i2];
             ce.gameObject.SetActive(false);
             ce.__GeneratedBricks.gameObject.SetActive(false);
             if (ce.__EnclosingGameObject != null)
                 ce.__EnclosingGameObject.gameObject.SetActive(false);
-        }
+        }*/
     }
 
     private void SelectCityElement(CityElement element)
@@ -251,26 +275,15 @@ public class CamAdjustWindow : EditorWindow
             var cam = Camera.main;
             ce.camPos = cam.transform.position;
             ce.camRot = cam.transform.eulerAngles;
+            Debug.Log($"Copied camera position {ce.camPos} and rotation {ce.camRot} to city element {ce.gameObject.name}");
+            //save scene
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            return;
         }
 
-        var gr = selectedObject.GetComponent<CameraFlyController>();
-        if (gr != null)
-        {
-            var cam = Camera.main;
-            gr.camPos = cam.transform.position;
-            gr.camRot = cam.transform.eulerAngles;
-        }
+        Debug.LogError("Select a CityElement first to copy camera position to it.");
 
-        var gr2 = selectedObject.GetComponent<CameraFlyController2>();
-        if (gr2 != null)
-        {
-            var cam = Camera.main;
-            gr2.camPos = cam.transform.position;
-            gr2.camRot = cam.transform.eulerAngles;
-        }
 
-        //save scene
-        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
     }
 
     private static void EnableCameraPreview()

@@ -5,9 +5,17 @@ using UnityEngine;
 public class BrickLayersContainer
 {
     public readonly List<Transform> sortedBricks = new List<Transform>();
+    private Transform generatedBricksContainer;
 
     public BrickLayersContainer(Transform generatedBricksContainer)
     {
+        this.generatedBricksContainer = generatedBricksContainer;
+        Reset();
+    }
+
+    public void Reset()
+    {
+        sortedBricks.Clear();
         var brickLayers = generatedBricksContainer.GetComponentsInChildren<BricksLayer>(true);
         foreach (var brickLayer in brickLayers)
         {
@@ -26,10 +34,6 @@ public class BrickLayersContainer
         {
             var sortedLooseBricks = looseChildren.OrderBy(b => RoundPos(b.localPosition.y)).ThenBy(b => RoundPos(b.localPosition.x)).ThenBy(b => RoundPos(b.localPosition.z));
             sortedBricks.AddRange(sortedLooseBricks);
-        }
-        foreach (var b in sortedBricks)
-        {
-           // b.transform.localScale = b.transform.localScale * 0.97f; //force scale update to fix any issues with lossy scale not being updated on child bricks
         }
     }
 

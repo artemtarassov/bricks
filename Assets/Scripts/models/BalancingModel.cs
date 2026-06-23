@@ -20,7 +20,6 @@ public class BalancingModel
     );
 
     public static int AdditionalBricksOnEmptyElement = 3;
-    public static int FirstCityElementIndex = 0;
 
     private BuildingDataContainer buildingDataContainer;
 

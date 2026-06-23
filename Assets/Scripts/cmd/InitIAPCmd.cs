@@ -107,6 +107,7 @@ class MyIAPManager
     private void OnStoreConnected()
     {
         SubscribeToModelEvents();
+        EnableAppleAppReceiptRefresh();
         ValidateRequestedProducts();
         LogRequestedProducts("OnStoreConnected");
         storeController.FetchProducts(productDefinitions);
@@ -248,6 +249,8 @@ class MyIAPManager
 
     private void OnPurchasePending(PendingOrder order)
     {
+        LogAppleReceiptState(order, "OnPurchasePending");
+
         var validated = true;
 #if !UNITY_EDITOR
         validated = Validate(order);
@@ -356,6 +359,52 @@ class MyIAPManager
                 + StandardPurchasingModule.Instance().appStore
         );
         return false;
+    }
+
+    private void EnableAppleAppReceiptRefresh()
+    {
+        if (!IsAppleStoreSelected())
+        {
+            return;
+        }
+
+        var applePurchaseService = storeController.AppleStoreExtendedPurchaseService;
+        if (applePurchaseService == null)
+        {
+            Debug.LogWarning(
+                "MyIAPManager AppleStoreExtendedPurchaseService is unavailable, cannot enable receipt refresh"
+            );
+            return;
+        }
+
+        applePurchaseService.SetRefreshAppReceipt(true);
+        Debug.Log("MyIAPManager enabled automatic Apple app receipt refresh");
+    }
+
+    private static void LogAppleReceiptState(Order order, string context)
+    {
+        if (!IsAppleStoreSelected())
+        {
+            return;
+        }
+
+        var unifiedReceiptLength = order?.Info?.Receipt?.Length ?? 0;
+        var appReceiptLength = order?.Info?.Apple?.AppReceipt?.Length ?? 0;
+        var jwsLength = order?.Info?.Apple?.jwsRepresentation?.Length ?? 0;
+        var transactionId = order?.Info?.TransactionID ?? "";
+
+        Debug.Log(
+            "MyIAPManager "
+                + context
+                + " Apple receipt state: transactionId="
+                + transactionId
+                + ", unifiedReceiptLength="
+                + unifiedReceiptLength
+                + ", appReceiptLength="
+                + appReceiptLength
+                + ", jwsLength="
+                + jwsLength
+        );
     }
 
     private void InitializeReceiptValidation()

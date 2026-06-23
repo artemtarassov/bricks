@@ -15,22 +15,21 @@ public class SwitchBuildingCmd
 
         var buildingNames = playerModel.GetUnlockedBuildings();
         var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
-        var nextGroupIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
-        if (nextGroupIndex < 0)
+        var nextBuildingIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
+        if (nextBuildingIndex < 0)
         {
-            nextGroupIndex = buildingNames.Count - 1;
+            nextBuildingIndex = buildingNames.Count - 1;
         }
-        if (nextGroupIndex >= buildingNames.Count)
+        if (nextBuildingIndex >= buildingNames.Count)
         {
-            nextGroupIndex = 0;
+            nextBuildingIndex = 0;
         }
-        var nextGroupName = buildingNames[nextGroupIndex];
-        Assert.IsFalse(nextGroupName == BuildingName.Undefined, "SwitchGroupCmd: nextGroupName is undefined");
-        Debug.Log($"SwitchGroupCmd: current group {currentBuildingName} next group {nextGroupName}");
-        var progress = pd.GetBuildingProgressByName(nextGroupName);
-        Assert.IsNotNull(progress, $"SwitchGroupCmd: progress is null for group {nextGroupName}");
-        cityModel.SetCurrentBuildingName(nextGroupName);
-        playerModel.SetCurrentBuilding(nextGroupName, progress.State);
+        var nextBuildingName = buildingNames[nextBuildingIndex];
+        Assert.IsFalse(nextBuildingName == BuildingName.Undefined, "SwitchBuildingCmd: nextBuildingName is undefined");
+        var progress = pd.GetBuildingProgressByName(nextBuildingName);
+        Assert.IsNotNull(progress, $"SwitchBuildingCmd: progress is null for building {nextBuildingName}");
+        cityModel.SetCurrentBuildingName(nextBuildingName);
+        playerModel.SetCurrentBuilding(nextBuildingName, progress.State);
 
         if (progress.GetCurrentElement() != null)
         {
@@ -42,22 +41,23 @@ public class SwitchBuildingCmd
 
         CamModel.Instance.MoveCameraToBuilding();
 
-        for (var i = 0; i < buildingNames.Count; i++)
+        var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
+        for (var i = 0; i < allBuildingNames.Count; i++)
         {
-            var buildingName = buildingNames[i];
+            var buildingName = allBuildingNames[i];
             var building = cityModel.GetBuildingByName(buildingName);
-            building.gameObject.SetActive(buildingName == nextGroupName);
+            building.gameObject.SetActive(buildingName == nextBuildingName);
         }
 
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
         ViewModel.Instance.Fade(FadeType.Flash);
 
-/*
-        RenderSettings.skybox = null;
-        Camera.main.clearFlags = CameraClearFlags.SolidColor;
-        Camera.main.backgroundColor = Color.red;
-*/
-        ChangeSkyMaterial(nextGroupName);
+        /*
+                RenderSettings.skybox = null;
+                Camera.main.clearFlags = CameraClearFlags.SolidColor;
+                Camera.main.backgroundColor = Color.red;
+        */
+        ChangeSkyMaterial(nextBuildingName);
     }
 
     private void ChangeSkyMaterial(BuildingName nextBuildingName)

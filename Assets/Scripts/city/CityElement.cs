@@ -134,6 +134,17 @@ public class CityElement : MonoBehaviour
 
     private void SetBrickColors()
     {
+        if (this.brickColors == null || this.brickColors.Count == 0)
+        {
+            //0=1C4795
+            //1=E05230
+            //2=2AAE59
+            //3=E8CA33
+            //4=8C61AD
+            //5=1BA4BC
+            //6=DAD9D3
+            this.brickColors = new List<Color>() { new Color(0.109f, 0.278f, 0.584f), new Color(0.878f, 0.322f, 0.188f), new Color(0.165f, 0.682f, 0.349f), new Color(0.910f, 0.792f, 0.200f), new Color(0.549f, 0.380f, 0.678f), new Color(0.106f, 0.643f, 0.737f), new Color(0.855f, 0.847f, 0.827f) };
+        }
         var j = 0;
         foreach (var bd in dataContainer.brickDataList)
         {

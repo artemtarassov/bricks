@@ -14,6 +14,12 @@ public class BricksLayer : MonoBehaviour
     [SerializeField]
     private bool zSortAscending = true;
 
+    [SerializeField]
+    private bool zSortDescendingOnly = false;
+
+    [SerializeField]
+    private bool zSortAscendingOnly = false;
+
     public List<Transform> GetSortedBricks()
     {
         return SortBricks(CollectBrickChildren());
@@ -36,7 +42,14 @@ public class BricksLayer : MonoBehaviour
 
     private List<Transform> SortBricks(List<Transform> bricks)
     {
-  
+        if (zSortAscendingOnly)
+        {
+            return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenBy(b => RoundPos(b.localPosition.z)).ToList();
+        }
+        if (zSortDescendingOnly)
+        {
+            return bricks.OrderBy(b => RoundPos(b.localPosition.y)).ThenByDescending(b => RoundPos(b.localPosition.z)).ToList();
+        }
 
         if (xSortAscending && zSortAscending)
         {

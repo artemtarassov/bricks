@@ -9,6 +9,8 @@ public sealed class Loca
     {
         switch (buildingName)
         {
+            case BuildingName.Preset_Bath_House_01:
+                return "Baiae";
             case BuildingName.Ruins1_House:
                 return "Palermo";
             case BuildingName.Tower_House:

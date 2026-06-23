@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class GroupWindow : EditorWindow
     {
         GetWindow<GroupWindow>("Group");
     }
+
+    private static List<Transform> copiedPositionsAndRotations = new List<Transform>();
 
     private void OnGUI()
     {
@@ -50,6 +53,47 @@ public class GroupWindow : EditorWindow
                 }
             }
         }
+
+        if (GUILayout.Button("Copy positions and rotations"))
+        {
+            copiedPositionsAndRotations.Clear();
+            var selection = Selection.gameObjects;
+            foreach (var obj in selection)
+            {
+                copiedPositionsAndRotations.Add(obj.transform);
+            }
+        }
+
+        if (GUILayout.Button("Paste positions and rotations"))
+        {
+            var selection = Selection.gameObjects;
+            for (var i = 0; i < selection.Length && i < copiedPositionsAndRotations.Count; i++)
+            {
+                var obj = selection[i];
+                var transformData = copiedPositionsAndRotations[i];
+                obj.transform.position = transformData.position;
+                obj.transform.rotation = transformData.rotation;
+            }
+        }
+    }
+
+    private List<GameObject> GetBricksInObject(GameObject obj)
+    {
+        //check recursively for all children with tag "Brick"
+        var result = new List<GameObject>();
+        for (var i = 0; i < obj.transform.childCount; i++)
+        {
+            var child = obj.transform.GetChild(i);
+            if (child.tag == "Brick")
+            {
+                result.Add(child.gameObject);
+            }
+            else
+            {
+                result.AddRange(GetBricksInObject(child.gameObject));
+            }
+        }
+        return result;
     }
 
 
@@ -66,7 +110,15 @@ public class GroupWindow : EditorWindow
         }
         if (bricks.Count == 0)
         {
-            throw new System.Exception("No bricks found in selection");
+            if (Selection.gameObjects.Length > 0)
+            {
+                var selectedObject = Selection.gameObjects[0];
+                bricks = GetBricksInObject(selectedObject);
+            }
+            else
+            {
+                throw new System.Exception("No bricks selected");
+            }
         }
         //ensure all bricks have the same parent
         var firstParent = bricks[0].transform.parent;

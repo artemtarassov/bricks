@@ -38,11 +38,11 @@ public class SetupCmd
                 var cityElementGroups = root.GetComponentsInChildren<BuildingElement>(true).ToList();
                 new SetupCityCmd().Run(cityElementGroups);
 
-                //#if !UNITY_EDITOR
+                #if !UNITY_EDITOR
                 new InitServicesCmd().Run(root);
 
                 root.AddComponent<MobilePerformanceController>();
-                //#endif
+                #endif
         }
 
 

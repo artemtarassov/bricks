@@ -26,7 +26,7 @@ public class SetupCityCmd
 
         if (pd.CurrentBuildingName == BuildingName.Undefined)
         {
-            var firstBuilding = buildings[0].BuildingName;
+            var firstBuilding = BuildingName.Preset_Bath_House_01;
             cityModel.SetBuildings(buildings, firstBuilding);
             playerModel.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
         }

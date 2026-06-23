@@ -10,6 +10,7 @@ public enum BuildingName
     Preset_House_05 = 100,
     Ruins1_House = 200,
     Tower_House = 300,
+    Preset_Bath_House_01 = 400
 }
 
 public class BuildingNameUtil

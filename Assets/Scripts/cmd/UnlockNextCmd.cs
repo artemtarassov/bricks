@@ -15,7 +15,7 @@ public class UnlockNextCmd
     private BuildingName currentBuildingName;
     private BuildingData currentGroupData;
 
-    private readonly int firstCityElementIndex = BalancingModel.FirstCityElementIndex;
+    private readonly int firstCityElementIndex = 0;
 
     private BuildingProgressData progress => playerModel.playerData.GetCurrentBuildingProgress();
 
