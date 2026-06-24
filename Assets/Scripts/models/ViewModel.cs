@@ -24,6 +24,7 @@ public enum BottomNav
     Slots,
     MainNav,
     FinishElement,
+    ThankYou
 }
 
 

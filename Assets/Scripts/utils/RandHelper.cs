@@ -95,4 +95,37 @@ public class RandHelper
         }
     }
 
+    public static HashSet<int> GetRandIndexList(int range, int amount=1)
+    {
+        var result = new HashSet<int>();
+        if (range <= 0 || amount <= 0)
+        {
+            return result;
+        }
+
+        var count = System.Math.Min(range, amount);
+        var spacing = range / (double)count;
+        var jitter = spacing * 0.3d;
+
+        for (var i = 0; i < count; i++)
+        {
+            var segmentStart = i * range / count;
+            var segmentEnd = (i + 1) * range / count;
+            var center = (i + 0.5d) * spacing;
+
+            var min = System.Math.Max(segmentStart, (int)System.Math.Ceiling(center - jitter));
+            var maxInclusive = System.Math.Min(segmentEnd - 1, (int)System.Math.Floor(center + jitter));
+
+            if (min > maxInclusive)
+            {
+                min = segmentStart;
+                maxInclusive = segmentEnd - 1;
+            }
+
+            result.Add(GetRandomInt(min, maxInclusive + 1));
+        }
+
+        return result;
+    }
+
 }

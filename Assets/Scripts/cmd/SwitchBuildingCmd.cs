@@ -13,7 +13,7 @@ public class SwitchBuildingCmd
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
 
-        var buildingNames = playerModel.GetUnlockedBuildings();
+        var buildingNames = playerModel.GetVisibleBuildingNames();
         var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
         var nextBuildingIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
         if (nextBuildingIndex < 0)

@@ -10,15 +10,23 @@ public class CameraFlyController : MonoBehaviour
 {
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
+    [SerializeField] private Transform skyLookAtTransform;
     private Transform lookAt;
     private Vector3 lookAtChanged;
+    private CameraTouchLookaround touchLookaround;
 
     void Start()
     {
+        touchLookaround = Camera.main.GetComponent<CameraTouchLookaround>();
+        if (touchLookaround == null)
+        {
+            touchLookaround = Camera.main.gameObject.AddComponent<CameraTouchLookaround>();
+        }
         CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly += OnAnticipateRocketFly;
         CamModel.Instance.OnMoveCamBack += OnMoveCamBack;
+        CamModel.Instance.OnMoveCameraToSky += OnMoveCameraToSky;
 
 
         var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
@@ -28,12 +36,20 @@ public class CameraFlyController : MonoBehaviour
         }
     }
 
+    private void OnMoveCameraToSky()
+    {
+        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == "Sky");
+        this.lookAt = this.skyLookAtTransform;
+        MoveCameraLongSpline(spline, Durations.CamOrbit);
+    }
+
     void OnDestroy()
     {
         CamModel.Instance.OnMoveCameraToBuilding -= OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement -= OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly -= OnAnticipateRocketFly;
         CamModel.Instance.OnMoveCamBack -= OnMoveCamBack;
+        CamModel.Instance.OnMoveCameraToSky -= OnMoveCameraToSky;
     }
 
     private void OnMoveCamBack()
@@ -73,7 +89,9 @@ public class CameraFlyController : MonoBehaviour
         mainCam.transform.DOKill();
 
         var t = Durations.CamFly;
-        mainCam.transform.DOMove(cityElement.camPos, t).SetEase(Ease.OutBack);
+        mainCam.transform.DOMove(cityElement.camPos, t)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => touchLookaround?.Setup(cityElement.camPos, cityElement.camRot));
         mainCam.transform.DORotate(cityElement.camRot, t * 0.8f).SetEase(Ease.OutSine);
     }
 
@@ -120,4 +138,3 @@ public class CameraFlyController : MonoBehaviour
 
 
 }
-

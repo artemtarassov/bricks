@@ -11,6 +11,7 @@ public class LogoController : MonoBehaviour
     [SerializeField] private GameObject palermo;
     [SerializeField] private GameObject veneto;
     [SerializeField] private GameObject tuscany;
+    [SerializeField] private GameObject baiae;
 
     void Start()
     {
@@ -52,6 +53,7 @@ public class LogoController : MonoBehaviour
             palermo.SetActive(false);
             veneto.SetActive(false);
             tuscany.SetActive(false);
+            baiae.SetActive(false);
             contents.SetActive(true);
 
 
@@ -67,6 +69,10 @@ public class LogoController : MonoBehaviour
             else if (currentBuildingName == BuildingName.Preset_House_05)
             {
                 tuscany.SetActive(true);
+            }
+            else if (currentBuildingName == BuildingName.Preset_Bath_House_01)
+            {
+                baiae.SetActive(true);
             }
         }
         else

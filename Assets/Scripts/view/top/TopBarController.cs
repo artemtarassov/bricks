@@ -106,7 +106,7 @@ public class TopBarController : MonoBehaviour
 
     private void UpdateNavigationVisibility(BottomNav bottomNav, int coins)
     {
-        this.backButton.gameObject.SetActive(bottomNav != BottomNav.MainNav && bottomNav != BottomNav.None);
+        this.backButton.gameObject.SetActive(bottomNav == BottomNav.FinishElement || bottomNav == BottomNav.Slots);
         this.coinsObject.SetActive(coins > 0 || bottomNav == BottomNav.Slots);
     }
 

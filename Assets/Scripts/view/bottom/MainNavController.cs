@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,8 @@ public class MainNavController : MonoBehaviour
     [SerializeField] private Button btnLeft;
     [SerializeField] private Button btnRight;
 
+    [SerializeField] private Button btnPremium;
+
     [SerializeField] private TMP_Text groupTitle;
 
     private Vector3 startPos;
@@ -29,11 +32,18 @@ public class MainNavController : MonoBehaviour
         btnNext.GetComponent<HoldButton>().OnClick.AddListener(OnBtnNextClicked);
         btnLeft.GetComponent<HoldButton>().OnClick.AddListener(OnBtnLeftClicked);
         btnRight.GetComponent<HoldButton>().OnClick.AddListener(OnBtnRightClicked);
+        btnPremium.GetComponent<BtnIAP>().onClicked = (OnBtnPremiumClicked);
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
         ViewModel.Instance.OnShowView += OnViewUpdate;
         ViewModel.Instance.OnHideView += OnViewUpdate;
         PlayerModel.Instance.OnPlayerDataChanged += UpdateVisibility;
         UpdateVisibility();
+    }
+
+    private void OnBtnPremiumClicked(IAPProductName pn)
+    {
+        //
+        new RequestPurchaseCmd(pn).Run();
     }
 
     private void OnViewUpdate(ViewName viewName)
@@ -63,6 +73,7 @@ public class MainNavController : MonoBehaviour
         btnNext.gameObject.SetActive(false);
         btnLeft.gameObject.SetActive(false);
         btnRight.gameObject.SetActive(false);
+        btnPremium.gameObject.SetActive(false);
     }
 
     private BuildingState state => PlayerModel.Instance.playerData.GetCurrentBuildingProgress().State;
@@ -86,6 +97,16 @@ public class MainNavController : MonoBehaviour
             return;
         }
         DisableAllButtons();
+
+        if (state == BuildingState.Premium)
+        {
+            Debug.Log("MainNavController: showing premium state buttons");
+            this.btnPremium.gameObject.SetActive(true);
+            UpdateLeftRightButtonVisibility();
+            UpdateGroupTitle();
+            AnimateIn();
+            return;
+        }
 
         if (state == BuildingState.Completed)
         {
@@ -147,12 +168,12 @@ public class MainNavController : MonoBehaviour
     private void UpdateLeftRightButtonVisibility()
     {
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var unlockedBuildingNames = PlayerModel.Instance.GetUnlockedBuildings();
+        var unlockedBuildingNames = PlayerModel.Instance.GetVisibleBuildingNames();
         //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: current building {currentBuildingName} unlocked buildings count {unlockedBuildingNames.Count}");
 
         var currentIndex = unlockedBuildingNames.IndexOf(currentBuildingName);
         var hasPrevious = currentIndex > 0;
-        var hasNext = currentIndex < unlockedBuildingNames.Count - 1;
+        var hasNext = true;//currentIndex < unlockedBuildingNames.Count - 1;
 
         //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: hasPrevious {hasPrevious} hasNext {hasNext}, currentIndex {currentIndex} unlockedBuildingNames count {unlockedBuildingNames.Count}");
         this.btnLeft.gameObject.SetActive(hasPrevious);
@@ -185,6 +206,17 @@ public class MainNavController : MonoBehaviour
     {
         //
         new SoundCmd(SoundModel.Instance.CLICK1).Run();
+
+        var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
+        var unlockedBuildingNames = PlayerModel.Instance.GetVisibleBuildingNames();
+        var isLast = unlockedBuildingNames.Last() == currentBuildingName;
+
+        Debug.Log($"MainNavController OnBtnNextClicked: current building {currentBuildingName} isLast {isLast}");
+        if(isLast)
+        {
+            new ShowThankyouCmd().Run();
+            return;
+        }
         new SwitchBuildingCmd().Run(1);
     }
 
@@ -196,8 +228,7 @@ public class MainNavController : MonoBehaviour
 
     private void OnBtnRightClicked()
     {
-        new SoundCmd(SoundModel.Instance.CLICK1).Run();
-        new SwitchBuildingCmd().Run(1);
+        OnBtnNextClicked();
     }
 
 

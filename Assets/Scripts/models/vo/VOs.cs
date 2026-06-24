@@ -49,7 +49,8 @@ public enum IAPProductName
     Undefined = 0,
     GoldenTicket = 1,
     GoldenTicketTemp = 2,
-    AdditionalSpace = 3
+    AdditionalSpace = 3,
+    PremiumBuilding1 = 4,
 }
 
 
@@ -181,7 +182,19 @@ public class SlotColumnData
         this.list.ForEach((e) => e.ResetEmittingStates());
     }
 
-
+    public int GetNextBrickIndex(int atIndex)
+    {
+        while (atIndex < list.Count)
+        {
+            var e = list[atIndex];
+            if (e.type == SlotElementType.Bricks)
+            {
+                return atIndex;
+            }
+            atIndex++;
+        }
+        return -1;
+    }
 
     public bool IsEmpty()
     {
@@ -270,6 +283,15 @@ public class BuildingData
     {
         this.buildingName = n;
         this.cityElementDataList = new List<CityElementDataContainer>();
+    }
+
+    public CityElementDataContainer GetElementDataContainerByIndex(int index)
+    {
+        if (index < 0 || index >= cityElementDataList.Count)
+        {
+            return null;
+        }
+        return cityElementDataList[index];
     }
 
     public BuildingData Clone()

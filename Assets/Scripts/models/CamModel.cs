@@ -6,6 +6,7 @@ public class CamModel
     public static CamModel Instance;
 
     public Action OnMoveCameraToBuilding;
+    public Action OnMoveCameraToSky;
     public Action<CityElement> OnMoveCameraToCityElement;
 
     public Action OnAnticipateRocketFly;
@@ -34,6 +35,11 @@ public class CamModel
     {
         Debug.Log("CamModel MoveCameraToBuilding: moving camera to building");
         OnMoveCameraToBuilding?.Invoke();
+    }
+    public void MoveCameraToSky()
+    {
+        Debug.Log("CamModel MoveCameraToSky: moving camera to sky");
+        OnMoveCameraToSky?.Invoke();
     }
 
 }

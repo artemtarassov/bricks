@@ -30,7 +30,7 @@ public class SoundCmd
             var musicTrack = remoteConfig.MusicTrack;
             if (musicTrack == 0)
             {
-                Debug.Log("SoundCmd: Music track 0, not playing music");
+                Debug.Log("SoundCmd: Music track 0, not playing music because it was disabled in the remote config");
                 return;
             }
         }

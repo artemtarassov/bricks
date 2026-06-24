@@ -19,14 +19,33 @@ public class SetupCityCmd
             var progress = pd.GetBuildingProgressByName(building.BuildingName);
             if (progress == null)
             {
-                progress = new BuildingProgressData(building.BuildingName, i == 0 ? BuildingState.Unlocked : BuildingState.Locked);
+                progress = new BuildingProgressData(building.BuildingName, BuildingState.Unlocked);
+                if (progress.BuildingName == BuildingName.Preset_Bath_House_01)
+                {
+                    progress.SetState(BuildingState.Premium);
+                }
+                progress.attempts = 5;
                 pd.Progress.Add(progress);
+            }
+            if (progress.attempts == -1)
+            {
+                progress.attempts = 5;
             }
         }
 
+        #if UNITY_EDITOR
+        foreach (var progress in pd.Progress.ToList())
+        {
+            if(progress.State==BuildingState.Premium)
+            {
+                progress.SetState(BuildingState.Unlocked);
+            }
+        }
+        #endif
+
         if (pd.CurrentBuildingName == BuildingName.Undefined)
         {
-            var firstBuilding = BuildingName.Preset_Bath_House_01;
+            var firstBuilding = BuildingName.Preset_House_05;
             cityModel.SetBuildings(buildings, firstBuilding);
             playerModel.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
         }
@@ -35,17 +54,62 @@ public class SetupCityCmd
             cityModel.SetBuildings(buildings, pd.CurrentBuildingName);
         }
 
-        foreach (var progress in pd.Progress.ToList())
+        if (pd.appVersion != Application.version)
         {
-            ValidateProgress(progress);
+            pd.appVersion = Application.version;
+            ResetCurrentElement();
         }
 
-        //new EnsureSolveableCmd().Run();
         new SwitchBuildingCmd().Run(0);
 
 #if UNITY_EDITOR    
         new ValidateDataCmd().Run();
+        new TestExtrasCmd().Run();
 #endif
+    }
+
+
+    private void ResetCurrentElement()
+    {
+        var pd = PlayerModel.Instance.playerData;
+        foreach (var progress in pd.Progress.ToList())
+        {
+            ResetCurrentElement(progress);
+        }
+    }
+    private void ResetCurrentElement(BuildingProgressData progress)
+    {
+        var building = cityModel.GetBuildingByName(progress.BuildingName);
+        if (building == null)
+        {
+            //whole building was removed.
+            playerModel.playerData.Progress.Remove(progress);
+            return;
+        }
+        var element = progress.GetCurrentElement();
+        if (element == null || element.ElementCompleted())
+        {
+            //element was not set or was completed.
+            return;
+        }
+        var balancingBuildingData = BalancingModel.Instance.GetDataCopy(building.BuildingName);
+        var prevElementIndex = progress.currentElementIndex;
+        if (prevElementIndex > 0)
+        {
+            var freshData = balancingBuildingData.GetElementDataContainerByIndex(prevElementIndex);
+            if (freshData != null)
+                progress.SetCurrentElement(freshData);
+            return;
+        }
+        if (progress.CompletedElementsCounter > 0)
+        {
+            var index = progress.CompletedElementsCounter - 1;
+            var freshData = balancingBuildingData.GetElementDataContainerByIndex(index);
+            if (freshData != null)
+                progress.SetCurrentElement(freshData);
+            return;
+        }
+
     }
 
     private void ValidateProgress(BuildingProgressData progress)

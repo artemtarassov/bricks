@@ -45,8 +45,10 @@ public class CompleteView : DefaultView
     {
         if (this.rewardCollected)
         {
+            Debug.Log("CompleteView: OnBtnCollect2xClicked: reward already collected, ignoring click");
             return;
         }
+        Debug.Log("CompleteView: OnBtnCollect2xClicked: showing ad for double coins");
         new ShowAdCmd().Run(RewardName.DOUBLE_COINS);
     }
     void OnEnable()

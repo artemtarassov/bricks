@@ -41,6 +41,7 @@ public class IAPModel
     public const string GoldenTicketTemp = "de.badmonkee.solari.goldentickettemp";
     public const string GoldenTicket = "de.badmonkee.solari.goldenticket";
     public const string AdditionalSpace = "de.badmonkee.solari.morespace";
+    public const string PremiumBuilding1 = "de.badmonkee.solari.premiumbuilding1";
 
     public const string CashPack1 = "de.badmonkee.solari.smallcashpack";//Small cash pack: Receive a small cash pack immediately
     public const string CashPack2 = "de.badmonkee.solari.mediumcashpack";//Medium cash pack: Receive a medium cash pack immediately
@@ -66,6 +67,7 @@ public class IAPModel
         productIds.Add(GoldenTicket);
         productIds.Add(GoldenTicketTemp);
         productIds.Add(AdditionalSpace);
+        productIds.Add(PremiumBuilding1);
         var pricesJson = FilePrefs.GetString("IAPModel.prices", "{}");
         prices = JsonUtility.FromJson<Dictionary<string, PriceData>>(pricesJson);
     }

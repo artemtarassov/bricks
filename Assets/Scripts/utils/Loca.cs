@@ -18,7 +18,6 @@ public sealed class Loca
             case BuildingName.Preset_House_05:
                 return "Tuscany";
             default:
-                Debug.LogError($"Loca: GetThemeName: no theme name found for building name {buildingName}");
                 return buildingName.ToString();
         }
     }

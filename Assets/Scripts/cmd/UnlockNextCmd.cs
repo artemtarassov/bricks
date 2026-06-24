@@ -13,7 +13,7 @@ public class UnlockNextCmd
 
     private CityElementDataContainer currentElementData;
     private BuildingName currentBuildingName;
-    private BuildingData currentGroupData;
+    private BuildingData currentBuildingData;
 
     private readonly int firstCityElementIndex = 0;
 
@@ -32,13 +32,13 @@ public class UnlockNextCmd
     {
         Debug.Log("UnlockNextCmd Run with currentBuildingName " + currentBuildingName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
 
-        this.currentGroupData = balancingModel.GetDataCopy(this.currentBuildingName);
+        this.currentBuildingData = balancingModel.GetDataCopy(this.currentBuildingName);
         ViewModel.Instance.ResetOutOfSpaceCounter();
 
         if (currentElementData == null)
         {
             var firstElementName = cityModel.GetElementByIndex(firstCityElementIndex).dataKey;
-            currentElementData = currentGroupData.cityElementDataList.Find(e => e.dataKey == firstElementName);
+            currentElementData = currentBuildingData.cityElementDataList.Find(e => e.dataKey == firstElementName);
             progress.ResetElementsCounter();
             progress.SetCurrentElement(currentElementData);
             progress.currentElementIndex = 0;
@@ -69,12 +69,12 @@ public class UnlockNextCmd
                     return;
                 }
                 var nextElement = elementsInBuilding[nextElementIndexInBuilding];
-                var nextElementData = currentGroupData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
+                var nextElementData = currentBuildingData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
                 progress.SetCurrentElement(nextElementData);
                 currentElementData = nextElementData;
             }
 
-        new AddExtrasCmd().Run(currentElementData);
+        new AddExtrasCmd(currentBuildingName).Run(currentElementData);
         UnlockElement(currentElementData);
         playerModel.OnPlayerDataChanged?.Invoke();
         new SoundCmd(SoundModel.Instance.MUSIC1).Run();

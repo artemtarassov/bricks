@@ -28,6 +28,15 @@ public class CompleteIapCmd
 
     public void Run(IapResponse response, bool report = true)
     {
+        if (productId == IAPModel.PremiumBuilding1)
+        {
+            if (response == IapResponse.Success || response == IapResponse.Restore)
+            {
+                var progress = PlayerModel.Instance.playerData.GetBuildingProgressByName(BuildingName.Preset_Bath_House_01);
+                progress.SetState(BuildingState.Unlocked);
+                PlayerModel.Instance.OnPlayerDataChanged?.Invoke();
+            }
+        }
 
         if (productId == IAPModel.AdditionalSpace)
         {

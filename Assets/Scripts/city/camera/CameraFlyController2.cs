@@ -14,18 +14,27 @@ public class CameraFlyController2 : MonoBehaviour
 
     [SerializeField] public Vector3 camPos;
     [SerializeField] public Vector3 camRot;
+    [SerializeField] private Transform skyLookAtTransform;
     private Transform lookAt;
     private Vector3 lookAtChanged;
     private BezierSpline activeSpline;
     private float currentSplineT;
     private bool isOrbitingOnSpline;
+    private CameraTouchLookaround touchLookaround;
 
     private CityElement currentCityElement;
 
     void Start()
     {
+        touchLookaround = Camera.main.GetComponent<CameraTouchLookaround>();
+        if (touchLookaround == null)
+        {
+            touchLookaround = Camera.main.gameObject.AddComponent<CameraTouchLookaround>();
+        }
+
         CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
+        CamModel.Instance.OnMoveCameraToSky += OnMoveCameraToSky;
 
         var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         if (progress.State == BuildingState.Unlocked || progress.State == BuildingState.Completed)
@@ -38,6 +47,7 @@ public class CameraFlyController2 : MonoBehaviour
     {
         CamModel.Instance.OnMoveCameraToBuilding -= OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement -= OnMoveCameraToCityElement;
+        CamModel.Instance.OnMoveCameraToSky -= OnMoveCameraToSky;
     }
 
     private void OnMoveCameraToCityElement(CityElement cityElement)
@@ -68,15 +78,18 @@ public class CameraFlyController2 : MonoBehaviour
         if (!hasStoredCameraPose)
         {
             var p = cityElement.GetAveragePosition();
-            cameraTransform.DOMove(targetPosition, CityElementTransitionDuration).OnUpdate(() =>
-            {
-                cameraTransform.LookAt(p);
-            });
+            cameraTransform.DOMove(targetPosition, CityElementTransitionDuration)
+                .OnUpdate(() =>
+                {
+                    cameraTransform.LookAt(p);
+                })
+                .OnComplete(() => touchLookaround?.Setup(cameraTransform.position, cameraTransform.rotation.eulerAngles));
         }
         else
         {
             cameraTransform.DOMove(targetPosition, CityElementTransitionDuration).SetEase(Ease.InOutSine);
-            TweenRotationShortestPath(cameraTransform, cityElement.camRot, CityElementTransitionDuration);
+            TweenRotationShortestPath(cameraTransform, cityElement.camRot, CityElementTransitionDuration)
+                .OnComplete(() => touchLookaround?.Setup(targetPosition, cityElement.camRot));
         }
     }
 
@@ -139,6 +152,18 @@ public class CameraFlyController2 : MonoBehaviour
             1f,
             Mathf.Max(0.01f, SplineRotationBlendDuration)
         ).SetEase(Ease.OutSine));
+    }
+
+    private void OnMoveCameraToSky()
+    {
+        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == "Sky");
+        var cam = Camera.main;
+        cam.transform.DOKill();
+        var duration = 200;
+        activeSpline = spline;
+        isOrbitingOnSpline = true;
+        this.lookAt = this.skyLookAtTransform;
+        MoveCameraLongSpline(spline, duration);
     }
 
     private void OnMoveCameraToBuilding()

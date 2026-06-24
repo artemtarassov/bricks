@@ -1,8 +1,8 @@
 ﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="CodeStage.AFPSCounter.Runtime.csproj" />
   <Project Path="Boxophobic.Utils.Editor.csproj" />
   <Project Path="BezierSolution.Runtime.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Google.Play.Common.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="CodeStage.AFPSCounter.Editor.csproj" />

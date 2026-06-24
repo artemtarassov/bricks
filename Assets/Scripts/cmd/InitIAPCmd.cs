@@ -26,6 +26,7 @@ class MyIAPManager
     {
         new ProductDefinition(IAPModel.AdditionalSpace, IAPModel.AdditionalSpace, ProductType.NonConsumable),
         new ProductDefinition(IAPModel.GoldenTicket, IAPModel.GoldenTicket, ProductType.NonConsumable),
+        new ProductDefinition(IAPModel.PremiumBuilding1, IAPModel.PremiumBuilding1, ProductType.NonConsumable),
         new ProductDefinition(IAPModel.GoldenTicketTemp, IAPModel.GoldenTicketTemp, ProductType.Consumable),
     };
 
@@ -63,7 +64,7 @@ class MyIAPManager
             isInitialized = true;
             Debug.Log(
                 "MyIAPManager Connect succeeded for store "
-                    + StandardPurchasingModule.Instance().appStore
+                    + GetCurrentStoreName()
                     + " and app "
                     + Application.identifier
             );
@@ -240,7 +241,7 @@ class MyIAPManager
                 + ", failed="
                 + FormatProductDefinitions(failure.FailedFetchProducts)
                 + ", store="
-                + StandardPurchasingModule.Instance().appStore
+                + GetCurrentStoreName()
                 + ", appId="
                 + Application.identifier
         );
@@ -356,7 +357,7 @@ class MyIAPManager
 
         Debug.LogError(
             "MyIAPManager Validate failed: unsupported store for local receipt validation: "
-                + StandardPurchasingModule.Instance().appStore
+                + GetCurrentStoreName()
         );
         return false;
     }
@@ -431,13 +432,18 @@ class MyIAPManager
 
     private static bool IsGooglePlayStoreSelected()
     {
-        return StandardPurchasingModule.Instance().appStore == AppStore.GooglePlay;
+        return GetCurrentStoreName() == GooglePlay.Name;
     }
 
     private static bool IsAppleStoreSelected()
     {
-        var appStore = StandardPurchasingModule.Instance().appStore;
-        return appStore == AppStore.AppleAppStore || appStore == AppStore.MacAppStore;
+        var storeName = GetCurrentStoreName();
+        return storeName == AppleAppStore.Name || storeName == MacAppStore.Name;
+    }
+
+    private static string GetCurrentStoreName()
+    {
+        return UnityIAPServices.GetDefaultStore();
     }
 
     private void OnPurchaseConfirmed(Order order)

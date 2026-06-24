@@ -21,9 +21,16 @@ public class SelectColumnCmd
 
         if (ModelUtils.IsOutOfSpace())
         {
-            this.ShowOutOfSpace();
+            new SoundCmd(SoundModel.Instance.ERROR).Run();
+
+            if (ViewModel.Instance.OutOfSpaceCounter != 0)
+            {
+                this.ShowOutOfSpace();
+            }
             return;
         }
+
+
 
         PlayerModel.Instance.playerData.isDirty = true;
 

@@ -63,19 +63,20 @@ public class PlayerModel
         }
     }
 
-    public List<BuildingName> GetUnlockedBuildings()
+    public List<BuildingName> GetVisibleBuildingNames()
     {
         var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
-        var unlockedBuildings = new List<BuildingName>();
+        var result = new List<BuildingName>();
         foreach (var buildingName in allBuildingNames)
         {
             var progress = playerData.GetBuildingProgressByName(buildingName);
-            if (progress != null && progress.State != BuildingState.Locked)
+            Assert.IsNotNull(progress, "no progress for building " + buildingName);
+            if (progress.State != BuildingState.Locked)
             {
-                unlockedBuildings.Add(buildingName);
+                result.Add(buildingName);
             }
         }
-        return unlockedBuildings;
+        return result;
     }
 
     public bool IsSettingEnabled(SettingsKey key)
@@ -90,7 +91,6 @@ public class PlayerModel
         {
             enabledSettings = allSettingsKeys,
             coins = 0,
-            attempts = 5,
             installTimestamp = TimeUtils.GetUnixTimestamp(),
             isDirty = true,
         };
