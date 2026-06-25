@@ -81,18 +81,15 @@ public class MainNavController : MonoBehaviour
 
     private void UpdateVisibility()
     {
-        Debug.Log("MainNavController UpdateVisibility: checking visibility with state " + state);
         var nav = ViewModel.Instance.CurrentBottomNav;
         if (nav != BottomNav.MainNav)
         {
-            Debug.Log("MainNavController: hiding because nav is " + nav);
             this.content.SetActive(false);
             return;
         }
         var hasViews = ViewModel.Instance.HasAnyView();
         if (hasViews)
         {
-            Debug.Log("MainNavController: hiding because there is an active view");
             this.content.SetActive(false);
             return;
         }
@@ -100,7 +97,6 @@ public class MainNavController : MonoBehaviour
 
         if (state == BuildingState.Premium)
         {
-            Debug.Log("MainNavController: showing premium state buttons");
             this.btnPremium.gameObject.SetActive(true);
             UpdateLeftRightButtonVisibility();
             UpdateGroupTitle();
@@ -110,7 +106,6 @@ public class MainNavController : MonoBehaviour
 
         if (state == BuildingState.Completed)
         {
-            Debug.Log("MainNavController: showing completed state buttons");
             this.btnRestart.gameObject.SetActive(true);
             this.btnNext.gameObject.SetActive(true);
             UpdateLeftRightButtonVisibility();
@@ -119,9 +114,8 @@ public class MainNavController : MonoBehaviour
             return;
         }
 
-        if (state == BuildingState.Unlocked)
+        if (state == BuildingState.Unlocked || state == BuildingState.Locked || state == BuildingState.Playing)
         {
-            Debug.Log("MainNavController: showing unlocked state buttons");
             var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
             if (progress.GetCurrentElement() == null)
             {
@@ -136,7 +130,6 @@ public class MainNavController : MonoBehaviour
             AnimateIn();
             return;
         }
-        Debug.Log("MainNavController: hiding because state is " + state);
         this.content.SetActive(false);
     }
 
@@ -168,12 +161,13 @@ public class MainNavController : MonoBehaviour
     private void UpdateLeftRightButtonVisibility()
     {
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var unlockedBuildingNames = PlayerModel.Instance.GetVisibleBuildingNames();
-        //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: current building {currentBuildingName} unlocked buildings count {unlockedBuildingNames.Count}");
+        var names = BuildingNameUtil.GetAllBuildingNames();
 
-        var currentIndex = unlockedBuildingNames.IndexOf(currentBuildingName);
+        var currentIndex = names.IndexOf(currentBuildingName);
         var hasPrevious = currentIndex > 0;
-        var hasNext = true;//currentIndex < unlockedBuildingNames.Count - 1;
+        var hasNext = true;//currentIndex < names.Count - 1;
+
+
 
         //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: hasPrevious {hasPrevious} hasNext {hasNext}, currentIndex {currentIndex} unlockedBuildingNames count {unlockedBuildingNames.Count}");
         this.btnLeft.gameObject.SetActive(hasPrevious);
@@ -208,11 +202,10 @@ public class MainNavController : MonoBehaviour
         new SoundCmd(SoundModel.Instance.CLICK1).Run();
 
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var unlockedBuildingNames = PlayerModel.Instance.GetVisibleBuildingNames();
-        var isLast = unlockedBuildingNames.Last() == currentBuildingName;
+        var names = BuildingNameUtil.GetAllBuildingNames();
+        var isLast = names.Last() == currentBuildingName;
 
-        Debug.Log($"MainNavController OnBtnNextClicked: current building {currentBuildingName} isLast {isLast}");
-        if(isLast)
+        if (isLast)
         {
             new ShowThankyouCmd().Run();
             return;

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -31,7 +30,6 @@ public class AddExtrasCmd
 
     public void Run(CityElementDataContainer currentElementData, int difficultyToApply = -1)
     {
-        Debug.Log($"AddExtrasCmd: adding extras to element {currentElementData.dataKey}");
         Assert.IsNotNull(currentElementData, "AddExtrasCmd Run: data container is null");
         Assert.IsTrue(currentElementData.columns.Count > 0, "AddExtrasCmd Run: data container should have at least 1 column");
         var totalBricks = currentElementData.columns.Sum(c => c.list.Count(e => e.IsBrick));
@@ -43,9 +41,6 @@ public class AddExtrasCmd
         {
             return;
         }
-
-
-        Debug.Log($"AddExtrasCmd: totalBricks={totalBricks}");
         this.SetLimits(totalBricks);
 
         this.columns = new NonRepeatingShuffleBag<SlotColumnData>(this.dataContainer.columns);
@@ -53,7 +48,7 @@ public class AddExtrasCmd
 
         var amountOfExtrasPerColumn = Mathf.RoundToInt(this.SumLimits() / (float)this.dataContainer.columns.Count);
         Assert.IsTrue(amountOfExtrasPerColumn > 0, "invalid amountOfExtrasPerColumn");
-        Debug.Log($"AddExtrasCmd: amountOfExtrasPerColumn={amountOfExtrasPerColumn}");
+
         for (var i = 0; i < this.dataContainer.columns.Count; i++)
         {
             var c = this.dataContainer.columns[i];
@@ -98,13 +93,13 @@ public class AddExtrasCmd
         }
         else
         {
-            this.maxCoins = Mathf.RoundToInt(totalBricks / 30.0f);
+            this.maxCoins = Mathf.RoundToInt(totalBricks / 40.0f);
             if (this.maxCoins < 1)
             {
                 this.maxCoins = 1;
             }
-            this.maxHiddenBricks = Mathf.RoundToInt(totalBricks / 20.0f);
-            this.maxDeaths = Mathf.RoundToInt(totalBricks / 20.0f);
+            this.maxHiddenBricks = Mathf.RoundToInt(totalBricks / 15.0f);
+            this.maxDeaths = Mathf.RoundToInt(totalBricks / 15.0f);
             this.maxMults = Mathf.RoundToInt(totalBricks / 20.0f);
             this.maxAds = Mathf.RoundToInt(totalBricks / 30.0f);
             if (this.maxAds < 1)
@@ -117,7 +112,7 @@ public class AddExtrasCmd
         {
             this.maxAds = 0;
         }
-        if (coins > 1000)
+        if (coins >= RemoteConfigModel.Instance.RemoteConfig.RefillCoins)
         {
             this.maxCoins--;
         }
@@ -151,9 +146,11 @@ public class AddExtrasCmd
             return false;
         }
 
+        var remoteConfig = RemoteConfigModel.Instance.RemoteConfig;
+        var curTimestamp = TimeUtils.GetUnixTimestamp();
         var installTimestamp = PlayerModel.Instance.playerData.installTimestamp;
-        var secPassedSinceInstall = TimeUtils.GetUnixTimestamp() - installTimestamp;
-        if (secPassedSinceInstall < RemoteConfigModel.Instance.RemoteConfig.ShowMidSessionAdAfterSec)
+        var secPassedSinceInstall = curTimestamp - installTimestamp;
+        if (secPassedSinceInstall < remoteConfig.ShowMidSessionAdAfterSec)
         {
             //don't add ad for the first 5 minutes after install
             return false;
@@ -161,8 +158,8 @@ public class AddExtrasCmd
         var lastInterstitialTimestamp = AdModel.Instance.LastInterstitialTimestamp;
         if (lastInterstitialTimestamp > 0)
         {
-            var timeDiff = TimeUtils.GetUnixTimestamp() - lastInterstitialTimestamp;
-            if (timeDiff < RemoteConfigModel.Instance.RemoteConfig.ShowMidSessionAdAfterSec)
+            var timeDiff = curTimestamp - lastInterstitialTimestamp;
+            if (timeDiff < remoteConfig.ShowMidSessionAdAfterSec)
             {
                 //don't add ad if the last interstitial was shown less than configured seconds ago
                 return false;
@@ -210,7 +207,6 @@ public class AddExtrasCmd
 
     private void AddAds()
     {
-        Debug.Log($"AddExtrasCmd: adding ads, maxAds={maxAds}");
         while (maxAds > 0)
         {
             var column = this.columns.GetNext();
@@ -232,7 +228,6 @@ public class AddExtrasCmd
 
     private void AddBicksMultiplier()
     {
-        Debug.Log($"AddExtrasCmd: adding bicks multiplier, maxMults={maxMults}");
         while (maxMults > 0)
         {
             var column = this.columns.GetNext();
@@ -254,7 +249,6 @@ public class AddExtrasCmd
 
     private void SetHiddenBricks()
     {
-        Debug.Log($"AddExtrasCmd: adding hidden bricks, maxHiddenBricks={maxHiddenBricks}");
         while (maxHiddenBricks > 0)
         {
             var column = this.columns.GetNext();
@@ -276,7 +270,6 @@ public class AddExtrasCmd
 
     private void AddDeaths()
     {
-        Debug.Log($"AddExtrasCmd: adding deaths, maxDeaths={maxDeaths}");
         while (maxDeaths > 0)
         {
             var column = this.columns.GetNext();
@@ -356,35 +349,7 @@ public class AddExtrasCmd
         {
             column.list[nextBrickIndex].type = SlotElementType.HiddenBricks;
         }
-        /*
-        var countExisting = dataContainer.columns.Sum(c => c.list.Count(e => e.type == SlotElementType.HiddenBricks));
-        if (countExisting >= amount)
-        {
-            return;
-        }
-        var columns = dataContainer.columns.ToList();
-        RandHelper.Shuffle(columns);
-
-        for (int i = 0; i < columns.Count && amount > 0; i++)
-        {
-            var randColumn = columns[i];
-            var allBrickElements = randColumn.list.Where(e => e.IsBrick).ToList();
-            if (allBrickElements.Count < 5)
-            {
-                continue;
-            }
-            var randIndex = RandHelper.GetRandIndex(allBrickElements, 2, RandHelper.RandPos.SecondHalf);
-            var randBrick = allBrickElements[randIndex];
-            randBrick.type = SlotElementType.HiddenBricks;
-            amount--;
-        }*/
     }
-
-    private bool HasSlotElementType(SlotElementType type)
-    {
-        return dataContainer.columns.Any(c => c.list.Any(e => e.type == type));
-    }
-
 
     private static NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 2, 3, 4 });
 

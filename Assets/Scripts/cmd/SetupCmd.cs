@@ -1,14 +1,16 @@
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class SetupCmd
 {
         public void Run(Transform root)
         {
+#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
+        Debug.unityLogger.filterLogType = LogType.Error | LogType.Exception | LogType.Assert;
+#endif
 
 #if UNITY_EDITOR
-                FilePrefs.DeleteAll(); //for testing only, remove in production
+                //FilePrefs.DeleteAll(); //for testing only, remove in production
 #endif
 
                 PlayerModel.Instance = new PlayerModel();
@@ -41,7 +43,7 @@ public class SetupCmd
                 #if !UNITY_EDITOR
                 new InitServicesCmd().Run(root);
 
-                root.AddComponent<MobilePerformanceController>();
+                root.gameObject.AddComponent<MobilePerformanceController>();
                 #endif
         }
 

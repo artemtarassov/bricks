@@ -189,7 +189,7 @@ public class PlayerModel
 
         foreach (var p in playerData.Progress)
         {
-            if (p.State == BuildingState.Playing)
+            if (p.State == BuildingState.Playing || p.State == BuildingState.Locked)
             {
                 p.SetState(BuildingState.Unlocked); //reset in-progress building to unlocked, so player can replay it
             }

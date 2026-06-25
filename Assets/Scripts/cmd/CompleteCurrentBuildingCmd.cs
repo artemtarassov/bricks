@@ -35,7 +35,7 @@ public class CompleteCurrentBuildingCmd
         //Debug.Log("CompleteCurrentBuildingCmd: completed building " + currentBuildingName + " elements " + allElements.Count);
 
 
-        var allBuildingNames = cityModel.GetAllBuildingNames();
+        var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
         var currentBuildingIndex = allBuildingNames.IndexOf(currentBuildingName);
         var nextBuildingIndex = currentBuildingIndex + 1;
         if (nextBuildingIndex < allBuildingNames.Count)

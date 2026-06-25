@@ -15,22 +15,20 @@ public class CameraFlyController : MonoBehaviour
     private Vector3 lookAtChanged;
     private CameraTouchLookaround touchLookaround;
 
+
     void Start()
     {
-        touchLookaround = Camera.main.GetComponent<CameraTouchLookaround>();
-        if (touchLookaround == null)
-        {
-            touchLookaround = Camera.main.gameObject.AddComponent<CameraTouchLookaround>();
-        }
+        touchLookaround = this.gameObject.GetComponent<CameraTouchLookaround>();
+        touchLookaround.enabled = false;
+
         CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
         CamModel.Instance.OnAnticipateRocketFly += OnAnticipateRocketFly;
         CamModel.Instance.OnMoveCamBack += OnMoveCamBack;
         CamModel.Instance.OnMoveCameraToSky += OnMoveCameraToSky;
 
-
         var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-        if (progress.State == BuildingState.Unlocked || progress.State == BuildingState.Completed)
+        if (progress != null)
         {
             OnMoveCameraToBuilding();
         }
@@ -38,9 +36,11 @@ public class CameraFlyController : MonoBehaviour
 
     private void OnMoveCameraToSky()
     {
+        Debug.Log($"CameraFlyController OnMoveCameraToSky: moving camera to sky");
         var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == "Sky");
         this.lookAt = this.skyLookAtTransform;
         MoveCameraLongSpline(spline, Durations.CamOrbit);
+        touchLookaround.enabled = false;
     }
 
     void OnDestroy()
@@ -54,6 +54,7 @@ public class CameraFlyController : MonoBehaviour
 
     private void OnMoveCamBack()
     {
+
         var mainCam = Camera.main;
         mainCam.transform.DOKill();
 
@@ -85,6 +86,7 @@ public class CameraFlyController : MonoBehaviour
 
     private void OnMoveCameraToCityElement(CityElement cityElement)
     {
+        Debug.Log($"CameraFlyController OnMoveCameraToCityElement: moving camera to city element {cityElement.name}");
         var mainCam = Camera.main;
         mainCam.transform.DOKill();
 
@@ -92,12 +94,17 @@ public class CameraFlyController : MonoBehaviour
         mainCam.transform.DOMove(cityElement.camPos, t)
             .SetEase(Ease.OutBack)
             .OnComplete(() => touchLookaround?.Setup(cityElement.camPos, cityElement.camRot));
-        mainCam.transform.DORotate(cityElement.camRot, t * 0.8f).SetEase(Ease.OutSine);
+        mainCam.transform.DORotate(cityElement.camRot, t * 0.8f).SetEase(Ease.OutSine).OnComplete(() =>
+        {
+            touchLookaround.enabled = true;
+            touchLookaround?.Setup(cityElement.camPos, cityElement.camRot);
+        });
     }
 
     private void OnMoveCameraToBuilding()
     {
         var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+        Debug.Log($"CameraFlyController OnMoveCameraToBuilding: moving camera to building {currentBuildingName}");
         var currentBuilding = CityModel.Instance.GetBuildingByName(currentBuildingName);
         var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentBuildingName.ToString());
         Assert.IsNotNull(spline, "CameraFlyController OnMoveCameraToBuilding: no spline found for building " + currentBuildingName);
@@ -108,6 +115,8 @@ public class CameraFlyController : MonoBehaviour
 
     private void MoveCameraLongSpline(BezierSpline spline, float duration)
     {
+        touchLookaround.enabled = false;
+
         var cam = Camera.main;
         cam.transform.DOKill();
         cam.transform.position = spline.GetPoint(0);

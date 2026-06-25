@@ -33,21 +33,20 @@ public class SetupCityCmd
             }
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         foreach (var progress in pd.Progress.ToList())
         {
-            if(progress.State==BuildingState.Premium)
+            if (progress.State == BuildingState.Premium)
             {
                 progress.SetState(BuildingState.Unlocked);
             }
         }
-        #endif
+#endif
 
         if (pd.CurrentBuildingName == BuildingName.Undefined)
         {
-            var firstBuilding = BuildingName.Preset_House_05;
-            cityModel.SetBuildings(buildings, firstBuilding);
-            playerModel.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
+            pd.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
+            cityModel.SetBuildings(buildings, BuildingName.Preset_House_05);
         }
         else
         {

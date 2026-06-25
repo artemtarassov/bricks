@@ -1,11 +1,12 @@
 using UnityEngine;
 using DG.Tweening;
-#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using InputSystemTouchPhase = UnityEngine.InputSystem.TouchPhase;
-#endif
+
 
 public class CameraTouchLookaround : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class CameraTouchLookaround : MonoBehaviour
     [SerializeField] private float maxPitchOffset = 12f;
     [SerializeField] private float followFingerDuration = 0.12f;
     [SerializeField] private float returnToSetupDuration = 0.35f;
+    [SerializeField] private bool enableEditorTouchSimulation = true;
+    [SerializeField] private bool verboseLogging = true;
 
     private Quaternion setupRotation;
     private Vector3 setupPosition;
@@ -24,23 +27,35 @@ public class CameraTouchLookaround : MonoBehaviour
     private Quaternion activeHomeRotation;
     private Quaternion lastTweenTargetRotation;
     private Tween rotationTween;
+    private static readonly List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
 
-    private Transform TargetTransform => transform;
+    private Transform TargetTransform => Camera.main.transform;
 
     void OnEnable()
     {
-#if ENABLE_INPUT_SYSTEM
         EnhancedTouchSupport.Enable();
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (enableEditorTouchSimulation)
+        {
+            TouchSimulation.Enable();
+        }
 #endif
+        Log("EnhancedTouchSupport enabled");
     }
 
     void OnDisable()
     {
         rotationTween?.Kill();
         activeTouchId = -1;
-#if ENABLE_INPUT_SYSTEM
-        EnhancedTouchSupport.Disable();
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (enableEditorTouchSimulation)
+        {
+            TouchSimulation.Disable();
+        }
 #endif
+        Log("EnhancedTouchSupport disabled");
+        EnhancedTouchSupport.Disable();
     }
 
     void Start()
@@ -65,14 +80,6 @@ public class CameraTouchLookaround : MonoBehaviour
 
     void Update()
     {
-        if (!Application.isMobilePlatform)
-        {
-            return;
-        }
-
-#if !ENABLE_INPUT_SYSTEM
-        return;
-#else
         if (activeTouchId == -1 && !hasExplicitSetup)
         {
             setupPosition = TargetTransform.position;
@@ -81,6 +88,8 @@ public class CameraTouchLookaround : MonoBehaviour
         }
 
         var activeTouches = EnhancedTouch.activeTouches;
+        //Log($"activeTouches.Count = {activeTouches.Count}, activeTouchId = {activeTouchId}");
+        
         if (activeTouches.Count == 0)
         {
             if (activeTouchId != -1)
@@ -113,7 +122,6 @@ public class CameraTouchLookaround : MonoBehaviour
                 ReleaseLookaround();
                 break;
         }
-#endif
     }
 
     void OnDestroy()
@@ -121,7 +129,6 @@ public class CameraTouchLookaround : MonoBehaviour
         rotationTween?.Kill();
     }
 
-#if ENABLE_INPUT_SYSTEM
     private void TryBeginLookaround(ReadOnlyArray<EnhancedTouch> activeTouches)
     {
         for (var i = 0; i < activeTouches.Count; i++)
@@ -129,6 +136,12 @@ public class CameraTouchLookaround : MonoBehaviour
             var touch = activeTouches[i];
             if (touch.phase != InputSystemTouchPhase.Began)
             {
+                continue;
+            }
+
+            if (IsScreenPositionOverUI(touch.screenPosition))
+            {
+                Log("Ignoring lookaround touch because it started over UI");
                 continue;
             }
 
@@ -162,10 +175,9 @@ public class CameraTouchLookaround : MonoBehaviour
         var dragDelta = touch.screenPosition - touchStartPosition;
         var yaw = Mathf.Clamp(dragDelta.x * yawSensitivity, -maxYawOffset, maxYawOffset);
         var pitch = Mathf.Clamp(-dragDelta.y * pitchSensitivity, -maxPitchOffset, maxPitchOffset);
-        var targetRotation = activeHomeRotation * Quaternion.Euler(pitch, yaw, 0f);
+        var targetRotation = GetLookaroundRotation(activeHomeRotation, pitch, yaw);
         TweenToRotation(targetRotation, followFingerDuration);
     }
-#endif
 
     private void ReleaseLookaround()
     {
@@ -200,5 +212,38 @@ public class CameraTouchLookaround : MonoBehaviour
         .SetUpdate(UpdateType.Late)
         .SetTarget(this)
         .OnKill(() => rotationTween = null);
+    }
+
+    private void Log(string message)
+    {
+        if (!verboseLogging)
+        {
+            return;
+        }
+
+        Debug.Log($"CameraTouchLookaround: {message}");
+    }
+
+    private bool IsScreenPositionOverUI(Vector2 screenPosition)
+    {
+        if (EventSystem.current == null)
+        {
+            return false;
+        }
+
+        var eventData = new PointerEventData(EventSystem.current)
+        {
+            position = screenPosition
+        };
+
+        uiRaycastResults.Clear();
+        EventSystem.current.RaycastAll(eventData, uiRaycastResults);
+        return uiRaycastResults.Count > 0;
+    }
+
+    private Quaternion GetLookaroundRotation(Quaternion homeRotation, float pitchOffset, float yawOffset)
+    {
+        var homeEuler = homeRotation.eulerAngles;
+        return Quaternion.Euler(homeEuler.x + pitchOffset, homeEuler.y + yawOffset, homeEuler.z);
     }
 }

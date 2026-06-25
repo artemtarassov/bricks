@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class MobilePerformanceController : MonoBehaviour
 {
-    private const string PerformanceTierPrefKey = "MobilePerformanceController.PerformanceTier";
+    private const string PerformanceTierPrefKey = "MobilePerformanceController.PerformanceTier2";
     private const string LowTierValue = "low";
     private const string HighTierValue = "high";
-    private const float SampleDurationSeconds = 5f;
+    private const float SampleDurationSeconds = Durations.FpsCheckDuration;
     private const float LowFpsThreshold = 20f;
 
     private bool hasApplicationFocus = true;
@@ -15,21 +15,21 @@ public class MobilePerformanceController : MonoBehaviour
 
     void Awake()
     {
-#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
-        Debug.unityLogger.filterLogType = LogType.Error | LogType.Exception | LogType.Assert;
-#endif
+        Application.targetFrameRate = 60;
     }
 
     private void SetLow()
     {
         SetQualityLevel("MobileLow");
         Application.targetFrameRate = 30;
+        Debug.Log("MobilePerformanceController: SetLow() called, targetFrameRate set to 30");
     }
 
     private void SetHigh()
     {
         SetQualityLevel("MobileHigh");
         Application.targetFrameRate = 60;
+        Debug.Log("MobilePerformanceController: SetHigh() called, targetFrameRate set to 60");
     }
 
     void Start()
@@ -81,9 +81,12 @@ public class MobilePerformanceController : MonoBehaviour
 
             elapsed += Time.unscaledDeltaTime;
             frameCount++;
+
+            //Debug.Log($"MobilePerformanceController: Measuring performance, elapsed: {elapsed:F2}s, frameCount: {frameCount}, averageFPS: {(elapsed > 0f ? frameCount / elapsed : 0f):F2}");
         }
 
         float averageFps = elapsed > 0f ? frameCount / elapsed : 0f;
+        // Debug.Log($"MobilePerformanceController: Measurement complete, averageFPS: {averageFps:F2}");
         if (averageFps < LowFpsThreshold)
         {
             SetLow();
@@ -97,6 +100,11 @@ public class MobilePerformanceController : MonoBehaviour
 
     private void SavePerformanceTier(string tier)
     {
+        if (FilePrefs.HasKey(PerformanceTierPrefKey) == false)
+        {
+            var dict = new System.Collections.Generic.Dictionary<string, object>();
+            new LogEventCmd().Run("performance_tier_" + tier, dict);
+        }
         FilePrefs.SetString(PerformanceTierPrefKey, tier);
         FilePrefs.Save();
     }
@@ -114,7 +122,6 @@ public class MobilePerformanceController : MonoBehaviour
         {
             return;
         }
-
         QualitySettings.SetQualityLevel(qualityLevel, true);
     }
 

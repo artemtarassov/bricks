@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.Assertions;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public class LogoController : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class LogoController : MonoBehaviour
     [SerializeField] private GameObject tuscany;
     [SerializeField] private GameObject baiae;
 
+    [SerializeField] private AttemptsRow attemptsRow;
+
     void Start()
     {
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
@@ -20,6 +23,12 @@ public class LogoController : MonoBehaviour
         ViewModel.Instance.OnHideView += OnViewUpdate;
         PlayerModel.Instance.OnPlayerDataChanged += OnPlayerDataChanged;
         this.OnBottomNavChange(BottomNav.MainNav);
+
+        var images = attemptsRow.GetComponentsInChildren<Image>(true);
+        foreach (var image in images)
+        {
+            image.color = Color.yellow;
+        }
     }
     void OnDestroy()
     {
@@ -49,6 +58,7 @@ public class LogoController : MonoBehaviour
         }
         if (tab == BottomNav.MainNav)
         {
+            attemptsRow.UpdateValues(PlayerModel.Instance.playerData.attempts);
 
             palermo.SetActive(false);
             veneto.SetActive(false);

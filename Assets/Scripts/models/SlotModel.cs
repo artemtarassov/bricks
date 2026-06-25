@@ -85,11 +85,7 @@ public class SlotModel
 
     public void Fill(List<SlotColumnData> columns)
     {
-        //var hasExplosive = columns.Any(c => c.list.Any(e => e.type == SlotElementType.FinalExplosion));
-        //Assert.IsTrue(hasExplosive, "SlotModel Fill: columns should contain explosive elements");
-
         var bricksInEmitter = columns.SelectMany(c => c.list).Where(e => e.IsBrick && e.BrickData.inEmitter).Select(e => e.BrickData).ToList();
-        Debug.Log($"SlotModel Fill: filling slot with {columns.Count} columns. bricks in emitter: {bricksInEmitter.Count}");
 
         for (var i = 0; i < this.Emitters.Count; i++)
         {

@@ -54,12 +54,10 @@ public class CityModel
         var b = this.buildings.Find(g => g.BuildingName == currentBuildingName);
         Assert.IsNotNull(b, $"CityModel SetCurrentBuildingName: failed to find group with name {currentBuildingName}");
         this.cityElements = b.GetElements().ToList();
-    }
-
-
-    public List<BuildingName> GetAllBuildingNames()
-    {
-        return BuildingNameUtil.GetAllBuildingNames();
+        foreach (var b1 in this.buildings)
+        {
+            b1.gameObject.SetActive(b1.BuildingName == currentBuildingName);
+        }
     }
 
     public int GetBuildingNameIndex(BuildingName buildingName)

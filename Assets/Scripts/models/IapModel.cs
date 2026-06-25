@@ -4,11 +4,18 @@ using System.Linq;
 using UnityEngine;
 
 [Serializable]
+public class PriceDataList
+{
+    public List<PriceData> prices = new List<PriceData>();
+}
+
+[Serializable]
 public class PriceData
 {
     public string priceString;
     public string isoCurrencyCode;
     public float price;
+    public string productId;
 }
 
 [Serializable]
@@ -36,7 +43,7 @@ public class IAPModel
     public static IAPModel Instance;
 
     public readonly List<string> productIds = new List<string>();
-    private Dictionary<string, PriceData> prices = new Dictionary<string, PriceData>();
+    private PriceDataList priceDataList;
 
     public const string GoldenTicketTemp = "de.badmonkee.solari.goldentickettemp";
     public const string GoldenTicket = "de.badmonkee.solari.goldenticket";
@@ -68,14 +75,14 @@ public class IAPModel
         productIds.Add(GoldenTicketTemp);
         productIds.Add(AdditionalSpace);
         productIds.Add(PremiumBuilding1);
-        var pricesJson = FilePrefs.GetString("IAPModel.prices", "{}");
-        prices = JsonUtility.FromJson<Dictionary<string, PriceData>>(pricesJson);
     }
 
     public static string GetProductIdByIAPProductName(IAPProductName productName)
     {
         switch (productName)
         {
+            case IAPProductName.PremiumBuilding1:
+                return PremiumBuilding1;
             case IAPProductName.GoldenTicket:
                 return GoldenTicket;
             case IAPProductName.GoldenTicketTemp:
@@ -89,6 +96,25 @@ public class IAPModel
 
     public void Load()
     {
+        var pricesJson = FilePrefs.GetString("IAPModel.prices1", "");
+        if (!string.IsNullOrEmpty(pricesJson))
+        {
+            try
+            {
+                priceDataList = JsonUtility.FromJson<PriceDataList>(pricesJson);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("IAPModel constructor: failed to load prices from prefs: " + e.Message);
+                priceDataList = new PriceDataList();
+
+            }
+        }
+        else
+        {
+            priceDataList = new PriceDataList();
+        }
+
         if (FilePrefs.HasKey("IAPModel.completedPurchases"))
         {
             try
@@ -228,7 +254,7 @@ public class IAPModel
     {
         if (HasPriceForProduct(productId))
         {
-            return prices[productId].priceString;
+            return this.priceDataList.prices.Find(p => p.productId == productId).priceString;
         }
         return "?";
     }
@@ -239,7 +265,7 @@ public class IAPModel
         {
             return null;
         }
-        return prices[productId];
+        return priceDataList.prices.Find(p => p.productId == productId);
     }
 
     public bool HasPriceForProduct(string productId)
@@ -248,7 +274,7 @@ public class IAPModel
         {
             return false;
         }
-        return prices.ContainsKey(productId);
+        return priceDataList.prices.Exists(p => p.productId == productId);
     }
 
     public void SetPriceForProduct(
@@ -258,23 +284,24 @@ public class IAPModel
         string isoCurrencyCode
     )
     {
-        /*Debug.Log(
-            "IAPModel.SetPriceForProduct: "
-                + productId
-                + "; priceString "
-                + priceString
-                + "; price "
-                + price
-                + "; isoCurrencyCode "
-                + isoCurrencyCode
-        );*/
-        prices[productId] = new PriceData()
+        var existingPriceData = priceDataList.prices.Find(p => p.productId == productId);
+        if (existingPriceData != null)
         {
-            priceString = priceString,
-            price = price,
-            isoCurrencyCode = isoCurrencyCode
-        };
-        FilePrefs.SetString("IAPModel.prices", JsonUtility.ToJson(prices));
+            existingPriceData.priceString = priceString;
+            existingPriceData.price = price;
+            existingPriceData.isoCurrencyCode = isoCurrencyCode;
+        }
+        else
+        {
+            priceDataList.prices.Add(new PriceData()
+            {
+                productId = productId,
+                priceString = priceString,
+                price = price,
+                isoCurrencyCode = isoCurrencyCode
+            });
+        }
+        FilePrefs.SetString("IAPModel.prices1", JsonUtility.ToJson(priceDataList));
         OnPricesSet?.Invoke(productId);
     }
 

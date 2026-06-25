@@ -23,4 +23,7 @@ public static class Durations
     public const float MusicFade = 0.5f;
 
     public const float NavTransition = 0.3f;
+
+    public const float FakeLoaderDuration = 5;
+    public const float FpsCheckDuration = 10;
 }
