@@ -30,6 +30,11 @@ public class BuildingNameUtil
         var result = GetAllBuildingNames().Find(b => b.ToString() == name);
         return result;
     }
+
+    public static bool IsPremiumBuilding(BuildingName buildingName)
+    {
+        return buildingName == BuildingName.Preset_Bath_House_01;
+    }
 }
 
 [Serializable]

@@ -20,7 +20,7 @@ public class SetupCityCmd
             if (progress == null)
             {
                 progress = new BuildingProgressData(building.BuildingName, BuildingState.Unlocked);
-                if (progress.BuildingName == BuildingName.Preset_Bath_House_01)
+                if (BuildingNameUtil.IsPremiumBuilding(progress.BuildingName))
                 {
                     progress.SetState(BuildingState.Premium);
                 }

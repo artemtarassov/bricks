@@ -140,7 +140,7 @@ public class AddExtrasCmd
             return false;
         }
 
-        if (this.buildingName == BuildingName.Preset_Bath_House_01)
+        if (BuildingNameUtil.IsPremiumBuilding(this.buildingName))
         {
             //don't add ad for premium building
             return false;
