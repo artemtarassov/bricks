@@ -99,7 +99,7 @@ public class AddExtrasCmd
                 this.maxCoins = 1;
             }
             this.maxHiddenBricks = Mathf.RoundToInt(totalBricks / 15.0f);
-            this.maxDeaths = Mathf.RoundToInt(totalBricks / 15.0f);
+            this.maxDeaths = Mathf.RoundToInt(totalBricks / 25.0f);
             this.maxMults = Mathf.RoundToInt(totalBricks / 20.0f);
             this.maxAds = Mathf.RoundToInt(totalBricks / 30.0f);
             if (this.maxAds < 1)
@@ -351,7 +351,7 @@ public class AddExtrasCmd
         }
     }
 
-    private static NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 2, 3, 4 });
+    private static NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 2, 3 });
 
     private bool AddDeath(SlotColumnData column, int atIndex)
     {
