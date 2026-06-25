@@ -17,5 +17,5 @@ MonoBehaviour:
   enableKotlinXCoroutinesPackagingOption: 1
   optimizeInitialization: 1
   optimizeAdLoading: 1
-  userTrackingUsageDescription: 
+  userTrackingUsageDescription: This identifier will be used to deliver more relevant ads and support the game.
   validateGradleDependencies: 0
