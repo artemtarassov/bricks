@@ -9,7 +9,13 @@ public class ToastCmd
     }
     public void Run()
     {
-        viewModel.ShowToast(msg);
-        new SoundCmd(SoundModel.Instance.ERROR).Run(); 
+        viewModel.ShowToast(new ToastMsg { text = msg });
+        new SoundCmd(SoundModel.Instance.ERROR).Run();
+    }
+
+    public void Run(BuildingName buildingName)
+    {
+        viewModel.ShowToast(new ToastMsg { text = msg, challenge = buildingName });
+        new SoundCmd(SoundModel.Instance.MAGIC_LIGHT).Run();
     }
 }

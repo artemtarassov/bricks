@@ -10,19 +10,25 @@ public class GoBackBtnCmd
         new HideViewCmd().Run();
 
         var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-        if (progress.State == BuildingState.Playing || progress.State == BuildingState.Completed)
-        {
-            //ok
-        }
-        else
-        {
-            return;
-        }
+        var currentBuildingName = progress.BuildingName;
 
-        PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
+
         var currentElement = ModelUtils.GetCurrentElement();
         var index = CityModel.Instance.GetElementIndex(currentElement);
         CityModel.Instance.ActivateElements(index - 1);
+
+        if (BuildingNameUtil.IsChallengeBuilding(currentBuildingName))
+        {
+            var firstBuilding = BuildingNameUtil.allBuildingNamesRegular[0];
+            PlayerModel.Instance.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
+            CityModel.Instance.SetCurrentBuildingName(firstBuilding);
+        }
+        else
+        {
+            PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
+            CityModel.Instance.SetCurrentBuildingName(progress.BuildingName);
+        }
+
         ViewModel.Instance.ResetOutOfSpaceCounter();
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
 

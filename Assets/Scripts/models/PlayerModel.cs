@@ -63,22 +63,6 @@ public class PlayerModel
         }
     }
 
-    public List<BuildingName> GetVisibleBuildingNames()
-    {
-        var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
-        var result = new List<BuildingName>();
-        foreach (var buildingName in allBuildingNames)
-        {
-            var progress = playerData.GetBuildingProgressByName(buildingName);
-            Assert.IsNotNull(progress, "no progress for building " + buildingName);
-            if (progress.State != BuildingState.Locked)
-            {
-                result.Add(buildingName);
-            }
-        }
-        return result;
-    }
-
     public bool IsSettingEnabled(SettingsKey key)
     {
         return playerData.enabledSettings.Contains(key);

@@ -14,9 +14,12 @@ public class SlotElement : MonoBehaviour
 
     [SerializeField] public GameObject death;
 
+    [SerializeField] public GameObject seconds;
+
 
     [SerializeField] private TMP_Text count;
     [SerializeField] private UIBrick uiBrick;
+    [SerializeField] private ChallengeIcon challengeIcon;
 
     [HideInInspector]
     public SlotElementData slotElementData;
@@ -32,6 +35,16 @@ public class SlotElement : MonoBehaviour
         if (data == null)
         {
             SetupAsEmpty();
+            return;
+        }
+        if (data.type == SlotElementType.AddSecondsInChallenge)
+        {
+            SetupWithSecondsInChallenge();
+            return;
+        }
+        if (data.type == SlotElementType.UnlockChallenge)
+        {
+            SetupWithChallenge();
             return;
         }
         if (data.type == SlotElementType.Bricks)
@@ -143,6 +156,21 @@ public class SlotElement : MonoBehaviour
         this.addMoreBricks.SetActive(true);
     }
 
+    private void SetupWithChallenge()
+    {
+        this.SetupAsEmpty();
+        this.challengeIcon.gameObject.SetActive(true);
+        this.challengeIcon.Setup(this.slotElementData.challenge);
+    }
+
+    private void SetupWithSecondsInChallenge()
+    {
+        this.SetupAsEmpty();
+        this.seconds.gameObject.SetActive(true);
+        this.count.text = "+" + this.slotElementData.secondsToAdd.ToString();
+        this.count.gameObject.SetActive(true);
+    }
+
     private void SetupAsEmpty()
     {
         this.uiBrick.gameObject.SetActive(false);
@@ -153,5 +181,7 @@ public class SlotElement : MonoBehaviour
         this.ad.SetActive(false);
         this.explosion.SetActive(false);
         this.death.SetActive(false);
+        this.challengeIcon.gameObject.SetActive(false);
+        this.seconds.gameObject.SetActive(false);
     }
 }

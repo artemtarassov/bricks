@@ -34,6 +34,22 @@ public class SelectColumnCmd
 
         PlayerModel.Instance.playerData.isDirty = true;
 
+        if (this.data.type == SlotElementType.AddSecondsInChallenge)
+        {
+            //todo.
+            SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            return;
+        }
+
+        if (this.data.type == SlotElementType.UnlockChallenge)
+        {
+            ChallengeModel.Instance.UnlockChallenge(this.data.challenge);
+            SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            var msgText = "New challenge unlocked!";
+            new ToastCmd(msgText).Run(this.data.challenge);
+            return;
+        }
+
         if (this.data.type == SlotElementType.Coins)
         {
             var nCoins = RemoteConfigModel.Instance.RemoteConfig.ColumnCoins;

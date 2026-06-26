@@ -14,6 +14,8 @@ public class DebugController : MonoBehaviour
 
     [SerializeField] Button completeElement;
 
+    [SerializeField] Button cha1;
+
     void Awake()
     {
 #if !UNITY_EDITOR
@@ -29,7 +31,12 @@ public class DebugController : MonoBehaviour
         this.moveCameraToElementGroupBtn.onClick.AddListener(OnMoveCameraToElementGroupClicked);
         this.completeCurrentGroupBtn.onClick.AddListener(OnCompleteCurrentGroupClicked);
         this.rocketBtn.onClick.AddListener(OnRocketBtnClicked);
-         this.completeElement.onClick.AddListener(OnCompleteElementClicked);
+        this.completeElement.onClick.AddListener(OnCompleteElementClicked);
+
+        this.cha1.onClick.AddListener(() =>
+        {
+            new SwitchBuildingCmd().Run(BuildingName.Challenge_House_Cat01);
+        });
     }
 
     private void OnRocketBtnClicked()

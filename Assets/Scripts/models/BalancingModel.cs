@@ -65,20 +65,6 @@ public class BalancingModel
         return d.Clone();
     }
 
-    public BuildingName GetNextGroup(BuildingName buildingName)
-    {
-        Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetNextGroup: groups is null, did you forget to call Load()?");
-        Assert.IsFalse(buildingName == BuildingName.Undefined, "BalancingModel GetNextGroup: buildingName is undefined");
-        var index = this.buildingDataContainer.buildings.FindIndex(g => g.BuildingName == buildingName);
-        Assert.IsTrue(index >= 0, $"BalancingModel GetNextGroup: no data found for building {buildingName}");
-        var nextIndex = index + 1;
-        if (nextIndex >= this.buildingDataContainer.buildings.Count)
-        {
-            throw new Exception($"BalancingModel GetNextGroup: no next building found for building {buildingName}, index: {index}, nextIndex: {nextIndex}, total buildings: {this.buildingDataContainer.buildings.Count}");
-        }
-        return this.buildingDataContainer.buildings[nextIndex].BuildingName;
-    }
-
     public CityElementDataContainer GetDataCopy(BuildingName buildingName, string dataKey)
     {
         Assert.IsNotNull(this.buildingDataContainer, "BalancingModel GetData: groups is null, did you forget to call Load()?");
@@ -165,11 +151,6 @@ public class BalancingWriter
         }
     }
 #endif
-
-    public List<BuildingName> GetAllBuildingNames()
-    {
-        return BuildingNameUtil.GetAllBuildingNames();
-    }
 
     public void Delete()
     {

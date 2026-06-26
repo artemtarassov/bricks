@@ -7,11 +7,10 @@ using UnityEngine.UI;
 using Unity.VisualScripting;
 using System.Linq;
 
-public class FinishElementController : MonoBehaviour
+public class FinishElementSlideDownController : MonoBehaviour
 {
     [SerializeField] private GameObject content;
     [SerializeField] private SlideDown slideDown;
-    [SerializeField] private Button nextButton;
 
     private Vector3 startPos;
 

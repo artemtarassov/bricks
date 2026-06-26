@@ -19,6 +19,16 @@ public class LogEventCmd
             new LogEventCmd().Run("out_of_space", dict);
         }
     }
+
+    public static void OutOfTime()
+    {
+        {
+            var dict = new Dictionary<string, object>();
+            dict["buildingName"] = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName.ToString();
+            new LogEventCmd().Run("out_of_time", dict);
+        }
+    }
+
     private static UnityAnalyticsCache cache = null;
     public void Run(string logEventName, Dictionary<string, object> dict)
     {

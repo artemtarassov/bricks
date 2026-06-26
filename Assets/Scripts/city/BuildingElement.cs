@@ -26,7 +26,7 @@ public class BuildingElement : MonoBehaviour
         {
             elements = new HashSet<CityElement>(this.GetComponentsInChildren<CityElement>(true));
         }
-        Assert.IsTrue(elements.Count > 1, $"BuildingElement {BuildingName} has no CityElements");
+        Assert.IsTrue(elements.Count > 0, $"BuildingElement {BuildingName} has no CityElements");
 #if UNITY_EDITOR
         //ensure that all elements have unique data keys
         var dataKeys = new HashSet<string>();

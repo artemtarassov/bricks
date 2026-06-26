@@ -3,16 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-[Serializable]
-
-public enum BuildingState
-{
-    Locked = 1,
-    Unlocked = 2,
-    Playing = 3,
-    Completed = 4,
-    Premium = 5,
-}
 
 [Serializable]
 public class BuildingProgressData

@@ -7,6 +7,11 @@ public sealed class Loca
 {
     public static string GetThemeName(BuildingName buildingName)
     {
+        if (BuildingNameUtil.IsChallengeBuilding(buildingName))
+        {
+            var index = BuildingNameUtil.allBuildingNamesChallenges.FindIndex(g => g == buildingName);
+            return "Challenge " + (index + 1);
+        }
         switch (buildingName)
         {
             case BuildingName.Preset_Bath_House_01:

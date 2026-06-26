@@ -6,6 +6,12 @@ using DG.Tweening;
 
 public class FakeAppLoaderController : MonoBehaviour
 {
+#if UNITY_EDITOR
+    void Awake()
+    {
+        Destroy(this.gameObject);
+    }
+#endif
     void Start()
     {
         var isFirstStart = RemoteConfigData.HasSavedData() == false;

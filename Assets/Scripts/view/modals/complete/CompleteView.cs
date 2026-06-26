@@ -21,7 +21,17 @@ public class CompleteView : DefaultView
     [SerializeField] private GameObject overlayCollected2x;
     private bool rewardCollected;
 
-    private int CompleteRewardCoins => RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins;
+    private int GetCompleteRewardCoins()
+    {
+        if (BuildingNameUtil.IsChallengeBuilding(currentBuildingName))
+        {
+            return RemoteConfigModel.Instance.RemoteConfig.CompleteChallengeRewardCoins;
+        }
+        else
+        {
+            return RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins;
+        }
+    }
 
     void Start()
     {
@@ -37,7 +47,7 @@ public class CompleteView : DefaultView
         }
         this.overlayCollected.SetActive(true);
         this.rewardCollected = true;
-        this.AddCoins(CompleteRewardCoins);
+        this.AddCoins(GetCompleteRewardCoins());
     }
 
 
@@ -70,19 +80,19 @@ public class CompleteView : DefaultView
         AdModel.Instance.OnRewardEarned -= OnRewardEarned;
     }
 
+    private BuildingName currentBuildingName => PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
+
     public override void OnShown()
     {
         AdModel.Instance.OnRewardEarned += OnRewardEarned;
-        var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
         this.rewardCollected = false;
         this.overlayCollected.SetActive(false);
         this.overlayCollected2x.SetActive(false);
         this.particles.SetActive(true);
         this.coinsIcon.gameObject.SetActive(true);
         this.coins.gameObject.SetActive(true);
-        this.coins.text = "Bonus: " + RemoteConfigModel.Instance.RemoteConfig.CompleteRewardCoins.ToString() + "";
+        this.coins.text = "Bonus: " + GetCompleteRewardCoins() + "";
         this.title.text = Loca.GetThemeName(currentBuildingName);
-
         var canvasGroup = this.GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0;
         canvasGroup.DOFade(1, Durations.ViewFadeIn);
@@ -101,7 +111,7 @@ public class CompleteView : DefaultView
         {
             this.overlayCollected2x.SetActive(true);
             this.rewardCollected = true;
-            this.AddCoins(CompleteRewardCoins * 2);
+            this.AddCoins(GetCompleteRewardCoins() * 2);
         }
     }
 

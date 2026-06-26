@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class OutOfSpaceView : DefaultView
@@ -9,6 +10,8 @@ public class OutOfSpaceView : DefaultView
     [SerializeField] private AttemptsRow attemptsRow;
 
     [SerializeField] private GameObject tapToClose;
+
+    [SerializeField] private TMP_Text title;
 
     void Start()
     {
@@ -31,6 +34,10 @@ public class OutOfSpaceView : DefaultView
         this.btnContinue.gameObject.SetActive(a > 0);
         this.btnRestart.gameObject.SetActive(a == 0);
         this.tapToClose.gameObject.SetActive(a > 0);
+
+
+        //continue here
+
     }
 
     private void OnFreeAttemptClicked()
@@ -69,11 +76,5 @@ public class OutOfSpaceView : DefaultView
     public override void OnBackgroundTap()
     {
         new HideViewCmd(ViewName.OutOfSpaceView).Run();
-        // new GoBackBtnCmd().Run();
-        /*
-        var a = PlayerModel.Instance.playerData.attempts;
-        var isGameOver = a == 0;
-        if (!isGameOver)
-            new HideViewCmd(ViewName.OutOfSpaceView).Run();*/
     }
 }

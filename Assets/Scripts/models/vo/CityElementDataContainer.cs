@@ -12,6 +12,8 @@ public class CityElementDataContainer
     public List<BrickData> brickDataList;
     public List<SlotColumnData> columns;
 
+    public FinishElementType finishElementType = FinishElementType.Undefined;
+
     public CityElementDataContainer(string dataKey)
     {
         Assert.IsFalse(string.IsNullOrEmpty(dataKey), "CityElementDataContainer: dataKey should not be null or empty");

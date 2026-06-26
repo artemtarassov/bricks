@@ -3,6 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
+public class ToastMsg
+{
+    public string text;
+    public BuildingName challenge = BuildingName.Undefined;
+}
+
+[Serializable]
+
+public enum FinishElementType
+{
+    Undefined = 0,
+    SlideDown = 100,
+    Explosion = 200
+}
+
+
+[Serializable]
+
+public enum BuildingState
+{
+    Locked = 1,
+    Unlocked = 2,
+    Playing = 3,
+    Completed = 4,
+    Premium = 5,
+}
+
 [Serializable]
 public enum BuildingName
 {
@@ -10,30 +38,61 @@ public enum BuildingName
     Preset_House_05 = 100,
     Ruins1_House = 200,
     Tower_House = 300,
-    Preset_Bath_House_01 = 400
+    Preset_Bath_House_01 = 400,
+
+    Challenge_House_Cat01 = 100100,
+    Challenge_House_Rabbit01 = 100200,
+    Challenge_House_Bear01 = 100300,
+    Challenge_House_Shark01 = 100400,
+    Challenge_House_Frog01 = 100500,
+    Challenge_House_Octopus01 = 100600,
+    Challenge_House_Sailbot01 = 100700,
+    Challenge_House_HotChocolate01 = 100800,
+    Challenge_House_Crystals01 = 100900,
+    Challenge_House_Cake01 = 101000
+
 }
 
 public class BuildingNameUtil
 {
-    private static List<BuildingName> allBuildingNames;
-    public static List<BuildingName> GetAllBuildingNames()
+    public static readonly List<BuildingName> allBuildingNamesRegular = new List<BuildingName>() {
+        BuildingName.Preset_House_05,
+        BuildingName.Ruins1_House,
+        BuildingName.Tower_House,
+        BuildingName.Preset_Bath_House_01
+    };
+    public static readonly List<BuildingName> allBuildingNamesChallenges = new List<BuildingName>() {
+        BuildingName.Challenge_House_Cat01,
+        BuildingName.Challenge_House_Rabbit01,
+        BuildingName.Challenge_House_Bear01,
+        BuildingName.Challenge_House_Shark01,
+        BuildingName.Challenge_House_Frog01,
+        BuildingName.Challenge_House_Octopus01,
+        BuildingName.Challenge_House_Sailbot01,
+        BuildingName.Challenge_House_HotChocolate01,
+        BuildingName.Challenge_House_Crystals01,
+        BuildingName.Challenge_House_Cake01
+    };
+    private static readonly List<BuildingName> allBuildingNamesAll = allBuildingNamesRegular.Concat(allBuildingNamesChallenges).ToList();
+
+    public static List<BuildingName> GetAllBuildingNames(bool includeChallenges)
     {
-        if (allBuildingNames != null)
-        {
-            return allBuildingNames;
-        }
-        allBuildingNames = Enum.GetValues(typeof(BuildingName)).Cast<BuildingName>().Where(v => v != BuildingName.Undefined).ToList();
-        return allBuildingNames;
+        return includeChallenges ? allBuildingNamesAll : allBuildingNamesRegular;
     }
     public static BuildingName GetBuildingNameByString(string name)
     {
-        var result = GetAllBuildingNames().Find(b => b.ToString() == name);
+        var result = GetAllBuildingNames(true).Find(b => b.ToString() == name);
         return result;
     }
 
     public static bool IsPremiumBuilding(BuildingName buildingName)
     {
         return buildingName == BuildingName.Preset_Bath_House_01;
+    }
+
+    public static bool IsChallengeBuilding(BuildingName buildingName)
+    {
+        return allBuildingNamesChallenges.Contains(buildingName);
     }
 }
 
@@ -71,7 +130,9 @@ public enum SlotElementType
     Ad = 5,
     FinalExplosion = 6,
     EmitterDeathWaiting = 7,
-    EmitterDeathActive = 8
+    EmitterDeathActive = 8,
+    UnlockChallenge = 9,
+    AddSecondsInChallenge = 10//only for challenges
 }
 
 [Serializable]
@@ -85,6 +146,10 @@ public class SlotElementData
     private BrickData brickData = null;
 
     public int deadCounter = 0;
+
+    public int secondsToAdd = 0; //only for challenges
+
+    public BuildingName challenge = BuildingName.Undefined;
 
     public BrickData BrickData
     {
@@ -124,14 +189,6 @@ public class SlotElementData
         return true;
     }
 
-    /*public bool IsInEmitter()
-    {
-        if (this.brickData == null)
-        {
-            return false;
-        }
-        return this.brickData.inEmitter;
-    }*/
     public void ResetEmittingStates()
     {
         if (BrickData != null)

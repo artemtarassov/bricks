@@ -22,7 +22,12 @@ public class CompleteElementCmd
             DOVirtual.DelayedCall(0.4f + delay, ViewModel.Instance.PlayAnnouncer);
         }
         CityModel.Instance.OnElementCompleted?.Invoke(cityElement);
-        ViewModel.Instance.ChangeBottomNav(BottomNav.FinishElement);
+
+        var fet = cityElement.dataContainer.finishElementType;
+        if (fet == FinishElementType.SlideDown || fet == FinishElementType.Undefined)
+        {
+            ViewModel.Instance.ChangeBottomNav(BottomNav.FinishElement);
+        }
     }
 
 }

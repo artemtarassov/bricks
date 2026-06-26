@@ -106,10 +106,21 @@ public class CameraFlyController : MonoBehaviour
         var currentBuildingName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
         Debug.Log($"CameraFlyController OnMoveCameraToBuilding: moving camera to building {currentBuildingName}");
         var currentBuilding = CityModel.Instance.GetBuildingByName(currentBuildingName);
-        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == currentBuildingName.ToString());
-        Assert.IsNotNull(spline, "CameraFlyController OnMoveCameraToBuilding: no spline found for building " + currentBuildingName);
+        var spline = this.GetSpline(currentBuildingName);
         this.lookAt = currentBuilding.GetCamCenterPos();
         MoveCameraLongSpline(spline, Durations.CamOrbit);
+    }
+
+    private BezierSpline GetSpline(BuildingName currentBuildingName)
+    {
+        var splineName = currentBuildingName.ToString();
+        if (BuildingNameUtil.IsChallengeBuilding(currentBuildingName))
+        {
+            splineName = "Challenges";
+        }
+        var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == splineName);
+        Assert.IsNotNull(spline, "CameraFlyController OnMoveCameraToBuilding: no spline found for building " + currentBuildingName);
+        return spline;
     }
 
 
@@ -122,11 +133,13 @@ public class CameraFlyController : MonoBehaviour
         cam.transform.position = spline.GetPoint(0);
         cam.transform.LookAt(lookAt);
 
+        var yShift = 2.0f;
+
         DOTween.To(
             () => 0f,
             progress =>
             {
-                lookAtChanged = (lookAt.position + new Vector3(0, 3.0f - progress * 6, 0));
+                lookAtChanged = (lookAt.position + new Vector3(0, (yShift / 2.0f) - progress * yShift, 0));
             },
             1f,
             duration / 2

@@ -9,7 +9,7 @@ public class ValidateDataCmd
     public void Run()
     {
 
-        var list = BuildingNameUtil.GetAllBuildingNames();
+        var list = BuildingNameUtil.GetAllBuildingNames(false);
         Debug.Log("ValidateDataCmd: validating data for buildings " + string.Join(", ", list));
 
         foreach (var buildingName in list)

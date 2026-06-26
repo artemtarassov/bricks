@@ -20,7 +20,9 @@ public enum RemoteConfigProperty
     ShowBannerAfterSec = 10,
     ShowMidSessionAdAfterSec = 11,
     Announcer = 12,
-    FillAttemptsAfterRestart = 13
+    FillAttemptsAfterRestart = 13,
+    FinishElementType = 14,
+    CompleteChallengeRewardCoins = 15,
 }
 
 [Serializable]
@@ -72,6 +74,7 @@ public class RemoteConfigData
     public int DailyRewardCoinsGoldenTicketTemp => GetValue(RemoteConfigProperty.DailyRewardCoinsGoldenTicketTemp, 1000);
 
     public int CompleteRewardCoins => GetValue(RemoteConfigProperty.CompleteRewardCoins, 500);
+    public int CompleteChallengeRewardCoins => GetValue(RemoteConfigProperty.CompleteChallengeRewardCoins, 100);
 
     public int ColumnCoins => GetValue(RemoteConfigProperty.ColumnCoins, 50);
 
@@ -85,6 +88,7 @@ public class RemoteConfigData
     public bool Announcer => GetValue(RemoteConfigProperty.Announcer, 1) == 1;
     public bool FillAttemptsAfterRestart => GetValue(RemoteConfigProperty.FillAttemptsAfterRestart, 1) == 1;
 
+    public int FinishElementType => GetValue(RemoteConfigProperty.FinishElementType, 0);//0=undefined,SlideDown=100, Explosion=200
     public static RemoteConfigData Load()
     {
         try

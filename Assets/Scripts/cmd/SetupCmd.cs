@@ -10,7 +10,7 @@ public class SetupCmd
 #endif
 
 #if UNITY_EDITOR
-                //FilePrefs.DeleteAll(); //for testing only, remove in production
+                FilePrefs.DeleteAll(); //for testing only, remove in production
 #endif
 
                 PlayerModel.Instance = new PlayerModel();
@@ -21,6 +21,9 @@ public class SetupCmd
 #endif
 
                 RemoteConfigModel.Instance = new RemoteConfigModel();
+                ChallengeModel.Instance = new ChallengeModel();
+                ChallengeModel.Instance.Load();
+                
                 CamModel.Instance = new CamModel();
 
                 IAPModel.Instance = new IAPModel();
@@ -40,11 +43,11 @@ public class SetupCmd
                 var cityElementGroups = root.GetComponentsInChildren<BuildingElement>(true).ToList();
                 new SetupCityCmd().Run(cityElementGroups);
 
-                #if !UNITY_EDITOR
+#if !UNITY_EDITOR
                 new InitServicesCmd().Run(root);
 
                 root.gameObject.AddComponent<MobilePerformanceController>();
-                #endif
+#endif
         }
 
 

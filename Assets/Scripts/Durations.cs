@@ -16,6 +16,7 @@ public static class Durations
 
     public const float RocketFlyDuration = 0.75f;
 
+    public const float ToastFade = 0.4f;
 
     public const float ViewFadeIn = 1.0f;
     public const float ViewFadeOut = 0.5f;

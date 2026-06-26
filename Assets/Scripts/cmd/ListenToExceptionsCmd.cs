@@ -40,7 +40,7 @@ public class ListenToExceptionsCmd
                 try
                 {
                     var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-                    var themeIndex = BuildingNameUtil.GetAllBuildingNames().FindIndex(g => g == progress.BuildingName);
+                    var themeIndex = BuildingNameUtil.GetAllBuildingNames(true).FindIndex(g => g == progress.BuildingName);
                     var currentElement = ModelUtils.GetCurrentElement();
                     dict = new Dictionary<string, object>();
                     dict["themeIndex"] = themeIndex;

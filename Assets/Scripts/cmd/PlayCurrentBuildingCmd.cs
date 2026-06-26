@@ -6,6 +6,12 @@ using UnityEngine.Assertions;
 
 public class PlayCurrentBuildingCmd
 {
+    public void Run(BuildingName bn)
+    {
+        PlayerModel.Instance.SetCurrentBuilding(bn, BuildingState.Unlocked);
+        CityModel.Instance.SetCurrentBuildingName(bn);
+        this.Run();
+    }
     public void Run()
     {
         ViewModel.Instance.Fade(FadeType.Flash);
@@ -15,24 +21,24 @@ public class PlayCurrentBuildingCmd
 
         if (state == BuildingState.Locked)
         {
-            throw new System.Exception($"PlayCurrentGroupCmd: current group {buildingName} is locked");
+            throw new System.Exception($"PlayCurrentBuildingCmd: current building {buildingName} is locked");
         }
 
         if (state == BuildingState.Completed)
         {
-            throw new System.Exception($"PlayCurrentGroupCmd: current group {buildingName} is already completed");
+            throw new System.Exception($"PlayCurrentBuildingCmd: current building {buildingName} is already completed");
         }
 
-        var group = CityModel.Instance.GetBuildingByName(buildingName);
-        Assert.IsNotNull(group, $"PlayCurrentGroupCmd: failed to find group with name {buildingName}");
+        var building = CityModel.Instance.GetBuildingByName(buildingName);
+        Assert.IsNotNull(building, $"PlayCurrentBuildingCmd: failed to find building with name {buildingName}");
 
 
         var progress = pd.GetCurrentBuildingProgress();
-        Assert.IsNotNull(progress, $"PlayCurrentGroupCmd: failed to find progress for current building {buildingName}");
+        Assert.IsNotNull(progress, $"PlayCurrentBuildingCmd: failed to find progress for current building {buildingName}");
 
         if (progress.GetCurrentElement() == null)
         {
-            var elements = group.GetElements();
+            var elements = building.GetElements();
             var firstElement = elements.FirstOrDefault();
             Assert.IsNotNull(firstElement, $"PlayCurrentGroupCmd: failed to find first element in building {buildingName}");
             this.MoveCameraToCityElement(firstElement);
@@ -40,7 +46,7 @@ public class PlayCurrentBuildingCmd
         }
         else
         {
-            var currentElement = group.GetElements().ToList().Find(e => e.dataKey == progress.GetCurrentElement().dataKey);
+            var currentElement = building.GetElements().ToList().Find(e => e.dataKey == progress.GetCurrentElement().dataKey);
             Assert.IsNotNull(currentElement, $"PlayCurrentGroupCmd: failed to find current element with dataKey {progress.GetCurrentElement().dataKey} in building {buildingName}");
             this.MoveCameraToCityElement(currentElement);
             Debug.Log("PlayCurrentGroupCmd: playing building " + buildingName + " current element " + currentElement.dataKey);

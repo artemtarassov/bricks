@@ -19,6 +19,16 @@ public class ModelUtils
         return cityElement;
     }
 
+    public static bool IsOutOfTime()
+    {
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (!BuildingNameUtil.IsChallengeBuilding(progress.BuildingName))
+        {
+            return false;
+        }
+        return ChallengeModel.Instance.GetSecondsLeft() == 0;
+    }
+
     public static bool IsOutOfSpace()
     {
         var element = GetCurrentElement();

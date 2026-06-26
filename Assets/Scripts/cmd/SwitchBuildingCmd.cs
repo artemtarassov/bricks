@@ -13,7 +13,7 @@ public class SwitchBuildingCmd
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
 
-        var buildingNames = BuildingNameUtil.GetAllBuildingNames();
+        var buildingNames = BuildingNameUtil.GetAllBuildingNames(true);
         var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
         var nextBuildingIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
         if (nextBuildingIndex < 0)
@@ -26,6 +26,14 @@ public class SwitchBuildingCmd
         }
         var nextBuildingName = buildingNames[nextBuildingIndex];
         Assert.IsFalse(nextBuildingName == BuildingName.Undefined, "SwitchBuildingCmd: nextBuildingName is undefined");
+        this.Run(nextBuildingName);
+    }
+
+    public void Run(BuildingName nextBuildingName)
+    {
+        var cityModel = CityModel.Instance;
+        var playerModel = PlayerModel.Instance;
+        var pd = playerModel.playerData;
         var progress = pd.GetBuildingProgressByName(nextBuildingName);
         Assert.IsNotNull(progress, $"SwitchBuildingCmd: progress is null for building {nextBuildingName}");
         cityModel.SetCurrentBuildingName(nextBuildingName);
@@ -38,25 +46,9 @@ public class SwitchBuildingCmd
             cityModel.ActivateElements(index - 1);
         }
 
-
         CamModel.Instance.MoveCameraToBuilding();
-
-        /*var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
-        for (var i = 0; i < allBuildingNames.Count; i++)
-        {
-            var buildingName = allBuildingNames[i];
-            var building = cityModel.GetBuildingByName(buildingName);
-            building.gameObject.SetActive(buildingName == nextBuildingName);
-        }*/
-
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
         ViewModel.Instance.Fade(FadeType.Flash);
-
-        /*
-                RenderSettings.skybox = null;
-                Camera.main.clearFlags = CameraClearFlags.SolidColor;
-                Camera.main.backgroundColor = Color.red;
-        */
         ChangeSkyMaterial(nextBuildingName);
     }
 

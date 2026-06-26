@@ -32,19 +32,6 @@ public class CompleteCurrentBuildingCmd
             element.EnableBricks(false);
             element.EnableVisuals(true);
         }
-        //Debug.Log("CompleteCurrentBuildingCmd: completed building " + currentBuildingName + " elements " + allElements.Count);
-
-
-        var allBuildingNames = BuildingNameUtil.GetAllBuildingNames();
-        var currentBuildingIndex = allBuildingNames.IndexOf(currentBuildingName);
-        var nextBuildingIndex = currentBuildingIndex + 1;
-        if (nextBuildingIndex < allBuildingNames.Count)
-        {
-            var nextBuildingName = allBuildingNames[nextBuildingIndex];
-            playerModel.playerData.GetBuildingProgressByName(nextBuildingName).SetState(BuildingState.Unlocked);
-        }
-
-
 
         CamModel.Instance.MoveCameraToBuilding();
         ViewModel.Instance.Fade(FadeType.Flash);

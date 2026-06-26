@@ -13,7 +13,7 @@ public class UnlockNextCmd
 
     private CityElementDataContainer currentElementData;
     private BuildingName currentBuildingName;
-    private BuildingData currentBuildingData;
+    //private BuildingData currentBuildingData;
 
     private readonly int firstCityElementIndex = 0;
 
@@ -32,13 +32,12 @@ public class UnlockNextCmd
     {
         Debug.Log("UnlockNextCmd Run with currentBuildingName " + currentBuildingName + ", currentElement " + (currentElementData != null ? currentElementData.dataKey : "null"));
 
-        this.currentBuildingData = balancingModel.GetDataCopy(this.currentBuildingName);
         ViewModel.Instance.ResetOutOfSpaceCounter();
 
         if (currentElementData == null)
         {
             var firstElementName = cityModel.GetElementByIndex(firstCityElementIndex).dataKey;
-            currentElementData = currentBuildingData.cityElementDataList.Find(e => e.dataKey == firstElementName);
+            currentElementData = CreateCityElementData(firstElementName);
             progress.ResetElementsCounter();
             progress.SetCurrentElement(currentElementData);
             progress.currentElementIndex = 0;
@@ -69,7 +68,7 @@ public class UnlockNextCmd
                     return;
                 }
                 var nextElement = elementsInBuilding[nextElementIndexInBuilding];
-                var nextElementData = currentBuildingData.cityElementDataList.Find((e) => e.dataKey == nextElement.dataKey);
+                var nextElementData = CreateCityElementData(nextElement.dataKey);
                 progress.SetCurrentElement(nextElementData);
                 currentElementData = nextElementData;
             }
@@ -80,6 +79,16 @@ public class UnlockNextCmd
         new SoundCmd(SoundModel.Instance.MUSIC1).Run();
     }
 
+    private CityElementDataContainer CreateCityElementData(string dataKey)
+    {
+        var currentBuildingData = balancingModel.GetDataCopy(this.currentBuildingName);
+        Assert.IsNotNull(currentBuildingData, $"UnlockNextCmd CreateCityElementData: failed to find balancing data for building {this.currentBuildingName}");
+        var d = currentBuildingData.cityElementDataList.Find((e) => e.dataKey == dataKey);
+        Assert.IsNotNull(d, $"UnlockNextCmd CreateCityElementData: failed to find city element data with dataKey {dataKey} in building {this.currentBuildingName}");
+        var rm = RemoteConfigModel.Instance.RemoteConfig;
+        d.finishElementType = (FinishElementType)rm.FinishElementType;
+        return d;
+    }
 
     private void UnlockElement(CityElementDataContainer currentElementData)
     {

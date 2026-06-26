@@ -14,7 +14,8 @@ public enum ViewName
     OutOfSpaceView,
     SettingsView,
     GoldenTicketView,
-    CompleteView
+    CompleteView,
+    ChallengesView
 }
 
 
@@ -64,7 +65,7 @@ public class ViewModel
     public Action<string, Vector2> OnShowParticles;
     public bool SetupCompleted { get; private set; } = false;
 
-    public Action<string> OnToastMsg;
+    public Action<ToastMsg> OnToastMsg;
 
     public Action OnSetupCompleted;
 
@@ -145,9 +146,9 @@ public class ViewModel
         return viewDataStack;
     }
 
-    public void ShowToast(string msg)
+    public void ShowToast(ToastMsg toastMsg)
     {
-        OnToastMsg?.Invoke(msg);
+        OnToastMsg?.Invoke(toastMsg);
     }
 
     public void LockUI(float sec)

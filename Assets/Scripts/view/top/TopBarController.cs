@@ -18,6 +18,8 @@ public class TopBarController : MonoBehaviour
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button backButton;
 
+    [SerializeField] private Button challengesButton;
+
     private ViewModel viewModel => ViewModel.Instance;
     private PlayerModel playerModel => PlayerModel.Instance;
     private RectTransform rootRectTransform;
@@ -38,6 +40,12 @@ public class TopBarController : MonoBehaviour
 
         Subscribe();
         this.isInitialized = true;
+        Refresh();
+    }
+
+    private void OnChallengesButtonClicked()
+    {
+        new ShowViewCmd(ViewName.ChallengesView).Run();
     }
 
     private void OnDestroy()
@@ -78,6 +86,7 @@ public class TopBarController : MonoBehaviour
         this.playerModel.OnPlayerDataChanged += OnPlayerDataChanged;
         this.settingsButton.onClick.AddListener(OnSettingsButtonClicked);
         this.backButton.onClick.AddListener(OnBackButtonClicked);
+        this.challengesButton.onClick.AddListener(OnChallengesButtonClicked);
     }
 
     private void Unsubscribe()
@@ -86,6 +95,7 @@ public class TopBarController : MonoBehaviour
         this.playerModel.OnPlayerDataChanged -= OnPlayerDataChanged;
         this.settingsButton.onClick.RemoveListener(OnSettingsButtonClicked);
         this.backButton.onClick.RemoveListener(OnBackButtonClicked);
+        this.challengesButton.onClick.RemoveListener(OnChallengesButtonClicked);
     }
 
     private void Refresh(bool forceCoinsSync = false)
@@ -106,8 +116,18 @@ public class TopBarController : MonoBehaviour
 
     private void UpdateNavigationVisibility(BottomNav bottomNav, int coins)
     {
+        
         this.backButton.gameObject.SetActive(bottomNav == BottomNav.FinishElement || bottomNav == BottomNav.Slots);
         this.coinsObject.SetActive(coins > 0 || bottomNav == BottomNav.Slots);
+
+        var lastUnlockedChallenge = ChallengeModel.Instance.GetLastUnlockedChallenge();
+        //Debug.Log("lastUnlockedChallenge " + lastUnlockedChallenge);
+        this.challengesButton.gameObject.SetActive(bottomNav == BottomNav.MainNav && lastUnlockedChallenge != BuildingName.Undefined);
+        if (this.challengesButton.gameObject.activeSelf)
+        {
+            var icon = this.challengesButton.GetComponentInChildren<ChallengeIcon>();
+            icon.Setup(lastUnlockedChallenge);
+        }
     }
 
     private void UpdateCoinsDisplay(int coins, bool forceImmediate)

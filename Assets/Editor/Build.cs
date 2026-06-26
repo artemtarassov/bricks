@@ -249,7 +249,7 @@ public class Build
         Debug.Log("Updated Info.plist: " + plistPath);
 
     }
-    #endif
+#endif
     public static void All()
     {
         //AndroidApk();
@@ -294,8 +294,24 @@ public class Build
         }
     }
 
+    private static void UpdateObjectsInCanvas()
+    {
+        UpdateObjectInCanvas("DebugController", false);
+        UpdateObjectInCanvas("ShowMouseController", false);
+        UpdateObjectInCanvas("FakeAppLoaderController", true);
+    }
+
+    private static void UpdateObjectInCanvas(string objectName, bool setActive)
+    {
+        //tbd.
+        //throw error if this objects is not found.
+        //objectName is a child of "Canvas" object. find it and set setActive
+    }
+
     public static void AndroidAab()
     {
+        UpdateObjectsInCanvas();
+
         PlayerSettings.Android.keystoreName = "user.keystore"; //build/user.keystore
         PlayerSettings.Android.keystorePass = "123dabei";
         PlayerSettings.Android.keyaliasName = "solari";
@@ -332,6 +348,8 @@ public class Build
         DisableIosResolverPodfileGeneration();
 #endif
 
+        UpdateObjectsInCanvas();
+
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = Scenes;
         buildPlayerOptions.locationPathName = "build/ios";
@@ -344,9 +362,9 @@ public class Build
 
         if (summary.result == BuildResult.Succeeded)
         {
-            #if UNITY_IOS
+#if UNITY_IOS
             UpdateOtherFile();
-            #endif
+#endif
             Debug.Log("Build succeeded: " + summary.totalSize + " bytes");
             //DeleteEmptyStringFiles("./build/ios/I2Localization/");
 

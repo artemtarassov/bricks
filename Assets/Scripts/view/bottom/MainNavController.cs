@@ -161,12 +161,11 @@ public class MainNavController : MonoBehaviour
     private void UpdateLeftRightButtonVisibility()
     {
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var names = BuildingNameUtil.GetAllBuildingNames();
+        var names = BuildingNameUtil.GetAllBuildingNames(false);
 
         var currentIndex = names.IndexOf(currentBuildingName);
         var hasPrevious = currentIndex > 0;
         var hasNext = true;//currentIndex < names.Count - 1;
-
 
 
         //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: hasPrevious {hasPrevious} hasNext {hasNext}, currentIndex {currentIndex} unlockedBuildingNames count {unlockedBuildingNames.Count}");
@@ -202,7 +201,7 @@ public class MainNavController : MonoBehaviour
         new SoundCmd(SoundModel.Instance.CLICK1).Run();
 
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var names = BuildingNameUtil.GetAllBuildingNames();
+        var names = BuildingNameUtil.GetAllBuildingNames(false);
         var isLast = names.Last() == currentBuildingName;
 
         if (isLast)
