@@ -9,6 +9,7 @@ public class ShowThankyouCmd
     {
         CamModel.Instance.MoveCameraToSky();
         ViewModel.Instance.ChangeBottomNav(BottomNav.ThankYou);
+        ViewModel.Instance.ChangeTopNav(TopNav.None);
         ViewModel.Instance.Fade(FadeType.Flash);
     }
 

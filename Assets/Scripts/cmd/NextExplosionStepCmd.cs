@@ -33,7 +33,7 @@ public class NextExplosionStepCmd
             }
             else
             {
-                new UnlockNextCmd().Run();
+                new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.NextElement, true).Run();
             }
         }
     }

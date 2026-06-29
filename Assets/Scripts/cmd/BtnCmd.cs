@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine.Assertions;
 
 public class BtnCmd
@@ -10,30 +11,43 @@ public class BtnCmd
         FreeAttemptForAd,
         AddSpaceForAd,
         AddSpaceForIAP,
-        ContinueNextAttempt
+        Continue,
+        UseAttemptAndContinue
     }
 
     private PlayerModel playerModel => PlayerModel.Instance;
     private CityModel cityModel => CityModel.Instance;
-    private SlotModel slotModel => SlotModel.Instance;
     private RemoteConfigData remoteConfig => RemoteConfigModel.Instance.RemoteConfig;
+
+    private BuildingName buildingName;
+    private BuildingProgressData progress => playerModel.playerData.GetBuildingProgressByName(buildingName);
+    private int maxAttempts = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
+
+    public BtnCmd(BuildingName buildingName)
+    {
+        this.buildingName = buildingName;
+    }
 
     public void Run(BtnAction action)
     {
+        var isChallengeBuilding = BuildingNameUtil.IsChallengeBuilding(buildingName);
+
         if (action == BtnAction.Restart)
         {
-            var progress = playerModel.playerData.GetCurrentBuildingProgress();
-            progress.ResetElementsCounter();
-            progress.RemoveCurrentElement();
-            progress.SetState(BuildingState.Unlocked);
-            cityModel.DeactivateAllElements();
-            new UnlockNextCmd().Run();
+            var FillAttemptsAfterRestart = this.remoteConfig.FillAttemptsAfterRestart;
+            if (FillAttemptsAfterRestart && !isChallengeBuilding)
+            {
+                //when player lost and restarts the building from the beginning he gets all hits attempts back
+                playerModel.FillAttempts(buildingName, maxAttempts, maxAttempts);
+            }
+            playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
+            cityModel.SetCurrentBuildingName(buildingName);
+            new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.RestartBuilding).Run();
             return;
         }
         if (action == BtnAction.RefillAttempts)
         {
-            var max = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
-            var full = playerModel.playerData.attempts >= max;
+            var full = progress.attempts >= maxAttempts;
             if (full)
             {
                 Toast("Attempts are already full");
@@ -46,31 +60,55 @@ public class BtnCmd
                 return;
             }
             new AddCoinsCmd(-costs).Run();
-            playerModel.FillAttempts(max, max);
+            playerModel.FillAttempts(this.buildingName, maxAttempts, maxAttempts);
             return;
         }
-        if (action == BtnAction.ContinueNextAttempt)
+
+        if (action == BtnAction.Continue)
         {
-            var didUse = playerModel.UseAttempt();
+            playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
+            cityModel.SetCurrentBuildingName(buildingName);
+
+
+
+            var curElement = progress.GetCurrentElement();
+            if (curElement == null || isChallengeBuilding)
+            {
+                new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.RestartBuilding).Run();
+            }
+            else
+            {
+                if (curElement.ElementCompleted())
+                {
+                    new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.NextElement).Run();
+                }
+                else
+                {
+                    new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.ContinueCurrentElement).Run();
+                }
+            }
+            return;
+        }
+        if (action == BtnAction.UseAttemptAndContinue)
+        {
+            var didUse = playerModel.UseAttempt(this.buildingName);
             if (!didUse)
             {
                 Toast("No attempts left");
                 return;
             }
-            var progress = playerModel.playerData.GetCurrentBuildingProgress();
-            var currentBuilding = progress.BuildingName;
-            var elementDataKey = progress.GetCurrentElement().dataKey;
-            progress.SetCurrentElement(BalancingModel.Instance.GetDataCopy(currentBuilding, elementDataKey));
-            new UnlockNextCmd().Run();
+            this.Run(BtnAction.Continue);
             return;
         }
 
         if (action == BtnAction.FreeAttemptForAd)
         {
-            new ShowAdCmd().Run(RewardName.ADD_ATTEMPT);
+            new ShowAdCmd().Run(RewardName.ADD_ATTEMPT, this.buildingName);
             return;
         }
     }
+
+
 
     private void Toast(string message)
     {

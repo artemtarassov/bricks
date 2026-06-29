@@ -18,26 +18,33 @@ public class SelectColumnCmd
 
     public void Run()
     {
-
-        if (ModelUtils.IsOutOfSpace())
+        var gameOverReason = ModelUtils.IsGameOver();
+        if (gameOverReason == GameOverReason.OutOfSpace)
         {
             new SoundCmd(SoundModel.Instance.ERROR).Run();
-
             if (ViewModel.Instance.OutOfSpaceCounter != 0)
             {
-                this.ShowOutOfSpace();
+                new ShowGameOverCmd().Run(gameOverReason);
             }
             return;
         }
 
+        if (gameOverReason == GameOverReason.OutOfTime)
+        {
+            new SoundCmd(SoundModel.Instance.ERROR).Run();
+            new ShowGameOverCmd().Run(gameOverReason);
+            return;
+        }
 
 
         PlayerModel.Instance.playerData.isDirty = true;
 
         if (this.data.type == SlotElementType.AddSecondsInChallenge)
         {
-            //todo.
+            PlayerModel.Instance.AddTimeoutSeconds(this.data.secondsToAdd);
+            ViewModel.Instance.OnClockTimeIncreased?.Invoke();
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
+            new SoundCmd(SoundModel.Instance.CONFIRM).Run();
             return;
         }
 
@@ -128,8 +135,4 @@ public class SelectColumnCmd
 
     }
 
-    private void ShowOutOfSpace()
-    {
-        new ShowOutOfSpaceCmd().Run();
-    }
 }

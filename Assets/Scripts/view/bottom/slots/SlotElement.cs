@@ -167,7 +167,7 @@ public class SlotElement : MonoBehaviour
     {
         this.SetupAsEmpty();
         this.seconds.gameObject.SetActive(true);
-        this.count.text = "+" + this.slotElementData.secondsToAdd.ToString();
+        this.count.text = this.slotElementData.secondsToAdd.ToString();
         this.count.gameObject.SetActive(true);
     }
 

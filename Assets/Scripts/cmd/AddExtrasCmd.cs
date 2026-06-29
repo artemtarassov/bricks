@@ -9,7 +9,6 @@ public class AddExtrasCmd
 {
     private CityElementDataContainer dataContainer;
     private int coins => PlayerModel.Instance.playerData.coins;
-    private int attempts => PlayerModel.Instance.playerData.attempts;
     private int difficultyToApply;
     private NonRepeatingShuffleBag<SlotColumnData> columns;
     private Dictionary<SlotColumnData, HashSet<int>> randIndex;
@@ -24,9 +23,9 @@ public class AddExtrasCmd
 
     private static readonly int[] difficulties = new int[] { 0, 1, 2, 3, 4, 5, 6, 2 };
     private static readonly NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 1, 2 });
-
-    private List<int> seconds = new List<int> { 5, 5, 10, 10, 15, 5, 5, 10, 5, 15, 5 };
     private BuildingName buildingName;
+
+    private bool IsChallange => BuildingNameUtil.IsChallengeBuilding(this.buildingName);
     public AddExtrasCmd(BuildingName buildingName)
     {
         this.buildingName = buildingName;
@@ -40,11 +39,12 @@ public class AddExtrasCmd
         Assert.IsTrue(totalBricks > 0, "AddExtrasCmd Run: data container should have at least 1 brick to add extras");
         this.dataContainer = currentElementData;
 
-        var extrasApplied = currentElementData.columns.Any(c => c.list.Any(e => !e.IsBrick));
+        var extrasApplied = currentElementData.extrasApplied || currentElementData.columns.Any(c => c.list.Any(e => !e.IsBrick));
         if (extrasApplied)
         {
             return;
         }
+        currentElementData.extrasApplied = true;
         if (IsShort())
         {
             AddExplosionIfRequired();
@@ -56,8 +56,7 @@ public class AddExtrasCmd
         this.columns = new NonRepeatingShuffleBag<SlotColumnData>(this.dataContainer.columns);
         this.randIndex = new Dictionary<SlotColumnData, HashSet<int>>();
 
-        var amountOfExtrasPerColumn = Mathf.RoundToInt(this.SumLimits() / (float)this.dataContainer.columns.Count) + 1;
-        Assert.IsTrue(amountOfExtrasPerColumn > 0, "invalid amountOfExtrasPerColumn");
+        var amountOfExtrasPerColumn = Mathf.RoundToInt(this.SumLimits() / (float)this.dataContainer.columns.Count) + 2;
 
         for (var i = 0; i < this.dataContainer.columns.Count; i++)
         {
@@ -66,16 +65,61 @@ public class AddExtrasCmd
             this.randIndex[c] = RandHelper.GetRandIndexList(maxElementInList, amountOfExtrasPerColumn);
         }
 
+        //this.PrintDebugOutput();
+
         ApplyDifficulty();
         AddExplosionIfRequired();
 
         this.AddUnlockChallenge();
         this.AddChallengeSeconds();
+        this.RemoveRepeatingDeaths();
+    }
+
+    private void RemoveRepeatingDeaths()
+    {
+        var allColumns = this.dataContainer.columns;
+        var maxRow = allColumns.Min(c => c.list.Count);
+        for (var row = 1; row < maxRow - 1; row++)
+        {
+            var deathCount1 = allColumns.Count(c => c.list[row].type == SlotElementType.EmitterDeathWaiting);
+            var deathCount2 = allColumns.Count(c => c.list[row - 1].type == SlotElementType.EmitterDeathWaiting);
+            var deathCount3 = allColumns.Count(c => c.list[row + 1].type == SlotElementType.EmitterDeathWaiting);
+            var sum = deathCount1 + deathCount2 + deathCount3;
+            if (sum > 1)
+            {
+                if (RemoveDeathAtIndex(row) || RemoveDeathAtIndex(row + 1) || RemoveDeathAtIndex(row - 1))
+                {
+                    maxRow = allColumns.Min(c => c.list.Count);
+                    continue;
+                }
+            }
+        }
+    }
+
+    private bool RemoveDeathAtIndex(int index)
+    {
+        var allColumns = this.dataContainer.columns;
+        for (var i = 0; i < allColumns.Count; i++)
+        {
+            var c = allColumns[i];
+            if (index >= 0 && index < c.list.Count && c.list[index].type == SlotElementType.EmitterDeathWaiting)
+            {
+                c.list.RemoveAt(index);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void PrintDebugOutput()
+    {
+        Debug.Log($"AddExtrasCmd PrintDebugOutput: building {this.buildingName} difficultyToApply {this.difficultyToApply} maxCoins {this.maxCoins} maxHiddenBricks {this.maxHiddenBricks} maxDeaths {this.maxDeaths} maxAds {this.maxAds} maxMults {this.maxMults} maxChallengeSeconds {this.maxChallengeSeconds}");
     }
 
     private void AddUnlockChallenge()
     {
-        if (BuildingNameUtil.IsChallengeBuilding(this.buildingName))
+        if (IsChallange)
         {
             return;
         }
@@ -84,26 +128,22 @@ public class AddExtrasCmd
         {
             return;
         }
-        var lastTimestamp = ChallengeModel.Instance.GetLastUnlockedTimestamp();
-        if (lastTimestamp > 0)
+        var hasUncompletedChallanges = ChallengeModel.Instance.HasUncompletedChallenges();
+        if (hasUncompletedChallanges == false)
         {
-            var diff = TimeUtils.GetUnixTimestamp() - lastTimestamp;
-            var hours = diff / 3600;
-            if (hours < 1)//unlock every hour.
+            var column = this.columns.GetNext();
+            var sed = new SlotElementData(SlotElementType.UnlockChallenge)
             {
-                return;
-            }
+                challenge = nextChallenge
+            };
+            var randIndex = RandHelper.GetRandIndex(column.list, 1, RandHelper.RandPos.SecondHalf);
+            column.list.Insert(randIndex, sed);
         }
-        var column = this.columns.GetNext();
-        column.list.Insert(0, new SlotElementData(SlotElementType.UnlockChallenge)
-        {
-            challenge = nextChallenge
-        });
     }
 
     private void SetDifficultyToApply(int n)
     {
-        if (BuildingNameUtil.IsChallengeBuilding(this.buildingName))
+        if (IsChallange)
         {
             this.difficultyToApply = 6;
         }
@@ -159,7 +199,7 @@ public class AddExtrasCmd
                 this.maxCoins = 1;
             }
             this.maxHiddenBricks = Mathf.RoundToInt(totalBricks / 15.0f);
-            this.maxDeaths = Mathf.RoundToInt(totalBricks / 35.0f);
+            this.maxDeaths = Mathf.RoundToInt(totalBricks / 30.0f);
             if (this.maxDeaths < 1)
             {
                 this.maxDeaths = 1;
@@ -184,6 +224,12 @@ public class AddExtrasCmd
         {
             this.maxCoins = 0;
             this.maxChallengeSeconds = (totalBricks / 20) + 1;
+        }
+
+        var allEmittersUnlocked = SlotModel.Instance.AllEmittersUnlocked();
+        if (allEmittersUnlocked)
+        {
+            this.maxDeaths++;
         }
 
     }
@@ -281,13 +327,13 @@ public class AddExtrasCmd
 
     private bool AddChallengeSeconds(SlotColumnData column, int atIndex)
     {
-        if (atIndex >= 0 && atIndex < column.list.Count && seconds.Count > 0)
+        if (atIndex >= 0 && atIndex < column.list.Count)
         {
+            var addSeconds = RemoteConfigModel.Instance.RemoteConfig.AddSecondsInChallenge;
             column.list.Insert(atIndex, new SlotElementData(SlotElementType.AddSecondsInChallenge)
             {
-                secondsToAdd = seconds.First()
+                secondsToAdd = addSeconds
             });
-            seconds.RemoveAt(0);
             return true;
         }
         return false;

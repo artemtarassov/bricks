@@ -92,7 +92,7 @@ public class CompleteView : DefaultView
         this.coinsIcon.gameObject.SetActive(true);
         this.coins.gameObject.SetActive(true);
         this.coins.text = "Bonus: " + GetCompleteRewardCoins() + "";
-        this.title.text = Loca.GetThemeName(currentBuildingName);
+        this.title.text = Loca.GetBuildingNameTranslation(currentBuildingName);
         var canvasGroup = this.GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0;
         canvasGroup.DOFade(1, Durations.ViewFadeIn);

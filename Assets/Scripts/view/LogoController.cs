@@ -58,7 +58,8 @@ public class LogoController : MonoBehaviour
         }
         if (tab == BottomNav.MainNav)
         {
-            attemptsRow.UpdateValues(PlayerModel.Instance.playerData.attempts);
+            attemptsRow.UpdateValues(PlayerModel.Instance.playerData.currentBuildingAttempts);
+            attemptsRow.gameObject.SetActive(true);
 
             palermo.SetActive(false);
             veneto.SetActive(false);
@@ -83,6 +84,9 @@ public class LogoController : MonoBehaviour
             else if (currentBuildingName == BuildingName.Preset_Bath_House_01)
             {
                 baiae.SetActive(true);
+            } else
+            {
+                attemptsRow.gameObject.SetActive(false);
             }
         }
         else

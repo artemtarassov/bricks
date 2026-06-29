@@ -5,7 +5,8 @@ using UnityEngine.Assertions;
 
 public class ShowAdCmd
 {
-    public void Run(RewardName rn)
+
+    public void Run(RewardName rn, BuildingName buildingName = BuildingName.Undefined)
     {
         if (!AdModel.Instance.IsAdReady(rn))
         {
@@ -13,7 +14,10 @@ public class ShowAdCmd
             return;
         }
         AudioListener.pause = true;
-        AdModel.Instance.ShowAd(new AdRewardData(rn));
+        AdModel.Instance.ShowAd(new AdRewardData(rn)
+        {
+            buildingName = buildingName
+        });
         new ShowViewCmd(ViewName.LoadingView).Run();
     }
 

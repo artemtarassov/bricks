@@ -7,6 +7,7 @@ public class EnableDifferentColorsCmd
 {
     public void Run(CityElement cityElement)
     {
+
     }
 
 }

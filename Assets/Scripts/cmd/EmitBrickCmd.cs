@@ -92,6 +92,9 @@ public class EmitBrickCmd
 
         if (elementDataContainer.ElementCountColoredBricks() == 0 && elementDataContainer.ElementCountEmittingBricks() == 0)
         {
+            var addSeconds = RemoteConfigModel.Instance.RemoteConfig.AddSecondsInChallenge / 2;
+            PlayerModel.Instance.AddTimeoutSeconds(addSeconds);
+            ViewModel.Instance.OnClockTimeIncreased?.Invoke();
             CityModel.Instance.EnableDifferentColors(cityElement, BalancingModel.AdditionalBricksOnEmptyElement);
             SlotModel.Instance.EmitterAlive();
             new SoundCmd(SoundModel.Instance.NEW_COLORED_BRICKS_APPEAR).Run();
@@ -99,7 +102,7 @@ public class EmitBrickCmd
 
         if (elementDataContainer.ElementCompleted())
         {
-            new CompleteElementCmd().Run(cityElement);
+            new CompleteElementCmd().Run(progress.BuildingName, cityElement);
         }
 
     }

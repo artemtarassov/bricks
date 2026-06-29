@@ -17,6 +17,7 @@ public class MainNavController : MonoBehaviour
     [SerializeField] private Button btnRight;
 
     [SerializeField] private Button btnPremium;
+    [SerializeField] private Button btnClose;
 
     [SerializeField] private TMP_Text groupTitle;
 
@@ -32,12 +33,18 @@ public class MainNavController : MonoBehaviour
         btnNext.GetComponent<HoldButton>().OnClick.AddListener(OnBtnNextClicked);
         btnLeft.GetComponent<HoldButton>().OnClick.AddListener(OnBtnLeftClicked);
         btnRight.GetComponent<HoldButton>().OnClick.AddListener(OnBtnRightClicked);
-        btnPremium.GetComponent<BtnIAP>().onClicked = (OnBtnPremiumClicked);
+        btnPremium.GetComponent<BtnIAP>().onClicked = OnBtnPremiumClicked;
+        btnClose.GetComponent<HoldButton>().OnClick.AddListener(OnCloseClicked);
         ViewModel.Instance.OnBottomNavChange += OnBottomNavChange;
         ViewModel.Instance.OnShowView += OnViewUpdate;
         ViewModel.Instance.OnHideView += OnViewUpdate;
         PlayerModel.Instance.OnPlayerDataChanged += UpdateVisibility;
         UpdateVisibility();
+    }
+
+    private void OnCloseClicked()
+    {
+        new GoBackBtnCmd().Run();
     }
 
     private void OnBtnPremiumClicked(IAPProductName pn)
@@ -74,9 +81,13 @@ public class MainNavController : MonoBehaviour
         btnLeft.gameObject.SetActive(false);
         btnRight.gameObject.SetActive(false);
         btnPremium.gameObject.SetActive(false);
+        btnClose.gameObject.SetActive(false);
+
     }
 
-    private BuildingState state => PlayerModel.Instance.playerData.GetCurrentBuildingProgress().State;
+    private BuildingProgressData progress => PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+    private BuildingState state => progress.State;
+    private bool isChallenge => BuildingNameUtil.IsChallengeBuilding(progress.BuildingName);
 
 
     private void UpdateVisibility()
@@ -107,7 +118,8 @@ public class MainNavController : MonoBehaviour
         if (state == BuildingState.Completed)
         {
             this.btnRestart.gameObject.SetActive(true);
-            this.btnNext.gameObject.SetActive(true);
+            this.btnNext.gameObject.SetActive(this.isChallenge == false);
+            this.btnClose.gameObject.SetActive(this.isChallenge);
             UpdateLeftRightButtonVisibility();
             UpdateGroupTitle();
             AnimateIn();
@@ -116,7 +128,6 @@ public class MainNavController : MonoBehaviour
 
         if (state == BuildingState.Unlocked || state == BuildingState.Locked || state == BuildingState.Playing)
         {
-            var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
             if (progress.GetCurrentElement() == null)
             {
                 this.btnStart.gameObject.SetActive(true);
@@ -139,6 +150,13 @@ public class MainNavController : MonoBehaviour
         var progressData = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         var completedElements = progressData.CompletedElementsCounter;
         var maxElements = CityModel.Instance.GetBuildingByName(currentBuildingName).GetElements().Count;
+        var isChallenge = BuildingNameUtil.IsChallengeBuilding(currentBuildingName);
+
+        if (isChallenge)
+        {
+            this.groupTitle.text = Loca.GetBuildingNameTranslation(currentBuildingName);
+            return;
+        }
         if (completedElements >= maxElements)
         {
             this.groupTitle.text = "Completed";
@@ -167,6 +185,13 @@ public class MainNavController : MonoBehaviour
         var hasPrevious = currentIndex > 0;
         var hasNext = true;//currentIndex < names.Count - 1;
 
+        var isChallenge = BuildingNameUtil.IsChallengeBuilding(currentBuildingName);
+        if (isChallenge)
+        {
+            hasPrevious = false;
+            hasNext = false;
+        }
+
 
         //Debug.Log($"MainNavController UpdateLeftRightButtonVisibility: hasPrevious {hasPrevious} hasNext {hasNext}, currentIndex {currentIndex} unlockedBuildingNames count {unlockedBuildingNames.Count}");
         this.btnLeft.gameObject.SetActive(hasPrevious);
@@ -178,21 +203,21 @@ public class MainNavController : MonoBehaviour
     {
         //
         new SoundCmd(SoundModel.Instance.CLICK2).Run();
-        new RestartCurrentGroupCmd().Run();
+        new BtnCmd(progress.BuildingName).Run(BtnCmd.BtnAction.Restart);
     }
 
     private void OnBtnContinueClicked()
     {
         //
         new SoundCmd(SoundModel.Instance.CLICK2).Run();
-        new PlayCurrentBuildingCmd().Run();
+        new BtnCmd(progress.BuildingName).Run(BtnCmd.BtnAction.Continue);
     }
 
     private void OnBtnStartClicked()
     {
         //
         new SoundCmd(SoundModel.Instance.CLICK2).Run();
-        new PlayCurrentBuildingCmd().Run();
+        new BtnCmd(progress.BuildingName).Run(BtnCmd.BtnAction.Restart);
     }
 
     private void OnBtnNextClicked()

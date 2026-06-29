@@ -19,24 +19,22 @@ public class ModelUtils
         return cityElement;
     }
 
-    public static bool IsOutOfTime()
-    {
-        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-        if (!BuildingNameUtil.IsChallengeBuilding(progress.BuildingName))
-        {
-            return false;
-        }
-        return ChallengeModel.Instance.GetSecondsLeft() == 0;
-    }
-
-    public static bool IsOutOfSpace()
+    public static GameOverReason IsGameOver()
     {
         var element = GetCurrentElement();
+        if (element.dataContainer.ElementCompleted())
+        {
+            return GameOverReason.Undefined;
+        }
         if (!SlotModel.Instance.HasEmitterSpace() && element.dataContainer.ElementCountEmittingBricks() == 0)
         {
-            return true;
+            return GameOverReason.OutOfSpace;
         }
-        return false;
+        if (element.dataContainer.IsOutOfTime())
+        {
+            return GameOverReason.OutOfTime;
+        }
+        return GameOverReason.Undefined;
     }
 
     public static bool CurrentBuildingCompleted()

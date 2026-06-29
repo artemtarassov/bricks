@@ -27,7 +27,7 @@ public class AdRewardData
 {
     public string adUnit => AdUnits.GetAdUnitForReward(this.rewardName);
     public RewardName rewardName = RewardName.UNDEFINED;
-    public int cash = 0;
+    public BuildingName buildingName = BuildingName.Undefined;
     public AdRewardData(RewardName rn)
     {
         this.rewardName = rn;

@@ -4,6 +4,13 @@ using System.Linq;
 using UnityEngine;
 
 
+public enum GameOverReason
+{
+    Undefined = 0,
+    OutOfSpace = 1,
+    OutOfTime = 2
+}
+
 public class ToastMsg
 {
     public string text;

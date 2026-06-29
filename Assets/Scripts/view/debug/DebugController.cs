@@ -46,7 +46,8 @@ public class DebugController : MonoBehaviour
 
     private void OnCompleteElementClicked()
     {
-        new CompleteElementCmd().Run(ModelUtils.GetCurrentElement());
+        var currentElement = ModelUtils.GetCurrentElement();
+        new CompleteElementCmd().Run(PlayerModel.Instance.playerData.CurrentBuildingName, currentElement);
     }
 
     public void OnMoveCameraToElementGroupClicked()

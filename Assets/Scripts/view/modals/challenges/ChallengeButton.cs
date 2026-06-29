@@ -10,6 +10,7 @@ public class ChallengeButton : MonoBehaviour
 {
     [SerializeField] private ChallengeIcon challengeIcon;
     [SerializeField] private GameObject selected;
+    [SerializeField] private GameObject checkmark;
 
     public ChallengeData challengeData { get; private set; }
     public void Setup(ChallengeData cd)
@@ -23,6 +24,7 @@ public class ChallengeButton : MonoBehaviour
         {
             this.challengeIcon.Setup(cd.buildingName, Color.white);
         }
+        this.checkmark.SetActive(cd.completedCount > 0);
     }
 
     public void SetSelected(bool s)

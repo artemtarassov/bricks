@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 public class CompleteElementCmd
 {
-    public void Run(CityElement cityElement)
+    public void Run(BuildingName buildingName, CityElement cityElement)
     {
         var completed = cityElement.dataContainer.ElementCompleted();
         if (!completed)
@@ -14,6 +14,13 @@ public class CompleteElementCmd
             cityElement.dataContainer.SetAll(BrickState.Full);
             cityElement.ShowCurrentState();
         }
+
+        var isChallengeBuilding = BuildingNameUtil.IsChallengeBuilding(buildingName);
+        if(isChallengeBuilding)
+        {
+            ChallengeModel.Instance.CompleteChallenge(buildingName);
+        }
+
         var delay = 0.25f;
         new SoundCmd(SoundModel.Instance.CAM_MOVE_BACK, delay).Run();
         DOVirtual.DelayedCall(delay, CamModel.Instance.MoveCamBack);
@@ -26,6 +33,7 @@ public class CompleteElementCmd
         var fet = cityElement.dataContainer.finishElementType;
         if (fet == FinishElementType.SlideDown || fet == FinishElementType.Undefined)
         {
+            ViewModel.Instance.ChangeTopNav(TopNav.None);
             ViewModel.Instance.ChangeBottomNav(BottomNav.FinishElement);
         }
     }

@@ -11,11 +11,11 @@ public enum ViewName
     None,
     AddSpaceView,
     LoadingView,
-    OutOfSpaceView,
     SettingsView,
     GoldenTicketView,
     CompleteView,
-    ChallengesView
+    ChallengesView,
+    GameOverView,
 }
 
 
@@ -26,6 +26,13 @@ public enum BottomNav
     MainNav,
     FinishElement,
     ThankYou
+}
+
+public enum TopNav
+{
+    None,
+    Coins,
+    Clock,
 }
 
 
@@ -87,13 +94,16 @@ public class ViewModel
     public Action<FadeType> OnFade;
 
     public Action<BottomNav> OnBottomNavChange;
+    public Action<TopNav> OnTopNavChange;
 
     public BottomNav CurrentBottomNav { get; private set; } = BottomNav.None;
+    public TopNav CurrentTopNav { get; private set; } = TopNav.None;
 
     public int GoldenTicketViewTriggerTimestamp = 0;
 
     public Action<float> OnFinishElement;
 
+    public Action OnClockTimeIncreased;
 
     public Action OnAnnouncer;
 
@@ -102,6 +112,7 @@ public class ViewModel
     {
         this.root = root;
         this.CurrentBottomNav = BottomNav.MainNav;
+        this.CurrentTopNav = TopNav.None;
     }
 
     public void PlayAnnouncer()
@@ -114,7 +125,17 @@ public class ViewModel
     {
         OnFinishElement?.Invoke(percent);
     }
-  
+
+    public void ChangeTopNav(TopNav nav)
+    {
+        if (CurrentTopNav == nav)
+        {
+            return;
+        }
+        CurrentTopNav = nav;
+        OnTopNavChange?.Invoke(nav);
+    }
+
 
     public void ChangeBottomNav(BottomNav nav)
     {

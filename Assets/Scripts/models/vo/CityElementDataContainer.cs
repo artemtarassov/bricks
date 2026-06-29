@@ -13,6 +13,9 @@ public class CityElementDataContainer
     public List<SlotColumnData> columns;
 
     public FinishElementType finishElementType = FinishElementType.Undefined;
+    public int timeoutSeconds = -1;
+
+    public bool extrasApplied = false;
 
     public CityElementDataContainer(string dataKey)
     {
@@ -20,6 +23,29 @@ public class CityElementDataContainer
         this.dataKey = dataKey;
         this.brickDataList = new List<BrickData>();
         this.columns = new List<SlotColumnData>();
+    }
+
+    public bool IsOutOfTime()
+    {
+        if (this.timeoutSeconds == -1)
+        {
+            return false;
+        }
+        if (this.timeoutSeconds == 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool AddTimeoutSeconds(int n)
+    {
+        if (this.timeoutSeconds > 0)
+        {
+            this.timeoutSeconds += n;
+            return true;
+        }
+        return false;
     }
 
     public int ElementCountColoredBricks(ColorIndex colorIndex)

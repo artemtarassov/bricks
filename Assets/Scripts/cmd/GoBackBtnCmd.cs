@@ -12,7 +12,6 @@ public class GoBackBtnCmd
         var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         var currentBuildingName = progress.BuildingName;
 
-
         var currentElement = ModelUtils.GetCurrentElement();
         var index = CityModel.Instance.GetElementIndex(currentElement);
         CityModel.Instance.ActivateElements(index - 1);
@@ -22,6 +21,7 @@ public class GoBackBtnCmd
             var firstBuilding = BuildingNameUtil.allBuildingNamesRegular[0];
             PlayerModel.Instance.SetCurrentBuilding(firstBuilding, BuildingState.Unlocked);
             CityModel.Instance.SetCurrentBuildingName(firstBuilding);
+            new ShowViewCmd(ViewName.ChallengesView).Run();
         }
         else
         {
@@ -31,6 +31,7 @@ public class GoBackBtnCmd
 
         ViewModel.Instance.ResetOutOfSpaceCounter();
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
+        ViewModel.Instance.ChangeTopNav(TopNav.None);
 
         ViewModel.Instance.Fade(FadeType.Flash);
         SlotModel.Instance.Clear();

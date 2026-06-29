@@ -8,6 +8,7 @@ public class ChallengeData
 {
     public BuildingName buildingName = BuildingName.Undefined;
     public bool isLocked = true;
+    public int completedCount = 0;
 }
 
 public class ChallengeDataContainer
@@ -15,8 +16,6 @@ public class ChallengeDataContainer
     public List<ChallengeData> list = new List<ChallengeData>();
     public bool isDirty = false;
     public int lastUnlockedTimestamp = 0;
-    public int currentChallengeStartTimestamp = 0;
-    public int currentChallengeEndTimestamp = 0;
 }
 
 public class ChallengeModel
@@ -25,8 +24,6 @@ public class ChallengeModel
 
     private ChallengeDataContainer dataContainer;
 
-    public Action OnStarted;
-    public Action OnStopped;
 
     private static readonly string savekey = "challenges";
 
@@ -46,6 +43,13 @@ public class ChallengeModel
         this.dataContainer.isDirty = false;
     }
 
+    public void CompleteChallenge(BuildingName buildingName)
+    {
+        var data = GetChallengeData(buildingName);
+        data.completedCount++;
+        this.dataContainer.isDirty = true;
+    }
+
     public List<ChallengeData> GetAllChallenges()
     {
         return this.dataContainer.list;
@@ -59,40 +63,15 @@ public class ChallengeModel
         this.dataContainer.lastUnlockedTimestamp = TimeUtils.GetUnixTimestamp();
     }
 
-    public void StartChallenge(int bricks)
-    {
-        this.dataContainer.currentChallengeStartTimestamp = TimeUtils.GetUnixTimestamp();
-        this.dataContainer.currentChallengeEndTimestamp = this.dataContainer.currentChallengeStartTimestamp + bricks * 10;
-        this.dataContainer.isDirty = true;
-        this.OnStarted?.Invoke();
-    }
-
-    public void StopChallenge()
-    {
-        if (this.dataContainer.currentChallengeEndTimestamp == 0)
-        {
-            return;
-        }
-        this.dataContainer.currentChallengeStartTimestamp = 0;
-        this.dataContainer.currentChallengeEndTimestamp = 0;
-        this.dataContainer.isDirty = true;
-        this.OnStopped?.Invoke();
-    }
-
-    public int GetSecondsLeft()
-    {
-        if (this.dataContainer.currentChallengeEndTimestamp == 0)
-        {
-            return -1;
-        }
-        var now = TimeUtils.GetUnixTimestamp();
-        var secondsLeft = this.dataContainer.currentChallengeEndTimestamp - now;
-        return Mathf.Max(0, secondsLeft);
-    }
 
     public int GetLastUnlockedTimestamp()
     {
         return this.dataContainer.lastUnlockedTimestamp;
+    }
+
+    public bool HasUncompletedChallenges()
+    {
+        return this.dataContainer.list.Exists((a) => a.completedCount == 0 && a.isLocked == false);
     }
 
     public bool HasUnlockedChallenges()

@@ -23,6 +23,7 @@ public enum RemoteConfigProperty
     FillAttemptsAfterRestart = 13,
     FinishElementType = 14,
     CompleteChallengeRewardCoins = 15,
+    AddSecondsInChallenge = 16
 }
 
 [Serializable]
@@ -89,6 +90,8 @@ public class RemoteConfigData
     public bool FillAttemptsAfterRestart => GetValue(RemoteConfigProperty.FillAttemptsAfterRestart, 1) == 1;
 
     public int FinishElementType => GetValue(RemoteConfigProperty.FinishElementType, 0);//0=undefined,SlideDown=100, Explosion=200
+
+    public int AddSecondsInChallenge => GetValue(RemoteConfigProperty.AddSecondsInChallenge, 10);
     public static RemoteConfigData Load()
     {
         try

@@ -12,7 +12,6 @@ public class SwitchBuildingCmd
         var playerModel = PlayerModel.Instance;
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
-
         var buildingNames = BuildingNameUtil.GetAllBuildingNames(true);
         var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
         var nextBuildingIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
@@ -47,32 +46,11 @@ public class SwitchBuildingCmd
         }
 
         CamModel.Instance.MoveCameraToBuilding();
+        ViewModel.Instance.ChangeTopNav(TopNav.None);
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
         ViewModel.Instance.Fade(FadeType.Flash);
-        ChangeSkyMaterial(nextBuildingName);
+        new UpdateSkyMaterialCmd().Run();
     }
 
-    private void ChangeSkyMaterial(BuildingName nextBuildingName)
-    {
-        var cm = ColoredMaterials.Instance;
-        if (cm == null)
-        {
-            return;
-        }
-        if (nextBuildingName == BuildingName.Preset_House_05)
-        {
-            RenderSettings.skybox = cm.GetMaterialByName("Sky 01");
-        }
-        else if (nextBuildingName == BuildingName.Tower_House)
-        {
-            RenderSettings.skybox = cm.GetMaterialByName("Sky 04");
-        }
-        else if (nextBuildingName == BuildingName.Ruins1_House)
-        {
-            RenderSettings.skybox = cm.GetMaterialByName("Sky 03");
-        }
-        else
-            RenderSettings.skybox = cm.GetMaterialByName("Sky 01");
-    }
 
 }

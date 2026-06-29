@@ -14,7 +14,7 @@ public class LogEventCmd
             dict["difficultyIndex"] = PlayerModel.Instance.playerData.difficultyIndex;
             dict["elementName"] = currentElement.dataKey;
             dict["themeIndex"] = currentGroupIndex;
-            dict["attempts"] = PlayerModel.Instance.playerData.attempts;
+            dict["attempts"] = PlayerModel.Instance.playerData.currentBuildingAttempts;
             dict["coins"] = PlayerModel.Instance.playerData.coins;
             new LogEventCmd().Run("out_of_space", dict);
         }

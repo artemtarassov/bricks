@@ -125,6 +125,11 @@ public class SlotModel
         }
     }
 
+    public bool AllEmittersUnlocked()
+    {
+        return this.Emitters.All(e => e.isUnlocked);
+    }
+
     public bool HasEmitterSpace()
     {
         return this.Emitters.FindAll((e) => e.IsEmpty).Count > 0;

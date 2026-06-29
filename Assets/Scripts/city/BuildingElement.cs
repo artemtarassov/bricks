@@ -20,6 +20,19 @@ public class BuildingElement : MonoBehaviour
 
     private Transform centerObj;
 
+    public CityElement GetElementByDataKey(string dataKey)
+    {
+        var elements = GetElements();
+        foreach (var e in elements)
+        {
+            if (e.dataKey == dataKey)
+            {
+                return e;
+            }
+        }
+        return null;
+    }
+
     public HashSet<CityElement> GetElements()
     {
         if (elements == null)

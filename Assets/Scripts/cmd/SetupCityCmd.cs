@@ -50,6 +50,11 @@ public class SetupCityCmd
         }
         else
         {
+            var isChallenge = BuildingNameUtil.IsChallengeBuilding(pd.CurrentBuildingName);
+            if (isChallenge)
+            {
+                pd.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
+            }
             cityModel.SetBuildings(buildings, pd.CurrentBuildingName);
         }
 
@@ -128,7 +133,7 @@ public class SetupCityCmd
             Debug.Log($"SetupCityCmd: ValidateProgress: no current element progress found for building {building.BuildingName} or element was completed. setting element progress to first element.");
             return;
         }
-        var cityElement = building.GetElements().First(e => e.dataKey == element.dataKey);
+        var cityElement = building.GetElementByDataKey(element.dataKey);
         if (cityElement == null)
         {
             //whole element was removed.

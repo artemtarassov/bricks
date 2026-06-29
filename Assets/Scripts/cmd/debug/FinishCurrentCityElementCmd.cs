@@ -8,7 +8,7 @@ public class FinishCurrentCityElementCmd
         var isCompleted = cityElement.dataContainer.ElementCompleted();
         if (isCompleted)
         {
-            new UnlockNextCmd().Run();
+            new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.NextElement).Run();
             return;
         }
         foreach (var c in cityElement.dataContainer.columns)

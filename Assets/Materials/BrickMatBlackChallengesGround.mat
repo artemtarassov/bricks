@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BrickMatBlackWithShadow
+  m_Name: BrickMatBlackChallengesGround
   m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -113,7 +113,7 @@ Material:
     - _ReceiveShadows: 1
     - _SampleGI: 0
     - _Shininess: 0
-    - _Smoothness: 0.6
+    - _Smoothness: 0
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
@@ -126,8 +126,8 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.18867922, g: 0.18540217, b: 0.17888926, a: 1}
-    - _Color: {r: 0.18867919, g: 0.18540213, b: 0.17888921, a: 1}
+    - _BaseColor: {r: 0.11320752, g: 0.11320752, b: 0.11320752, a: 1}
+    - _Color: {r: 0.1132075, g: 0.1132075, b: 0.1132075, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.1999897, g: 0.1999897, b: 0.1999897, a: 0}
   m_BuildTextureStacks: []

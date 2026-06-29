@@ -9,6 +9,9 @@ using UnityEngine.UI;
 public class ChallengesView : DefaultView
 {
     [SerializeField] private BtnRestart startBtn;
+    [SerializeField] private Button freeAttemptBtn;
+    [SerializeField] private Button refillAttemptsBtn;
+
     [SerializeField] private AttemptsRow attemptsRow;
 
     private List<ChallengeButton> challengeButtons = new List<ChallengeButton>();
@@ -22,8 +25,11 @@ public class ChallengesView : DefaultView
         {
             btn.GetComponent<HoldButton>().OnClick.AddListener(() => OnClickChallengeButton(btn));
         }
-        this.selectedBuilding = BuildingNameUtil.allBuildingNamesChallenges[0];
+        this.selectedBuilding = BuildingName.Undefined;
         this.startBtn.GetComponent<HoldButton>().OnClick.AddListener(OnClickStart);
+
+        this.freeAttemptBtn.GetComponent<HoldButton>().OnClick.AddListener(OnFreeAttemptClicked);
+        this.refillAttemptsBtn.GetComponent<HoldButton>().OnClick.AddListener(OnRefillAttemptsClicked);
     }
 
     private void OnClickChallengeButton(ChallengeButton btn)
@@ -35,13 +41,14 @@ public class ChallengesView : DefaultView
             cb.SetSelected(cb.challengeData.buildingName == this.selectedBuilding);
         }
         UpdateProgress();
+        this.UpdateStartButton();
     }
 
     private void OnClickStart()
     {
         new HideViewCmd(ViewName.ChallengesView).Run();
         new SoundCmd(SoundModel.Instance.CLICK2).Run();
-        new PlayCurrentBuildingCmd().Run(this.selectedBuilding);
+        new BtnCmd(this.selectedBuilding).Run(BtnCmd.BtnAction.UseAttemptAndContinue);
     }
 
     public override void OnBackgroundTap()
@@ -49,23 +56,79 @@ public class ChallengesView : DefaultView
         new HideViewCmd(ViewName.ChallengesView).Run();
     }
 
+    private void OnFreeAttemptClicked()
+    {
+        new BtnCmd(this.selectedBuilding).Run(BtnCmd.BtnAction.FreeAttemptForAd);
+    }
+
+    private void OnRefillAttemptsClicked()
+    {
+        new BtnCmd(this.selectedBuilding).Run(BtnCmd.BtnAction.RefillAttempts);
+    }
+
+
     void Start()
     {
     }
     void OnDestroy()
     {
+        PlayerModel.Instance.OnPlayerDataChanged -= OnPlayerDataChanged;
     }
 
     public override void OnHidden()
     {
-
+        PlayerModel.Instance.OnPlayerDataChanged -= OnPlayerDataChanged;
     }
 
     public override void OnShown()
     {
+        if (this.selectedBuilding == BuildingName.Undefined)
+        {
+            var unlockedChallenge = ChallengeModel.Instance.GetAllChallenges().FindLast((e) => e.isLocked == false);
+            this.selectedBuilding = unlockedChallenge.buildingName;
+        }
         this.UpateButtons();
         this.UpdateProgress();
+        this.UpdateStartButton();
+        ViewModel.Instance.ChangeTopNav(TopNav.Coins);
+        PlayerModel.Instance.OnPlayerDataChanged += OnPlayerDataChanged;
     }
+
+    private void OnPlayerDataChanged()
+    {
+        this.UpdateProgress();
+        this.UpdateStartButton();
+    }
+
+    private void UpdateStartButton()
+    {
+        var challenge = ChallengeModel.Instance.GetAllChallenges().Find(c => c.buildingName == this.selectedBuilding);
+        if (challenge.isLocked)
+        {
+            this.startBtn.GetComponent<Button>().interactable = false;
+            this.freeAttemptBtn.gameObject.SetActive(false);
+            this.refillAttemptsBtn.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (attempts < 1)
+            {
+                this.freeAttemptBtn.gameObject.SetActive(true);
+                this.refillAttemptsBtn.gameObject.SetActive(true);
+                this.startBtn.gameObject.SetActive(false);
+            }
+            else
+            {
+                this.freeAttemptBtn.gameObject.SetActive(false);
+                this.refillAttemptsBtn.gameObject.SetActive(false);
+                this.startBtn.GetComponent<Button>().interactable = true;
+                this.startBtn.gameObject.SetActive(true);
+            }
+
+        }
+    }
+
+    private int attempts => PlayerModel.Instance.playerData.GetBuildingProgressByName(this.selectedBuilding).attempts;
 
     private void UpdateProgress()
     {
@@ -73,8 +136,7 @@ public class ChallengesView : DefaultView
         {
             this.attemptsRow.gameObject.SetActive(false);
         }
-        var progess = PlayerModel.Instance.playerData.GetBuildingProgressByName(this.selectedBuilding);
-        this.attemptsRow.UpdateValues(progess.attempts);
+        this.attemptsRow.UpdateValues(attempts);
         this.attemptsRow.gameObject.SetActive(true);
     }
 

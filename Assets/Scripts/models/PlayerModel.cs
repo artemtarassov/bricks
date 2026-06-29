@@ -27,7 +27,6 @@ public class PlayerModel
 #endif
         FilePrefs.SetString(savekey, data);
         this.playerData.isDirty = false;
-        FilePrefs.Save();
     }
 
 
@@ -126,27 +125,24 @@ public class PlayerModel
         OnPlayerDataChanged?.Invoke();
     }
 
-    public bool FillAttempts(int amount, int max)
+    public bool FillAttempts(BuildingName buildingName, int amount, int max)
     {
-        if (this.playerData.attempts >= max)
-        {
-            return false;
-        }
-        this.playerData.attempts = Math.Min(this.playerData.attempts + amount, max);
+        var progress = this.playerData.GetBuildingProgressByName(buildingName);
+        progress.attempts = Math.Min(progress.attempts + amount, max);
         this.playerData.isDirty = true;
         OnPlayerDataChanged?.Invoke();
         return true;
     }
 
 
-    public bool UseAttempt()
+    public bool UseAttempt(BuildingName buildingName)
     {
-        if (this.playerData.attempts <= 0)
+        var progress = this.playerData.GetBuildingProgressByName(buildingName);
+        if (progress.attempts <= 0)
         {
             return false;
         }
-        Debug.Log("PlayerModel: using attempt, attempts left before use: " + this.playerData.attempts);
-        this.playerData.attempts -= 1;
+        progress.attempts -= 1;
         this.playerData.isDirty = true;
         OnPlayerDataChanged?.Invoke();
         return true;
@@ -187,6 +183,14 @@ public class PlayerModel
             element.columns.ForEach((s) => s.ResetEmittingStates());
         }
 
+    }
+
+    public void AddTimeoutSeconds(int n)
+    {
+        var progress = playerData.GetCurrentBuildingProgress();
+        var element = progress.GetCurrentElement();
+        element.AddTimeoutSeconds(n);
+        playerData.isDirty = true;
     }
 
 

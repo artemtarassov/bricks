@@ -14,7 +14,7 @@ public class CompleteCurrentBuildingCmd
 
 
         var progress = pd.GetBuildingProgressByName(currentBuildingName);
-        var state = progress.State;     
+        var state = progress.State;
 
         if (state == BuildingState.Locked)
         {
@@ -36,6 +36,13 @@ public class CompleteCurrentBuildingCmd
         CamModel.Instance.MoveCameraToBuilding();
         ViewModel.Instance.Fade(FadeType.Flash);
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
+        ViewModel.Instance.ChangeTopNav(TopNav.Coins);
+
+        if (RemoteConfigModel.Instance.RemoteConfig.FillAttemptsAfterRestart)
+        {
+            var maxAttempts = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
+            playerModel.FillAttempts(currentBuildingName, maxAttempts, maxAttempts);
+        }
 
         new ShowViewCmd(ViewName.CompleteView).Run();
     }

@@ -8,25 +8,31 @@ public class SecUpdateCmd
 {
 
     private int currentTimestamp;
+    private PlayerModel playerModel => PlayerModel.Instance;
+    private ViewModel viewModel => ViewModel.Instance;
+    private ChallengeModel challengeModel => ChallengeModel.Instance;
+    private BuildingProgressData progress;
+    private CityElementDataContainer currentElementData => progress.GetCurrentElement();
     public SecUpdateCmd()
     {
         this.currentTimestamp = TimeUtils.GetUnixTimestamp();
+        this.progress = playerModel.playerData.GetCurrentBuildingProgress();
     }
     public void Run()
     {
-        PlayerModel.Instance.playerData.secondsPlaying += 1;
-        PlayerModel.Instance.Save();
-        IAPModel.Instance.Save();
-        if (ViewModel.Instance.HasAnyView())
+        this.playerModel.playerData.secondsPlaying += 1;
+        this.playerModel.Save();
+        this.challengeModel.Save();
+        FilePrefs.Save();
+
+        if (viewModel.HasAnyView())
         {
             return;
         }
-        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
         if (progress.State == BuildingState.Playing)
         {
-            UpdateOutOfSpace();
+            UpdateGameOver();
             UpdateAdditionalEmitter();
-
         }
         UpdateDailyReward();
         UpdateAdLoading();
@@ -34,7 +40,7 @@ public class SecUpdateCmd
 
     private void UpdateAdLoading()
     {
-        var pm = PlayerModel.Instance.playerData;
+        var pm = playerModel.playerData;
         var hasGoldenTicket = IAPModel.Instance.DidPurchaseComplete(IAPProductName.GoldenTicket);
         var hasGoldenTicketTemp = IAPModel.Instance.HasTempGoldenTicket();
 
@@ -87,24 +93,34 @@ public class SecUpdateCmd
         }
     }
 
-    private void UpdateOutOfSpace()
+    private void UpdateGameOver()
     {
-        var isOut = ModelUtils.IsOutOfSpace();
-        if (!isOut)
+        var reason = ModelUtils.IsGameOver();
+        if (reason == GameOverReason.Undefined)
         {
-            ViewModel.Instance.ResetOutOfSpaceCounter();
+            viewModel.ResetOutOfSpaceCounter();
+            playerModel.AddTimeoutSeconds(-1);
             return;
         }
-        ViewModel.Instance.IncOutOfSpaceCounter();
-        if (ViewModel.Instance.OutOfSpaceCounter == 3)
+        if (reason == GameOverReason.OutOfSpace)
         {
-            new ShowOutOfSpaceCmd().Run();
+            viewModel.IncOutOfSpaceCounter();
+            if (viewModel.OutOfSpaceCounter == 3)
+            {
+                new ShowGameOverCmd().Run(reason);
+            }
+            return;
+        }
+        if (reason == GameOverReason.OutOfTime)
+        {
+            new ShowGameOverCmd().Run(reason);
+            return;
         }
     }
 
     private void UpdateAdditionalEmitter()
     {
-        var playerData = PlayerModel.Instance.playerData;
+        var playerData = playerModel.playerData;
 
         if (playerData.additionalEmitterUnlockTimeoutTimestamp <= 0)
         {

@@ -8,12 +8,15 @@ public class SoundModel
 {
     public static SoundModel Instance;
 
+    public readonly string DONG = "dong";
+    public readonly string CONFIRM = "confirm";
+
     public readonly string ERROR = "error";
     public readonly string COINS_FLY = "coins_fly";
 
     public readonly string COINS = "coins";
 
-    public readonly string MAGIC_LIGHT = "magic_shine_light_spell_04";    
+    public readonly string MAGIC_LIGHT = "magic_shine_light_spell_04";
 
     public readonly string MUSIC1 = "music1";
 

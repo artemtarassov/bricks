@@ -56,7 +56,7 @@ public class CompleteAdRewardCmd
         if (rd.rewardName == RewardName.ADD_ATTEMPT)
         {
             var maxAttempts = RemoteConfigModel.Instance.RemoteConfig.MaxAttempts;
-            PlayerModel.Instance.FillAttempts(1, maxAttempts);
+            PlayerModel.Instance.FillAttempts(rd.buildingName, 1, maxAttempts);
         }
 
 
