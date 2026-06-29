@@ -69,8 +69,6 @@ public class BtnCmd
             playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
             cityModel.SetCurrentBuildingName(buildingName);
 
-
-
             var curElement = progress.GetCurrentElement();
             if (curElement == null || isChallengeBuilding)
             {
@@ -97,7 +95,9 @@ public class BtnCmd
                 Toast("No attempts left");
                 return;
             }
-            this.Run(BtnAction.Continue);
+            playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
+            cityModel.SetCurrentBuildingName(buildingName);
+            new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.RestartElement).Run();
             return;
         }
 
