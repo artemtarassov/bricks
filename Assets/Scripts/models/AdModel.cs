@@ -47,6 +47,7 @@ public class AdData
 
     public int lastInterstitialTimestamp = 0;
     public int lastRewardedTimestamp = 0;
+    public int adsShown = 0;
 }
 
 public class AdModel
@@ -105,6 +106,11 @@ public class AdModel
     public void SetLoadError()
     {
         loadErrorTime = Time.time;
+    }
+
+    public int GetAdsShown()
+    {
+        return adData.adsShown;
     }
 
     public bool HasLoadError()
@@ -221,6 +227,7 @@ public class AdModel
         {
             this.adData.earnedRewardDayOfYear.RemoveAt(0);
         }
+        this.adData.adsShown++;
         this.OnRewardEarned?.Invoke(rewardDataByAdUnit);
     }
 

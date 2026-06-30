@@ -58,7 +58,8 @@ public class SecUpdateCmd
             AdModel.Instance.shouldLoadInterstitial = true;
         }
 
-        if (secSinceInstall >= RemoteConfigModel.Instance.RemoteConfig.ShowBannerAfterSec)
+        var adsShown = AdModel.Instance.GetAdsShown();
+        if (adsShown < 10 && secSinceInstall >= RemoteConfigModel.Instance.RemoteConfig.ShowBannerAfterSec)
         {
             AdModel.Instance.shouldLoadBanner = true;
         }

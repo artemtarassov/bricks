@@ -14,10 +14,9 @@ public class CompleteAdRewardCmd
         var rd = AdModel.Instance.GetRewardData(unit);
         AdModel.Instance.SetRewardEarned(unit);
 
-
         new LogEventCmd().Run("ad_reward_earned", "rewardName", rd.rewardName.ToString());
 
-        Debug.Log("CompleteAdRewardCmd. unit: " + unit + ", recorded: " + recorded);
+        //Debug.Log("CompleteAdRewardCmd. unit: " + unit + ", recorded: " + recorded);
 
         if (rd.rewardName == RewardName.MID_SESSION_INTERSTITIAL || rd.rewardName == RewardName.MID_SESSION_REWARDED)
         {

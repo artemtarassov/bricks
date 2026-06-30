@@ -173,6 +173,20 @@ public class PlayerModel
             {
                 p.SetState(BuildingState.Unlocked); //reset in-progress building to unlocked, so player can replay it
             }
+            //this is for backwards compatibility
+            var e = p.GetCurrentElement();
+            if (e == null)
+            {
+                continue;
+            }
+            if (BuildingNameUtil.IsChallengeBuilding(p.BuildingName))
+            {
+                p.SetCurrentElement(null);
+            }
+            else
+            {
+                e.timeoutSeconds = -1;
+            }
         }
 
         var progress = playerData.GetCurrentBuildingProgress();

@@ -81,7 +81,7 @@ public class RemoteConfigData
 
     public int MusicTrack => GetValue(RemoteConfigProperty.MusicTrack, 0);//disabled by default.
 
-    public int ShowBannerAfterSec => GetValue(RemoteConfigProperty.ShowBannerAfterSec, 60 * 60 * 24 * 7);//7 days by default.
+    public int ShowBannerAfterSec => GetValue(RemoteConfigProperty.ShowBannerAfterSec, 60 * 60 * 24 * 8);//8 days by default.
 
 
     public int ShowMidSessionAdAfterSec => GetValue(RemoteConfigProperty.ShowMidSessionAdAfterSec, 60 * 5);
