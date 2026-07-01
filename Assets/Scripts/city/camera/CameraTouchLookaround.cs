@@ -40,7 +40,6 @@ public class CameraTouchLookaround : MonoBehaviour
             TouchSimulation.Enable();
         }
 #endif
-        Log("EnhancedTouchSupport enabled");
     }
 
     void OnDisable()

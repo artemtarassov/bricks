@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+[Serializable]
 public class ChallengeData
 {
     public BuildingName buildingName = BuildingName.Undefined;
@@ -11,6 +12,7 @@ public class ChallengeData
     public int completedCount = 0;
 }
 
+[Serializable]
 public class ChallengeDataContainer
 {
     public List<ChallengeData> list = new List<ChallengeData>();

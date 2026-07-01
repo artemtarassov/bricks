@@ -117,9 +117,10 @@ public class CurrentBuildingOperationCmd
         {
             d.timeoutSeconds = rm.AddSecondsInChallenge * 2;
 #if UNITY_EDITOR
-            d.timeoutSeconds *= 3;
+            d.timeoutSeconds *= 10;
 #endif
         }
+
         progress.SetCurrentElement(currentElementData);
         new AddExtrasCmd(currentBuildingName).Run(currentElementData);
     }
@@ -176,11 +177,11 @@ public class CurrentBuildingOperationCmd
         }
 
 
-#if UNITY_EDITOR
-        //select gameobject
-        var go = cityElement.gameObject;
-        UnityEditor.Selection.activeGameObject = go;
-#endif
+        /*#if UNITY_EDITOR
+                //select gameobject
+                var go = cityElement.gameObject;
+                UnityEditor.Selection.activeGameObject = go;
+        #endif*/
     }
 
     private void InstaMoveCameraToCityElement(CityElement cityElement)

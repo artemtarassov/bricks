@@ -14,12 +14,27 @@ public class CameraFlyController : MonoBehaviour
     private Transform lookAt;
     private Vector3 lookAtChanged;
     private CameraTouchLookaround touchLookaround;
+    private bool UseTouchLookaround
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return false;
+#else
+            return touchLookaround != null;
+#endif
+        }
+    }
 
 
     void Start()
     {
+   
         touchLookaround = this.gameObject.GetComponent<CameraTouchLookaround>();
-        touchLookaround.enabled = false;
+        if (UseTouchLookaround)
+        {
+            touchLookaround.enabled = false;
+        }
 
         CamModel.Instance.OnMoveCameraToBuilding += OnMoveCameraToBuilding;
         CamModel.Instance.OnMoveCameraToCityElement += OnMoveCameraToCityElement;
@@ -40,7 +55,10 @@ public class CameraFlyController : MonoBehaviour
         var spline = this.GetComponentsInChildren<BezierSpline>(true).ToList().Find((s) => s.gameObject.name == "Sky");
         this.lookAt = this.skyLookAtTransform;
         MoveCameraLongSpline(spline, Durations.CamOrbit);
-        touchLookaround.enabled = false;
+        if (UseTouchLookaround)
+        {
+            touchLookaround.enabled = false;
+        }
     }
 
     void OnDestroy()
@@ -93,11 +111,20 @@ public class CameraFlyController : MonoBehaviour
         var t = Durations.CamFly;
         mainCam.transform.DOMove(cityElement.camPos, t)
             .SetEase(Ease.OutBack)
-            .OnComplete(() => touchLookaround?.Setup(cityElement.camPos, cityElement.camRot));
+            .OnComplete(() =>
+            {
+                if (UseTouchLookaround)
+                {
+                    touchLookaround.Setup(cityElement.camPos, cityElement.camRot);
+                }
+            });
         mainCam.transform.DORotate(cityElement.camRot, t * 0.8f).SetEase(Ease.OutSine).OnComplete(() =>
         {
-            touchLookaround.enabled = true;
-            touchLookaround?.Setup(cityElement.camPos, cityElement.camRot);
+            if (UseTouchLookaround)
+            {
+                touchLookaround.enabled = true;
+                touchLookaround.Setup(cityElement.camPos, cityElement.camRot);
+            }
         });
     }
 
@@ -126,7 +153,10 @@ public class CameraFlyController : MonoBehaviour
 
     private void MoveCameraLongSpline(BezierSpline spline, float duration)
     {
-        touchLookaround.enabled = false;
+        if (UseTouchLookaround)
+        {
+            touchLookaround.enabled = false;
+        }
 
         var cam = Camera.main;
         cam.transform.DOKill();

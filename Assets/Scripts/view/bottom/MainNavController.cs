@@ -157,7 +157,7 @@ public class MainNavController : MonoBehaviour
             this.groupTitle.text = Loca.GetBuildingNameTranslation(currentBuildingName);
             return;
         }
-        if (completedElements >= maxElements)
+        if (completedElements >= maxElements || progressData.State == BuildingState.Completed)
         {
             this.groupTitle.text = "Completed";
             return;
