@@ -116,6 +116,9 @@ public class CurrentBuildingOperationCmd
         if (BuildingNameUtil.IsChallengeBuilding(this.currentBuildingName))
         {
             d.timeoutSeconds = rm.AddSecondsInChallenge * 2;
+#if UNITY_EDITOR
+            d.timeoutSeconds *= 3;
+#endif
         }
         progress.SetCurrentElement(currentElementData);
         new AddExtrasCmd(currentBuildingName).Run(currentElementData);

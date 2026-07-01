@@ -167,36 +167,6 @@ public class PlayerModel
             this.CreateNewPlayerData();
         }
 
-        foreach (var p in playerData.Progress)
-        {
-            if (p.State == BuildingState.Playing || p.State == BuildingState.Locked)
-            {
-                p.SetState(BuildingState.Unlocked); //reset in-progress building to unlocked, so player can replay it
-            }
-            //this is for backwards compatibility
-            var e = p.GetCurrentElement();
-            if (e == null)
-            {
-                continue;
-            }
-            if (BuildingNameUtil.IsChallengeBuilding(p.BuildingName))
-            {
-                p.SetCurrentElement(null);
-            }
-            else
-            {
-                e.timeoutSeconds = -1;
-            }
-        }
-
-        var progress = playerData.GetCurrentBuildingProgress();
-        if (progress != null && progress.GetCurrentElement() != null)
-        {
-            var element = progress.GetCurrentElement();
-            element.brickDataList.ForEach((e) => e.ResetEmittingStates());
-            element.columns.ForEach((s) => s.ResetEmittingStates());
-        }
-
     }
 
     public void AddTimeoutSeconds(int n)

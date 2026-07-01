@@ -7,16 +7,20 @@ public class SetupCityCmd
 {
     private CityModel cityModel => CityModel.Instance;
     private PlayerModel playerModel => PlayerModel.Instance;
+    private PlayerData playerData => playerModel.playerData;
 
     public void Run(List<BuildingElement> buildings)
     {
         Assert.IsTrue(buildings.Count > 0, "SetupCityCmd: buildings list should not be empty");
-        var pd = PlayerModel.Instance.playerData;
+
+        this.ResetPlayingStates();
+        this.ResetChallenges();
+        this.ResetEmitterBricks();
 
         for (var i = 0; i < buildings.Count; i++)
         {
             var building = buildings[i];
-            var progress = pd.GetBuildingProgressByName(building.BuildingName);
+            var progress = playerData.GetBuildingProgressByName(building.BuildingName);
             if (progress == null)
             {
                 progress = new BuildingProgressData(building.BuildingName, BuildingState.Unlocked);
@@ -25,7 +29,7 @@ public class SetupCityCmd
                     progress.SetState(BuildingState.Premium);
                 }
                 progress.attempts = 5;
-                pd.Progress.Add(progress);
+                playerData.Progress.Add(progress);
             }
             if (progress.attempts == -1)
             {
@@ -33,34 +37,25 @@ public class SetupCityCmd
             }
         }
 
-#if UNITY_EDITOR
-        foreach (var progress in pd.Progress.ToList())
-        {
-            if (progress.State == BuildingState.Premium)
-            {
-                progress.SetState(BuildingState.Unlocked);
-            }
-        }
-#endif
 
-        if (pd.CurrentBuildingName == BuildingName.Undefined)
+        if (playerData.CurrentBuildingName == BuildingName.Undefined)
         {
-            pd.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
+            playerData.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
             cityModel.SetBuildings(buildings, BuildingName.Preset_House_05);
         }
         else
         {
-            var isChallenge = BuildingNameUtil.IsChallengeBuilding(pd.CurrentBuildingName);
+            var isChallenge = BuildingNameUtil.IsChallengeBuilding(playerData.CurrentBuildingName);
             if (isChallenge)
             {
-                pd.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
+                playerData.SetCurrentBuilding(BuildingName.Preset_House_05, BuildingState.Unlocked);
             }
-            cityModel.SetBuildings(buildings, pd.CurrentBuildingName);
+            cityModel.SetBuildings(buildings, playerData.CurrentBuildingName);
         }
 
-        if (pd.appVersion != Application.version)
+        if (playerData.appVersion != Application.version)
         {
-            pd.appVersion = Application.version;
+            playerData.appVersion = Application.version;
             ResetCurrentElement();
         }
 
@@ -70,6 +65,58 @@ public class SetupCityCmd
         new ValidateDataCmd().Run();
         new TestExtrasCmd().Run();
 #endif
+    }
+
+
+    private void ResetPlayingStates()
+    {
+        foreach (var p in playerData.Progress)
+        {
+            if (p.State == BuildingState.Playing || p.State == BuildingState.Locked)
+            {
+                p.SetState(BuildingState.Unlocked); //reset in-progress building to unlocked, so player can replay it
+            }
+        }
+#if UNITY_EDITOR
+        foreach (var progress in playerData.Progress.ToList())
+        {
+            if (progress.State == BuildingState.Premium)
+            {
+                progress.SetState(BuildingState.Unlocked);
+            }
+        }
+#endif
+    }
+
+    private void ResetChallenges()
+    {
+        foreach (var p in playerData.Progress)
+        {
+            var e = p.GetCurrentElement();
+            if (e == null)
+            {
+                continue;
+            }
+            if (BuildingNameUtil.IsChallengeBuilding(p.BuildingName))
+            {
+                p.RemoveCurrentElement();
+            }
+            else
+            {
+                e.timeoutSeconds = -1;
+            }
+        }
+    }
+
+    private void ResetEmitterBricks()
+    {
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        if (progress != null && progress.GetCurrentElement() != null)
+        {
+            var element = progress.GetCurrentElement();
+            element.brickDataList.ForEach((e) => e.ResetEmittingStates());
+            element.columns.ForEach((s) => s.ResetEmittingStates());
+        }
     }
 
 
@@ -163,7 +210,3 @@ public class SetupCityCmd
         }
     }
 }
-/*var appVersion = Application.version;
- element.brickDataList.ForEach((e) => e.ResetEmittingStates());
- element.columns.ForEach((s) => s.ResetEmittingStates());
- if (element.ElementCompleted() == false && element.appVersion != Application.version)*/
