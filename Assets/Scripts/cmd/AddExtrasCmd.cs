@@ -205,16 +205,15 @@ public class AddExtrasCmd
                 this.maxDeaths = 1;
             }
             this.maxMults = Mathf.RoundToInt(totalBricks / 20.0f);
-            this.maxAds = Mathf.RoundToInt(totalBricks / 30.0f);
-            if (this.maxAds < 1)
-            {
-                this.maxAds = 1;
-            }
         }
 
         if (this.ShouldAddAd() == false)
         {
             this.maxAds = 0;
+        }
+        else
+        {
+            this.maxAds = 1;
         }
         if (coins >= RemoteConfigModel.Instance.RemoteConfig.RefillCoins)
         {
@@ -223,7 +222,7 @@ public class AddExtrasCmd
         if (BuildingNameUtil.IsChallengeBuilding(this.buildingName))
         {
             this.maxCoins = 0;
-            this.maxChallengeSeconds = (totalBricks / 20) + 1;
+            this.maxChallengeSeconds = (totalBricks / 25) + 1;
         }
 
         var allEmittersUnlocked = SlotModel.Instance.AllEmittersUnlocked();
