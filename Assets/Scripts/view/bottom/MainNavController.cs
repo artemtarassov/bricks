@@ -148,7 +148,6 @@ public class MainNavController : MonoBehaviour
     {
         var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
         var progressData = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
-        var completedElements = progressData.CompletedElementsCounter;
         var maxElements = CityModel.Instance.GetBuildingByName(currentBuildingName).GetElements().Count;
         var isChallenge = BuildingNameUtil.IsChallengeBuilding(currentBuildingName);
 
@@ -157,12 +156,12 @@ public class MainNavController : MonoBehaviour
             this.groupTitle.text = Loca.GetBuildingNameTranslation(currentBuildingName);
             return;
         }
-        if (completedElements >= maxElements || progressData.State == BuildingState.Completed)
+        if (progressData.State == BuildingState.Completed)
         {
             this.groupTitle.text = "Completed";
             return;
         }
-        this.groupTitle.text = $"{completedElements}/{maxElements} completed";
+        this.groupTitle.text = $"{progressData.currentElementIndex}/{maxElements} completed";
     }
 
     private void AnimateIn()
@@ -223,23 +222,11 @@ public class MainNavController : MonoBehaviour
     private void OnBtnNextClicked()
     {
         //
-        new SoundCmd(SoundModel.Instance.CLICK1).Run();
-
-        var currentBuildingName = PlayerModel.Instance.playerData.CurrentBuildingName;
-        var names = BuildingNameUtil.GetAllBuildingNames(false);
-        var isLast = names.Last() == currentBuildingName;
-
-        if (isLast)
-        {
-            new ShowThankyouCmd().Run();
-            return;
-        }
         new SwitchBuildingCmd().Run(1);
     }
 
     private void OnBtnLeftClicked()
     {
-        new SoundCmd(SoundModel.Instance.CLICK1).Run();
         new SwitchBuildingCmd().Run(-1);
     }
 

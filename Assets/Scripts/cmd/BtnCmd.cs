@@ -43,6 +43,8 @@ public class BtnCmd
             playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
             cityModel.SetCurrentBuildingName(buildingName);
             new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.RestartBuilding).Run();
+
+            new LogEventCmd().Run("building_start", "buildingName", buildingName.ToString());
             return;
         }
         if (action == BtnAction.RefillAttempts)
@@ -85,6 +87,7 @@ public class BtnCmd
                     new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.ContinueCurrentElement).Run();
                 }
             }
+            new LogEventCmd().Run("building_continue", "buildingName", buildingName.ToString());
             return;
         }
         if (action == BtnAction.UseAttemptAndContinue)

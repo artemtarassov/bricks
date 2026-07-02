@@ -42,7 +42,6 @@ public class ListenToExceptionsCmd
                     var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
                     var themeIndex = BuildingNameUtil.GetAllBuildingNames(true).FindIndex(g => g == progress.BuildingName);
                     var currentElement = ModelUtils.GetCurrentElement();
-                    dict = new Dictionary<string, object>();
                     dict["themeIndex"] = themeIndex;
                     dict["elementName"] = currentElement == null ? "null" : currentElement.dataKey;
                     dict["progressState"] = progress.State.ToString();
@@ -50,7 +49,6 @@ public class ListenToExceptionsCmd
                 catch (System.Exception e)
                 {
                     Debug.Log("Exception while preparing exception log: " + e);
-                    dict = new Dictionary<string, object>();
                     dict["exceptionWhileLogging"] = e.ToString();
                 }
                 new LogEventCmd().Run("exception_info", dict);

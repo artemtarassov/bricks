@@ -34,7 +34,7 @@ public class ThankyouController : MonoBehaviour
     private void OnBackButtonClick()
     {
         new SoundCmd(SoundModel.Instance.CLICK1).Run();
-        new SwitchBuildingCmd().Run();
+        new SwitchBuildingCmd().Run(-1);
     }
 
     private void OnBottomNavChange(BottomNav nav)

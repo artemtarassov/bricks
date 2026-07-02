@@ -12,16 +12,21 @@ public class SwitchBuildingCmd
         var playerModel = PlayerModel.Instance;
         var pd = playerModel.playerData;
         var currentBuildingName = pd.CurrentBuildingName;
-        var buildingNames = BuildingNameUtil.GetAllBuildingNames(true);
-        var currentGroupIndex = buildingNames.FindIndex(g => g == currentBuildingName);
-        var nextBuildingIndex = direction == 0 ? currentGroupIndex : direction == 1 ? currentGroupIndex + 1 : currentGroupIndex - 1;
+        var buildingNames = BuildingNameUtil.GetAllBuildingNames(false);
+        var currentBuildingIndex = buildingNames.FindIndex(g => g == currentBuildingName);
+        var nextBuildingIndex = direction == 0 ? currentBuildingIndex : direction == 1 ? currentBuildingIndex + 1 : currentBuildingIndex - 1;
         if (nextBuildingIndex < 0)
         {
-            nextBuildingIndex = buildingNames.Count - 1;
+            return;
         }
         if (nextBuildingIndex >= buildingNames.Count)
         {
-            nextBuildingIndex = 0;
+            new ShowThankyouCmd().Run();
+            return;
+        }
+        if (direction != 0)
+        {
+            new SoundCmd(SoundModel.Instance.CLICK1).Run();
         }
         var nextBuildingName = buildingNames[nextBuildingIndex];
         Assert.IsFalse(nextBuildingName == BuildingName.Undefined, "SwitchBuildingCmd: nextBuildingName is undefined");
@@ -48,7 +53,7 @@ public class SwitchBuildingCmd
         CamModel.Instance.MoveCameraToBuilding();
         ViewModel.Instance.ChangeTopNav(TopNav.None);
         ViewModel.Instance.ChangeBottomNav(BottomNav.MainNav);
-        ViewModel.Instance.Fade(FadeType.Flash);
+        //ViewModel.Instance.Fade(FadeType.Flash);
         new UpdateSkyMaterialCmd().Run();
     }
 

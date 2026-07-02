@@ -13,16 +13,6 @@ public class BuildingProgressData
     public BuildingName BuildingName => buildingName;
 
     [SerializeField]
-    private int completedBuildingCounter = 0;
-
-    [SerializeField]
-    private int completedElementsCounter = 0;
-
-    public int CompletedElementsCounter => completedElementsCounter;
-
-    public int CompletedBuildingCounter => completedBuildingCounter;
-
-    [SerializeField]
     private BuildingState state = BuildingState.Locked;
 
     public BuildingState State => state;
@@ -57,26 +47,6 @@ public class BuildingProgressData
         Assert.IsNotNull(element, "BuildingProgressData: SetCurrentElement: element should not be null");
         Assert.IsFalse(string.IsNullOrEmpty(element.dataKey), "BuildingProgressData: SetCurrentElement: element dataKey should not be null or empty");
         this.currentElement = element;
-    }
-
-    public void ResetElementsCounter()
-    {
-        this.completedElementsCounter = 0;
-    }
-
-    public void IncCompletedElementsCounter()
-    {
-        this.completedElementsCounter++;
-    }
-
-    public void IncCompletedBuildingCounter()
-    {
-        this.completedBuildingCounter++;
-    }
-
-    public void ResetCompletedBuildingCounter()
-    {
-        this.completedBuildingCounter = 0;
     }
 
     public BuildingProgressData(BuildingName buildingName, BuildingState state)

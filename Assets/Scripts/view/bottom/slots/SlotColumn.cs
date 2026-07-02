@@ -32,8 +32,8 @@ public class SlotColumn : MonoBehaviour
     private void OnClick()
     {
         var activeSlotElement = this.slotElements.Find(e => e.gameObject.activeSelf);
-        Assert.IsNotNull(activeSlotElement, "SlotColumn: OnClick: activeSlotElement should not be null. total slots " + this.slotElements.Count);
-        new SelectColumnCmd(this.columnData.columnIndex, activeSlotElement).Run();
+        if (activeSlotElement != null)
+            new SelectColumnCmd(this.columnData.columnIndex, activeSlotElement).Run();
         this.blinkingArrow.SetActive(false);
     }
 

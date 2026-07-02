@@ -22,7 +22,7 @@ public class AddExtrasCmd
     private int maxChallengeSeconds = 0;
 
     private static readonly int[] difficulties = new int[] { 0, 1, 2, 3, 4, 5, 6, 2 };
-    private static readonly NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 1, 2 });
+    private static readonly NonRepeatingShuffleBag<int> deadCounter = new NonRepeatingShuffleBag<int>(new List<int> { 1, 1, 1, 2, 2, 3 });
     private BuildingName buildingName;
 
     private bool IsChallange => BuildingNameUtil.IsChallengeBuilding(this.buildingName);

@@ -7,6 +7,7 @@ public class ShowThankyouCmd
 {
     public void Run()
     {
+        new SoundCmd(SoundModel.Instance.THANKYOU).Run();
         CamModel.Instance.MoveCameraToSky();
         ViewModel.Instance.ChangeBottomNav(BottomNav.ThankYou);
         ViewModel.Instance.ChangeTopNav(TopNav.None);

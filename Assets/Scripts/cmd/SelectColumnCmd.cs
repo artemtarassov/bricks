@@ -54,6 +54,7 @@ public class SelectColumnCmd
             SlotModel.Instance.Replace(this.data, SlotElementType.Undefined);
             var msgText = "New challenge unlocked!";
             new ToastCmd(msgText).Run(this.data.challenge);
+            new LogEventCmd().Run("challenge_unlocked", "buildingName", this.data.challenge.ToString());
             return;
         }
 

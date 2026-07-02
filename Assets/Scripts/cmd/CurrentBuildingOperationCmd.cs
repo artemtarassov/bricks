@@ -58,7 +58,6 @@ public class CurrentBuildingOperationCmd
         {
             var firstElementName = cityModel.GetElementByIndex(firstCityElementIndex).dataKey;
             progress.currentElementIndex = 0;
-            progress.ResetElementsCounter();
             CreateCityElementData(firstElementName);
         }
 
@@ -82,20 +81,18 @@ public class CurrentBuildingOperationCmd
                 return;
             }
 
-            {
-                progress.IncCompletedElementsCounter();
-                var completedElementsCounter = progress.CompletedElementsCounter;
-                var buildingIndex = cm.GetBuildingNameIndex(currentBuildingName);
-                var dict = new Dictionary<string, object>();
-                dict["completedElementsCounter"] = completedElementsCounter;
-                dict["elementName"] = currentElementData.dataKey;
-                dict["themeIndex"] = buildingIndex;
-                new LogEventCmd().Run("complete_element", dict);
-            }
-
             progress.currentElementIndex = nextElementIndexInBuilding;
             var nextElement = elementsInBuilding[progress.currentElementIndex];
             CreateCityElementData(nextElement.dataKey);
+
+            {
+                var dict = new Dictionary<string, object>();
+                dict["elementIndex"] = nextElementIndexInBuilding;
+                dict["elementName"] = currentElementData.dataKey;
+                dict["buildingName"] = this.currentBuildingName.ToString();
+                dict["finishElementType"] = currentElementData.finishElementType.ToString();
+                new LogEventCmd().Run("next_element", dict); 
+            }
         }
 
         UnlockElement(currentElementData);

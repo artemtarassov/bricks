@@ -36,6 +36,12 @@ public class CompleteElementCmd
             ViewModel.Instance.ChangeTopNav(TopNav.None);
             ViewModel.Instance.ChangeBottomNav(BottomNav.FinishElement);
         }
+
+        var dict = new Dictionary<string, object>();
+        dict["buildingName"] = buildingName.ToString();
+        dict["elementName"] = cityElement.dataContainer.dataKey;
+        dict["finishElementType"] = fet.ToString();
+        new LogEventCmd().Run("complete_element_prepare", dict);
     }
 
 }

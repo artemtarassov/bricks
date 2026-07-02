@@ -23,13 +23,13 @@ public class BrickLightController2 : MonoBehaviour
         this.lightComponent.gameObject.SetActive(true);
         if (cityElement.lightRot == Vector3.zero)
         {
-            Debug.Log($"BrickLightController ShowLightForCityElement: lightRot is Vector3.zero for city element {cityElement.name}. Defaulting to look at city element average position.");
+            //Debug.Log($"BrickLightController ShowLightForCityElement: lightRot is Vector3.zero for city element {cityElement.name}. Defaulting to look at city element average position.");
             this.lightComponent.transform.position = cityElement.camPos;
             this.lightComponent.transform.LookAt(cityElement.GetAveragePosition());
         }
         else
         {
-            Debug.Log($"BrickLightController ShowLightForCityElement: setting light rotation to {cityElement.lightRot} for city element {cityElement.name}");
+            //Debug.Log($"BrickLightController ShowLightForCityElement: setting light rotation to {cityElement.lightRot} for city element {cityElement.name}");
             this.lightComponent.transform.eulerAngles = cityElement.lightRot;
         }
     }

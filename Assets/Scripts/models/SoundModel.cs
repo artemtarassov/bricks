@@ -8,6 +8,8 @@ public class SoundModel
 {
     public static SoundModel Instance;
 
+    public readonly string THANKYOU = "thankyou";
+
     public readonly string DONG = "dong";
     public readonly string CONFIRM = "confirm";
 

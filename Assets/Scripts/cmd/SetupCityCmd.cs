@@ -152,14 +152,6 @@ public class SetupCityCmd
                 progress.SetCurrentElement(freshData);
             return;
         }
-        if (progress.CompletedElementsCounter > 0)
-        {
-            var index = progress.CompletedElementsCounter - 1;
-            var freshData = balancingBuildingData.GetElementDataContainerByIndex(index);
-            if (freshData != null)
-                progress.SetCurrentElement(freshData);
-            return;
-        }
 
     }
 
