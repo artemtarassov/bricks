@@ -89,7 +89,7 @@ public class RemoteConfigData
     public bool Announcer => GetValue(RemoteConfigProperty.Announcer, 1) == 1;
     public bool FillAttemptsAfterRestart => GetValue(RemoteConfigProperty.FillAttemptsAfterRestart, 1) == 1;
 
-    public int FinishElementType => GetValue(RemoteConfigProperty.FinishElementType, (200));//0=undefined,SlideDown=100, Explosion=200
+    public int FinishElementType => GetValue(RemoteConfigProperty.FinishElementType, 0);//0=undefined,SlideDown=100, Explosion=200
 
     public int AddSecondsInChallenge => GetValue(RemoteConfigProperty.AddSecondsInChallenge, 10);
     public static RemoteConfigData Load()
