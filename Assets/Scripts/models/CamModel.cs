@@ -15,30 +15,30 @@ public class CamModel
 
     public void AnticipateRocketFly()
     {
-        Debug.Log("CamModel AnticipateRocketFly: anticipating rocket fly");
+        //Debug.Log("CamModel AnticipateRocketFly: anticipating rocket fly");
         OnAnticipateRocketFly?.Invoke();
     }
 
     public void MoveCamBack()
     {
-        Debug.Log("CamModel MoveCamBack: moving camera back to default position");
+        //Debug.Log("CamModel MoveCamBack: moving camera back to default position");
         OnMoveCamBack?.Invoke();
     }
 
     public void MoveCameraToCityElement(CityElement cityElement)
     {
-        Debug.Log("CamModel MoveCameraToCityElement: moving camera to city element " + cityElement.name);
+        //Debug.Log("CamModel MoveCameraToCityElement: moving camera to city element " + cityElement.name);
         OnMoveCameraToCityElement?.Invoke(cityElement);
     }
 
     public void MoveCameraToBuilding()
     {
-        Debug.Log("CamModel MoveCameraToBuilding: moving camera to building");
+        //Debug.Log("CamModel MoveCameraToBuilding: moving camera to building");
         OnMoveCameraToBuilding?.Invoke();
     }
     public void MoveCameraToSky()
     {
-        Debug.Log("CamModel MoveCameraToSky: moving camera to sky");
+        //Debug.Log("CamModel MoveCameraToSky: moving camera to sky");
         OnMoveCameraToSky?.Invoke();
     }
 
