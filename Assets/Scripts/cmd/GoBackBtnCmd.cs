@@ -25,7 +25,10 @@ public class GoBackBtnCmd
         }
         else
         {
-            PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
+            if (progress.State == BuildingState.Playing)
+            {
+                PlayerModel.Instance.SetCurrentBuilding(BuildingState.Unlocked);
+            }
             CityModel.Instance.SetCurrentBuildingName(progress.BuildingName);
         }
 

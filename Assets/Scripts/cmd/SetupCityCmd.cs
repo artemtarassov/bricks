@@ -23,11 +23,8 @@ public class SetupCityCmd
             var progress = playerData.GetBuildingProgressByName(building.BuildingName);
             if (progress == null)
             {
-                progress = new BuildingProgressData(building.BuildingName, BuildingState.Unlocked);
-                if (BuildingNameUtil.IsPremiumBuilding(progress.BuildingName))
-                {
-                    progress.SetState(BuildingState.Premium);
-                }
+                var state = BuildingNameUtil.IsPremiumBuilding(building.BuildingName) ? BuildingState.Premium : BuildingState.Unlocked;
+                progress = new BuildingProgressData(building.BuildingName, state);
                 progress.attempts = 5;
                 playerData.Progress.Add(progress);
             }

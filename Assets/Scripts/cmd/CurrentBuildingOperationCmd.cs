@@ -46,6 +46,7 @@ public class CurrentBuildingOperationCmd
 
     public void Run()
     {
+        Debug.Log($"CurrentBuildingOperationCmd.Run: buildingName {currentBuildingName}, nextOperation {nextOperation}");
         ViewModel.Instance.ResetOutOfSpaceCounter();
 
         if (nextOperation == NextOperation.ContinueCurrentElement)
@@ -76,9 +77,9 @@ public class CurrentBuildingOperationCmd
 
             if (nextElementIndexInBuilding >= elementsInBuilding.Count)
             {
-                //no more elements in building.
-                //new CompleteCurrentBuildingCmd().Run();
-                return;
+                //this should never happen.
+                Debug.Log($"CurrentBuildingOperationCmd.Run: NextElement: no more elements in building {this.currentBuildingName}. Current element index {elementIndexInBuilding}, next element index {nextElementIndexInBuilding}, total elements in building {elementsInBuilding.Count}");
+                nextElementIndexInBuilding = elementsInBuilding.Count - 1;
             }
 
             progress.currentElementIndex = nextElementIndexInBuilding;
@@ -91,7 +92,7 @@ public class CurrentBuildingOperationCmd
                 dict["elementName"] = currentElementData.dataKey;
                 dict["buildingName"] = this.currentBuildingName.ToString();
                 dict["finishElementType"] = currentElementData.finishElementType.ToString();
-                new LogEventCmd().Run("next_element", dict); 
+                new LogEventCmd().Run("next_element", dict);
             }
         }
 

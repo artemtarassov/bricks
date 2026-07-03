@@ -1,4 +1,5 @@
 using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 public class BtnCmd
@@ -30,6 +31,7 @@ public class BtnCmd
 
     public void Run(BtnAction action)
     {
+        Debug.Log($"BtnCmd.Run: buildingName {buildingName}, action {action}");
         var isChallengeBuilding = BuildingNameUtil.IsChallengeBuilding(buildingName);
 
         if (action == BtnAction.Restart)
@@ -68,6 +70,10 @@ public class BtnCmd
 
         if (action == BtnAction.Continue)
         {
+            Debug.Log($"BtnCmd.Run: Continue action for buildingName {buildingName}");
+
+            Assert.AreNotEqual(BuildingState.Completed, progress.State, $"BtnCmd.Run: Continue action for buildingName {buildingName} but building is already completed. Current element index {progress.currentElementIndex}");
+
             playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
             cityModel.SetCurrentBuildingName(buildingName);
 
@@ -98,6 +104,7 @@ public class BtnCmd
                 Toast("No attempts left");
                 return;
             }
+            Assert.AreNotEqual(BuildingState.Completed, progress.State, $"BtnCmd.Run: UseAttemptAndContinue action for buildingName {buildingName} but building is already completed. Current element index {progress.currentElementIndex}");
             playerModel.SetCurrentBuilding(buildingName, BuildingState.Playing);
             cityModel.SetCurrentBuildingName(buildingName);
             new CurrentBuildingOperationCmd(CurrentBuildingOperationCmd.NextOperation.RestartElement).Run();

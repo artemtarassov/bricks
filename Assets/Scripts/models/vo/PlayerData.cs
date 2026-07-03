@@ -33,6 +33,31 @@ public class BuildingProgressData
 
     public void SetState(BuildingState newState)
     {
+        if (this.state == newState)
+        {
+            return;
+        }
+        switch (this.state)
+        {
+            case BuildingState.Locked:
+                Assert.IsTrue(newState == BuildingState.Unlocked || newState == BuildingState.Premium, "BuildingProgressData: SetState: cannot change state from Locked to " + newState);
+                break;
+            case BuildingState.Unlocked:
+                Assert.IsTrue(newState == BuildingState.Playing, "BuildingProgressData: SetState new state is " + newState + " but should be BuildingState.Playing");
+                break;
+            case BuildingState.Playing:
+                Assert.IsTrue(newState == BuildingState.Completed || newState == BuildingState.Unlocked, "BuildingProgressData: SetState: cannot change state from Playing to " + newState);
+                break;
+            case BuildingState.Completed:
+                Assert.IsTrue(newState == BuildingState.Unlocked);
+                break;
+            case BuildingState.Premium:
+                Assert.IsTrue(newState == BuildingState.Unlocked);
+                break;
+            default:
+                Assert.IsTrue(false, "BuildingProgressData: SetState: unknown state " + this.state);
+                break;
+        }
         state = newState;
     }
 

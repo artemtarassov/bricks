@@ -39,31 +39,20 @@ public class ModelUtils
 
     public static bool CurrentBuildingCompleted()
     {
-        var currentGroupName = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
-        var currentGroup = CityModel.Instance.GetBuildingByName(currentGroupName);
-        var cityElements = currentGroup.GetElements();
-        foreach (var cityElement in cityElements)
+        var progress = PlayerModel.Instance.playerData.GetCurrentBuildingProgress();
+        var building = CityModel.Instance.GetBuildingByName(progress.BuildingName);
+        var isLastElement = progress.currentElementIndex >= building.GetElements().Count - 1;
+        if(isLastElement && progress.GetCurrentElement().ElementCompleted())
         {
-            if (!cityElement.gameObject.activeSelf)
-            {
-                return false;
-            }
-            var elementDidSetup = cityElement.dataContainer != null;
-            if (elementDidSetup)
-            {
-                if (!cityElement.dataContainer.ElementCompleted())
-                {
-                    return false;
-                }
-            }
+            return true;
         }
-        return true;
+        return false;
     }
 
-    public static int GetCurrentGroupIndex()
+    public static int GetCurrentBuildingIndex()
     {
         var bn = PlayerModel.Instance.playerData.GetCurrentBuildingProgress().BuildingName;
-        return CityModel.Instance.GetBuildingNameIndex(bn);
+        return BuildingNameUtil.GetAllBuildingNames(true).FindIndex(b => b == bn);
     }
 
 

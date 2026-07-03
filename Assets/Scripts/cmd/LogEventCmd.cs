@@ -9,7 +9,7 @@ public class LogEventCmd
     {
         {
             var currentElement = ModelUtils.GetCurrentElement();
-            var currentGroupIndex = ModelUtils.GetCurrentGroupIndex();
+            var currentGroupIndex = ModelUtils.GetCurrentBuildingIndex();
             var dict = new Dictionary<string, object>();
             dict["difficultyIndex"] = PlayerModel.Instance.playerData.difficultyIndex;
             dict["elementName"] = currentElement.dataKey;
