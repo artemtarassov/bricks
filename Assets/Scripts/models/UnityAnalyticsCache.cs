@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Analytics;
 using Unity.Services.Core;
+using UnityEngine.UnityConsent;
 using UnityEngine;
 
 public class UnityAnalyticsCache
@@ -16,6 +17,7 @@ public class UnityAnalyticsCache
     public void Send(AdImpressionEvent e)
     {
         cachedEvents.Add(e);
+        SendCachedEvents();
     } 
 
     public void Send(string logEventName, string key, int value)
@@ -44,12 +46,24 @@ public class UnityAnalyticsCache
         cachedEvents.Add(e);
         SendCachedEvents();
     }
-    private void SendCachedEvents()
+    public void SendCachedEvents()
     {
-        if (UnityServices.State != ServicesInitializationState.Initialized)
+        if (cachedEvents.Count == 0)
         {
             return;
         }
+
+        if (UnityServices.State != ServicesInitializationState.Initialized || !InitializeUnityServices.AnalyticsCollectionReady)
+        {
+            return;
+        }
+
+        if (EndUserConsent.GetConsentState().AnalyticsIntent != ConsentStatus.Granted)
+        {
+            return;
+        }
+
+        var unsentEvents = new List<Unity.Services.Analytics.Event>();
         foreach (var e in cachedEvents)
         {
             try
@@ -59,9 +73,11 @@ public class UnityAnalyticsCache
             catch (System.Exception ex)
             {
                 Debug.LogWarning("UnityAnalyticsCache.SendCachedEvents: " + ex.Message);
+                unsentEvents.Add(e);
             }
         }
-        cachedEvents.Clear();
+
+        cachedEvents = unsentEvents;
     }
 
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Unity.Services.Analytics;
 
 public class LogEventCmd
 {
@@ -30,6 +31,16 @@ public class LogEventCmd
     }
 
     private static UnityAnalyticsCache cache = null;
+
+    public static void FlushPending()
+    {
+        if (cache == null)
+        {
+            return;
+        }
+        cache.SendCachedEvents();
+    }
+
     public void Run(string logEventName, Dictionary<string, object> dict)
     {
         if (cache == null)
@@ -51,6 +62,21 @@ public class LogEventCmd
     {
         var dict = new Dictionary<string, object>();
         dict[key] = value;
+        Run(logEventName, dict);
+    }
+
+    public void Run(AdImpressionEvent e)
+    {
+        if (cache == null)
+        {
+            cache = new UnityAnalyticsCache();
+        }
+        cache.Send(e);
+    }
+
+    public void Run(string logEventName)
+    {
+        var dict = new Dictionary<string, object>();
         Run(logEventName, dict);
     }
 

@@ -33,30 +33,38 @@ public class InitServicesCmd
 class InitializeUnityServices : MonoBehaviour
 {
     public string environment = "production";
+    public static bool AnalyticsCollectionReady { get; private set; }
 
     async void Start()
     {
         var options = new InitializationOptions().SetEnvironmentName(environment);
         Debug.Log("InitializeUnityServices.Start: initializing unity services with environment " + environment);
+        AnalyticsCollectionReady = false;
 
         while (UnityServices.State != ServicesInitializationState.Initialized)
         {
             try
             {
                 await UnityServices.InitializeAsync(options);
+                if (UnityServices.State == ServicesInitializationState.Initialized)
+                {
+                    break;
+                }
             }
             catch (System.Exception e)
             {
                 Debug.LogWarning("InitializeUnityServices.Run: " + e.Message);
             }
-            //WaitForSeconds 10
             await System.Threading.Tasks.Task.Delay(10000);
         }
+
         EndUserConsent.SetConsentState(new ConsentState()
         {
             AdsIntent = ConsentStatus.Granted,
             AnalyticsIntent = ConsentStatus.Granted
         });
+        AnalyticsCollectionReady = true;
+        LogEventCmd.FlushPending();
 
         try
         {
@@ -82,11 +90,13 @@ class InitializeUnityServices : MonoBehaviour
 
     void OnApplicationQuit()
     {
+        AnalyticsCollectionReady = false;
         Debug.Log("InitializeUnityServices OnApplicationQuit");
     }
 
     void OnDestroy()
     {
+        AnalyticsCollectionReady = false;
         Debug.Log("InitializeUnityServices OnDestroy");
         RemoteConfigService.Instance.FetchCompleted -= ApplyRemoteConfig;
     }

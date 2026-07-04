@@ -34,8 +34,20 @@ public class FakeAppLoaderController : MonoBehaviour
         var canvasGroup = this.gameObject.GetComponent<CanvasGroup>();
         canvasGroup.DOFade(0, 0.5f).SetDelay(0.33f).OnComplete(() =>
         {
+            LogPreloaderEnd();
             GameObject.Destroy(this.gameObject);
+            
         });
+    }
+
+    private void LogPreloaderEnd()
+    {
+        if(FilePrefs.HasKey("fake_preloader_end"))
+        {
+            return;
+        }
+        FilePrefs.SetInt("fake_preloader_end", 1);
+        new LogEventCmd().Run("fake_preloader_end");
     }
 
 }

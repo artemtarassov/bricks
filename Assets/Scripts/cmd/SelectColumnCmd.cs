@@ -36,6 +36,12 @@ public class SelectColumnCmd
             return;
         }
 
+        
+
+        if (PlayerModel.Instance.playerData.secondsPlaying < 60)
+        {
+            new LogEventCmd().Run("column_selected", "slotElementType", this.data.type.ToString());
+        }
 
         PlayerModel.Instance.playerData.isDirty = true;
 
@@ -87,6 +93,7 @@ public class SelectColumnCmd
         }
 
         var element = ModelUtils.GetCurrentElement();
+        
         if (this.data.type == SlotElementType.AddMoreBricks)
         {
             CityModel.Instance.EnableDifferentColors(element, BalancingModel.AdditionalBricksOnEmptyElement);
